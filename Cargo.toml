@@ -1,5 +1,5 @@
 [package]
-name = "rust-tfidf"
+name = "text-vectorize"
 version = "0.1.0"
 authors = ["Roman Yurchak <rth.yurchak@pm.me>"]
 
@@ -17,3 +17,4 @@ overflow-checks = false
 [dependencies]
 regex = "1"
 lazy_static = "1.2.0"
+fnv = "1.0.3"

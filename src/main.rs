@@ -1,10 +1,11 @@
 #[macro_use]
 extern crate lazy_static;
 extern crate regex;
+extern crate fnv;
 
 use regex::Regex;
 
-use std::collections::HashMap;
+use fnv::FnvHashMap;
 use std::fs;
 use std::io::prelude::*;
 
@@ -25,7 +26,7 @@ fn analyze(tokens: Vec<String>) -> Vec<String> {
 
 fn count(tokens: Vec<&str>) -> (usize) {
 
-    let mut counter: HashMap<&str, i32> = HashMap::with_capacity(1000);
+    let mut counter: FnvHashMap<&str, i32> = FnvHashMap::with_capacity_and_hasher(1000, Default::default());
     for el in tokens {
         counter
             .entry(el)
