@@ -6,14 +6,15 @@ extern crate regex;
 extern crate sprs;
 
 use fnv::FnvHashMap;
+use math::{sort_indices, CSRArray};
 use regex::Regex;
-use sprs::CsMat;
-
 
 const TOKEN_PATTERN_DEFAULT: &str = r"(?-u:\b)\w\w+(?-u:\b)";
 
 #[cfg(test)]
 mod tests;
+
+mod math;
 
 pub fn analyze(tokens: Vec<&str>) -> Vec<&str> {
     tokens
@@ -35,14 +36,6 @@ pub fn count(tokens: Vec<&str>) -> (usize) {
     }
     counter.len()
 }
-
-#[derive(Debug)]
-struct _CSRArray {
-    pub indices: Vec<usize>,
-    pub indptr: Vec<usize>,
-    pub values: Vec<i32>,
-}
-
 
 #[derive(Debug)]
 pub struct HashingVectorizer {
@@ -68,40 +61,54 @@ impl HashingVectorizer {
         self
     }
 
-    pub fn transform(&self, X: &[String]) -> CsMat<i32> {
+    pub fn transform(&self, X: &[String]) -> CSRArray {
         // Transform method
 
-        let mut tf = _CSRArray {
+        let mut tf = ::math::CSRArray {
             indices: Vec::new(),
             indptr: Vec::new(),
-            values: Vec::new(),
+            data: Vec::new(),
         };
 
         tf.indptr.push(0);
 
         let mut size: usize = 0;
 
+        let mut counter: FnvHashMap<u32, i32> =
+            FnvHashMap::with_capacity_and_hasher(1000, Default::default());
+
         for (document_id, document) in X.iter().enumerate() {
             let tokens = tokenize(&document);
             let n_grams = analyze(tokens);
             for token in n_grams {
                 let hash = fasthash::murmur3::hash32(&token);
-                let bucket = hash % self.n_features;
+                let hash = hash % self.n_features;
 
-                tf.indices.push(bucket as usize);
-                tf.values.push(1);
+                counter.entry(hash).and_modify(|e| *e += 1).or_insert(1);
             }
-            tf.indptr.push(tf.values.len());
+            // Here we use a counter to sum duplicates tokens, this means that we
+            // re-hash the hashed values, but it means that we don't need to handle
+            // duplicates later on.
+            // The alternative is to insert them into indices vector as they are,
+            // and let the sparse library matrix to sort indices and sum duplicates
+            // as this is done in `scipy.sparse`.
+            for (key, value) in counter.drain() {
+                tf.indices.push(key as usize);
+                tf.data.push(value);
+            }
+            tf.indptr.push(tf.data.len());
         }
-        CsMat::new(
-            (tf.indptr.len() - 1, self.n_features as usize),
-            tf.indptr,
-            tf.indices,
-            tf.values,
-        )
+        sort_indices(&mut tf);
+        // CsMat::new(
+        //     (tf.indptr.len() - 1, self.n_features as usize),
+        //     tf.indptr,
+        //     tf.indices,
+        //     tf.data,
+        // )
+        tf
     }
 
-    pub fn fit_transform(&self, X: &[String]) -> CsMat<i32> {
+    pub fn fit_transform(&self, X: &[String]) -> CSRArray {
         // Fit and transform
         //
         self.transform(X)

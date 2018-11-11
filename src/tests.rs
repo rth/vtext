@@ -1,8 +1,5 @@
 use *;
 
-extern crate sprs;
-use sprs::CsMat;
-
 #[test]
 fn hashing_vectorizer_init() {
     // >>> vect = HashingVectorizer(norm=None, alternate_sign=False)
@@ -19,18 +16,17 @@ fn hashing_vectorizer_init() {
         String::from("The sky is blue"),
     ];
 
-    //let vect = HashingVectorizer::new();
-    //let vect = vect.fit(&documents);
-    //let X = vect.transform(&documents);
-    //println!("{:?}", X);
-    //let indptr: Vec<usize> = Vec::from(X.indptr());
-    //assert_eq!(indptr, vec![0, 4, 8])
-    //
-    let indptr = vec![0, 5, 8];
-    let indices = vec![761698, 328290, 828689, 761698, 780185, 901149, 780185, 144749, 258307];
-    let data = vec![1, 1, 1, 1, 1, 1, 1, 1, 1];
-    let a = CsMat::new_csc((2, 1000000), indptr, indices, data);
+    let vect = HashingVectorizer::new();
+    let vect = vect.fit(&documents);
+    let X = vect.transform(&documents);
+    assert_eq!(X.indptr, vec![0, 4, 8]);
+    assert_eq!(X.data, vec![1, 2, 1, 1, 1, 1, 1, 1]);
+    // this is not a thorough test because indices don't match exactly
+    // as hashing is not exactly identical
+    assert_eq!(X.data.len(), X.indices.len());
 
-    //let res2 = vect.fit_transform(&X);
-    //assert_eq!(res, res2);
+    let X2 = vect.fit_transform(&documents);
+    //assert_eq!(X.indices, X2.indices);
+    assert_eq!(X.indptr, X2.indptr);
+    assert_eq!(X.data, X2.data);
 }
