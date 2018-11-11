@@ -1,50 +1,10 @@
-#[macro_use]
-extern crate lazy_static;
-extern crate regex;
-extern crate fnv;
+extern crate text_vectorize;
 
-use regex::Regex;
-
-use fnv::FnvHashMap;
 use std::fs;
 use std::io::prelude::*;
+use text_vectorize::{analyze, tokenize, count};
 
-fn tokenize(text: &String) -> (Vec<&str>) {
-    lazy_static! {
-        static ref RE: Regex = Regex::new(r"(?-u:\b)\w\w+(?-u:\b)").unwrap();
-    }
 
-    RE.find_iter(text)
-        .map(|m| m.as_str())
-        .collect::<Vec<_>>()
-}
-
-fn analyze(tokens: Vec<String>) -> Vec<String> {
-
-    tokens
-    }
-
-fn count(tokens: Vec<&str>) -> (usize) {
-
-    let mut counter: FnvHashMap<&str, i32> = FnvHashMap::with_capacity_and_hasher(1000, Default::default());
-    for el in tokens {
-        counter
-            .entry(el)
-            .and_modify(|e| *e += 1)
-            .or_insert(1);
-    }
-    counter.len()
-}
-
-// fn hash_table(tokens: Vec<String>, indices: Vec<i32>, indptr: Vec<i64>, values: Vec<i32>,
-//               n_features: usize)  {
-//     /// Add current tokens to the existing  
-//     for el in tokens {
-// 
-//     }
-// 
-//     (indices, indptr, values)
-//     }
 
 fn main() {
     let _dirs_list = fs::read_dir("./data/").unwrap();

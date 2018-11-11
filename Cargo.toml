@@ -1,5 +1,5 @@
 [package]
-name = "text-vectorize"
+name = "text_vectorize"
 version = "0.1.0"
 authors = ["Roman Yurchak <rth.yurchak@pm.me>"]
 
