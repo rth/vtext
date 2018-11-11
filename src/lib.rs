@@ -7,6 +7,13 @@ extern crate fnv;
 use regex::Regex;
 use fnv::FnvHashMap;
 
+
+const TOKEN_PATTERN_DEFAULT: &str = r"(?-u:\b)\w\w+(?-u:\b)";
+
+
+#[cfg(test)]
+mod tests;
+
 #[derive(Debug)]
 struct CSRArray {
     indices: Vec<i32>,
@@ -20,6 +27,12 @@ struct Vectorizer {
 }
 
 
+#[derive(Debug)]
+struct HashingVectorizer {
+    lowercase: bool,
+    token_pattern: String
+}
+
 pub fn analyze(tokens: Vec<String>) -> Vec<String> {
 
     tokens
@@ -28,7 +41,7 @@ pub fn analyze(tokens: Vec<String>) -> Vec<String> {
 
 pub fn tokenize(text: &String) -> (Vec<&str>) {
     lazy_static! {
-        static ref RE: Regex = Regex::new(r"(?-u:\b)\w\w+(?-u:\b)").unwrap();
+        static ref RE: Regex = Regex::new(TOKEN_PATTERN_DEFAULT).unwrap();
     }
 
     RE.find_iter(text)
@@ -55,6 +68,43 @@ impl Vectorizer{
         self.count += count(tokens);
         1
     }
+}
+
+
+impl HashingVectorizer {
+    fn new() -> Self {
+        // Create a new HashingVectorizer class
+        HashingVectorizer {
+            lowercase: true,
+            token_pattern: String::from(TOKEN_PATTERN_DEFAULT)
+        }
+    }
+
+    fn fit(mut self, X: &[String]) -> Self {
+        // Fit method
+        //
+        // The vectorizer is stateless, this has no effect
+        self
+    }
+
+    fn transform(&self, X: &[String]) -> usize {
+        // Transform method
+        //
+        let mut s: usize = 0;
+        for document in X.iter() {
+            let tokens = tokenize(&document);
+            s += count(tokens);
+        }
+        s
+    }
+
+    fn fit_transform(&self, X: &[String]) -> usize {
+        // Fit method
+        //
+        // The vectorizer is stateless, this has no effect
+        self.transform(X)
+    }
+
 }
 
 
