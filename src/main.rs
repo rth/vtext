@@ -2,18 +2,16 @@ extern crate text_vectorize;
 
 use std::fs;
 use std::io::prelude::*;
-use text_vectorize::{analyze, tokenize, count};
-
-
+use text_vectorize::HashingVectorizer;
 
 fn main() {
     let _dirs_list = fs::read_dir("./data/").unwrap();
 
-    let mut s = 0;
-
     // let mut indices: Vec<i32> = Vec::new()
     // let mut idptr: Vec<i64> = Vec::new()
     // let mut values: Vec<i32> = Vec::new()
+
+    let mut documents: Vec<String> = Vec::new();
 
     for dir_path in _dirs_list {
         let dir_path = dir_path.unwrap();
@@ -24,12 +22,12 @@ fn main() {
                 let mut contents = String::new();
                 fh.read_to_string(&mut contents)
                     .expect("something went wrong");
-                let tokens = tokenize(&contents);
-                // let word_n_grams  = analyze(tokens);
-                s += count(tokens);
-
+                documents.push(contents)
             }
         }
     }
-    println!("{}", s);
+
+    let vect = HashingVectorizer::new();
+
+    let X = vect.fit_transform(&documents);
 }

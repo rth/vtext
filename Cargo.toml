@@ -18,3 +18,4 @@ overflow-checks = false
 regex = "1"
 lazy_static = "1.2.0"
 fnv = "1.0.3"
+fasthash = "0.3"
