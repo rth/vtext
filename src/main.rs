@@ -2,7 +2,7 @@ extern crate text_vectorize;
 
 use std::fs;
 use std::io::prelude::*;
-use text_vectorize::HashingVectorizer;
+use text_vectorize::CountVectorizer;
 
 fn main() {
     let _dirs_list = fs::read_dir("./data/").unwrap();
@@ -27,7 +27,7 @@ fn main() {
         }
     }
 
-    let vect = HashingVectorizer::new();
+    let mut vect = CountVectorizer::new();
 
     let X = vect.fit_transform(&documents);
 }
