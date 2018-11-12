@@ -5,5 +5,5 @@ from sklearn.feature_extraction.text import CountVectorizer
 
 if __name__ == '__main__':
     input_files = list(glob('./data/*/*'))
-    vect = CountVectorizer(input="filename")
+    vect = CountVectorizer(input="filename", lowercase=False)
     vect.fit_transform(input_files)
