@@ -12,9 +12,7 @@ fn count_vectorizer_simple() {
     let X = vect.transform(&documents);
 
     println!("{:?}", X.to_dense());
-    assert_eq!(X.to_dense(),
-               array![[0, 1, 0, 1, 1, 2], [1, 0, 1, 0, 3, 1]])
-
+    assert_eq!(X.to_dense(), array![[0, 1, 0, 1, 1, 2], [1, 0, 1, 0, 3, 1]])
 }
 
 #[test]
@@ -43,7 +41,9 @@ fn hashing_vectorizer_simple() {
     // as hashing is not exactly identical
     assert_eq!(X.data.len(), X.indices.len());
 
-    let mut indices_ref = vec![268391, 286878, 720286, 828689, 144749, 268391, 286878, 790269];
+    let mut indices_ref = vec![
+        268391, 286878, 720286, 828689, 144749, 268391, 286878, 790269,
+    ];
     indices_ref.sort();
     indices_ref.dedup();
     let mut indices = X.indices.to_vec();

@@ -1,3 +1,33 @@
+/*!
+# text-vectorize
+
+Text vectorizers and TF-IDF transforms
+
+# Introduction
+
+
+
+# Features
+
+ - bag of word, and character 1-gram vectorization of text documents
+ - optional hashing vectorization using fast
+ - API and implementation inspired by `CountVectorizer` and `HashingVectorizer`
+   estimators in [scikit-learn](https://scikit-learn.org/).
+
+# Example
+
+```rust
+
+
+let documents = vec![
+    String::from("the moon in the sky"),
+    String::from("The sky sky sky is blue"),
+];
+
+
+```
+*/
+
 #[macro_use]
 extern crate lazy_static;
 extern crate fasthash;
@@ -18,25 +48,23 @@ mod tests;
 
 mod math;
 
+/// Analyze tokens
+///
+/// Given a list of tokens (words or character groups) in a document,  
+/// this corresponding word or character n-grams.
 pub fn analyze(tokens: Vec<&str>) -> Vec<&str> {
     tokens
 }
 
+/// Tokenize text
+///
+/// Convert a text document into a vector of string tokens.
 pub fn tokenize(text: &String) -> (Vec<&str>) {
     lazy_static! {
         static ref RE: Regex = Regex::new(TOKEN_PATTERN_DEFAULT).unwrap();
     }
 
     RE.find_iter(text).map(|m| m.as_str()).collect::<Vec<_>>()
-}
-
-pub fn count(tokens: Vec<&str>) -> (usize) {
-    let mut counter: FnvHashMap<&str, i32> =
-        FnvHashMap::with_capacity_and_hasher(1000, Default::default());
-    for el in tokens {
-        counter.entry(el).and_modify(|e| *e += 1).or_insert(1);
-    }
-    counter.len()
 }
 
 #[derive(Debug)]
@@ -50,36 +78,36 @@ pub struct HashingVectorizer {
 pub struct CountVectorizer {
     lowercase: bool,
     token_pattern: String,
-    vocabulary: FnvHashMap<String, i32>
+    vocabulary: FnvHashMap<String, i32>,
 }
 
-pub enum Vectorizer {
-
-}
+pub enum Vectorizer {}
 
 impl CountVectorizer {
+    /// Initialize a CountVectorizer estimator
     pub fn new() -> Self {
-        // Create a new CountVectorizer estimator
         CountVectorizer {
             lowercase: true,
             token_pattern: String::from(TOKEN_PATTERN_DEFAULT),
-            vocabulary: FnvHashMap::with_capacity_and_hasher(1000, Default::default())
+            vocabulary: FnvHashMap::with_capacity_and_hasher(1000, Default::default()),
         }
     }
 
+    /// Fit the extimator
+    ///
+    /// This lears the vocabulary
     pub fn fit(&mut self, X: &[String]) -> () {
-        // Fit method
-        //
         self._fit_transform(X, false);
     }
 
+    /// Transform
+    ///
+    /// Converts a sequence of text documents to a CSR Matrix
     pub fn transform(&mut self, X: &[String]) -> CSRArray {
-        // Transform method
-
         self._fit_transform(X, true)
     }
 
-    pub fn _fit_transform(&mut self, X: &[String], fixed_vocabulary: bool) -> CSRArray {
+    fn _fit_transform(&mut self, X: &[String], fixed_vocabulary: bool) -> CSRArray {
         // Transform method
         let mut tf = ::math::CSRArray {
             indices: Vec::new(),
@@ -92,9 +120,10 @@ impl CountVectorizer {
         let mut size: usize = 0;
 
         // we use a localy scoped vocabulary
-        let mut vocabulary: FnvHashMap<&str, i32> = FnvHashMap::with_capacity_and_hasher(1000, Default::default());
+        let mut vocabulary: FnvHashMap<&str, i32> =
+            FnvHashMap::with_capacity_and_hasher(1000, Default::default());
 
-        let mut counter: FnvHashMap<i32, i32> = 
+        let mut counter: FnvHashMap<i32, i32> =
             FnvHashMap::with_capacity_and_hasher(1000, Default::default());
 
         for (document_id, document) in X.iter().enumerate() {
@@ -103,7 +132,10 @@ impl CountVectorizer {
             for token in n_grams {
                 let vocabulary_size = (vocabulary.len() + 1) as i32;
                 let token_id = vocabulary.entry(token).or_insert(vocabulary_size);
-                counter.entry(*token_id).and_modify(|e| *e += 1).or_insert(1);
+                counter
+                    .entry(*token_id)
+                    .and_modify(|e| *e += 1)
+                    .or_insert(1);
             }
             //// Here we use a counter to sum duplicates tokens, this means that we
             //// re-hash the hashed values, but it means that we don't need to handle
@@ -117,7 +149,6 @@ impl CountVectorizer {
             }
             tf.indptr.push(tf.data.len());
         }
-
 
         // Copy to the vocabulary in the struct and make it own data
         self.vocabulary.clear();
@@ -136,7 +167,6 @@ impl CountVectorizer {
     }
 }
 
-
 impl HashingVectorizer {
     pub fn new() -> Self {
         // Create a new HashingVectorizer estimator
@@ -146,7 +176,6 @@ impl HashingVectorizer {
             n_features: 1048576,
         }
     }
-
 
     pub fn fit(mut self, X: &[String]) -> Self {
         // Fit method
@@ -187,7 +216,7 @@ impl HashingVectorizer {
                 counter.entry(hash).and_modify(|e| *e += 1).or_insert(1);
             }
             // Here we use a counter to sum duplicates tokens, this means that we
-            // re-hash the hashed values, which is not great performance wise, 
+            // re-hash the hashed values, which is not great performance wise,
             // but it means that we don't need to handle duplicates later on.
             // The alternative is to insert them into indices vector as they are,
             // and let the sparse library matrix to sort indices and sum duplicates

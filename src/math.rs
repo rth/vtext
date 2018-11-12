@@ -33,7 +33,6 @@ fn sort_indices_data_slices<N: Copy, I: SpIndex>(
 }
 
 impl CSRArray {
-
     pub fn sort_indices(&mut self) {
         // Sort indices for a CSR array inplace
         let mut buf = Vec::new();
@@ -49,7 +48,7 @@ impl CSRArray {
         }
     }
 
-    pub fn to_dense(&self) -> Array2::<i32> {
+    pub fn to_dense(&self) -> Array2<i32> {
         let n_rows = self.indptr.len() - 1;
         let mut n_columns: usize = 0;
         if let Some(i) = self.indices.iter().max() {
