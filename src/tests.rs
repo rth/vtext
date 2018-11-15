@@ -2,6 +2,13 @@ use *;
 
 #[test]
 fn count_vectorizer_simple() {
+    // Example 1
+
+    let documents = vec![String::from("cat dog cat")];
+    let mut vect = CountVectorizer::new();
+    let X = vect.fit_transform(&documents);
+    assert_eq!(X.to_dense(), array![[2, 1]]);
+
     let documents = vec![
         String::from("the moon in the sky"),
         String::from("The sky sky sky is blue"),
@@ -11,7 +18,8 @@ fn count_vectorizer_simple() {
     vect.fit(&documents);
     let X = vect.transform(&documents);
 
-    println!("{:?}", X.to_dense());
+    println!("{:?}", X.indices);
+    assert_eq!(X.to_dense().shape(), [2, 6]);
     assert_eq!(X.to_dense(), array![[0, 1, 0, 1, 1, 2], [1, 0, 1, 0, 3, 1]])
 }
 

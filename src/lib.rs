@@ -117,32 +117,35 @@ impl CountVectorizer {
 
         tf.indptr.push(0);
 
-        let mut size: usize = 0;
-
         // we use a localy scoped vocabulary
-        let mut vocabulary: FnvHashMap<&str, i32> =
+        let mut vocabulary: FnvHashMap<String, i32> =
             FnvHashMap::with_capacity_and_hasher(1000, Default::default());
 
         let mut counter: FnvHashMap<i32, i32> =
             FnvHashMap::with_capacity_and_hasher(1000, Default::default());
 
         for (document_id, document) in X.iter().enumerate() {
+            let document = document.to_ascii_lowercase();
+
             let tokens = tokenize(&document);
+
             let n_grams = analyze(tokens);
             for token in n_grams {
-                let vocabulary_size = (vocabulary.len() + 1) as i32;
-                let token_id = vocabulary.entry(token).or_insert(vocabulary_size);
+                let vocabulary_size = vocabulary.len() as i32;
+                let token_id = vocabulary
+                    .entry(token.to_owned())
+                    .or_insert(vocabulary_size);
                 counter
                     .entry(*token_id)
                     .and_modify(|e| *e += 1)
                     .or_insert(1);
             }
-            //// Here we use a counter to sum duplicates tokens, this means that we
-            //// re-hash the hashed values, but it means that we don't need to handle
-            //// duplicates later on.
-            //// The alternative is to insert them into indices vector as they are,
-            //// and let the sparse library matrix to sort indices and sum duplicates
-            //// as this is done in `scipy.sparse`.
+            // Here we use a counter to sum duplicates tokens, this re-hashes already
+            // the hashed values, but it means that we don't need to handle
+            // duplicates later on.
+            // The alternative is to insert them into indices vector as they are,
+            // and let the sparse library matrix to sort indices and sum duplicates
+            // as this is done in `scipy.sparse`.
             for (key, value) in counter.drain() {
                 tf.indices.push(key as usize);
                 tf.data.push(value);
@@ -151,9 +154,8 @@ impl CountVectorizer {
         }
 
         // Copy to the vocabulary in the struct and make it own data
-        self.vocabulary.clear();
         for (key, value) in vocabulary.drain() {
-            self.vocabulary.insert(key.to_string(), value);
+            self.vocabulary.insert(key.to_owned(), value);
         }
 
         tf.sort_indices();
@@ -177,7 +179,7 @@ impl HashingVectorizer {
         }
     }
 
-    pub fn fit(mut self, X: &[String]) -> Self {
+    pub fn fit(self, X: &[String]) -> Self {
         // Fit method
         //
         // The vectorizer is stateless, this has no effect
@@ -194,8 +196,6 @@ impl HashingVectorizer {
         };
 
         tf.indptr.push(0);
-
-        let mut size: usize = 0;
 
         let mut counter: FnvHashMap<u32, i32> =
             FnvHashMap::with_capacity_and_hasher(1000, Default::default());
