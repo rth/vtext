@@ -38,6 +38,7 @@ extern crate ndarray;
 extern crate sprs;
 
 use fnv::FnvHashMap;
+use ndarray::Array;
 use math::CSRArray;
 use regex::Regex;
 
@@ -65,6 +66,23 @@ pub fn tokenize(text: &String) -> (Vec<&str>) {
     }
 
     RE.find_iter(text).map(|m| m.as_str()).collect::<Vec<_>>()
+}
+
+
+/// Sort features by name
+///
+/// Returns a reordered matrix and modifies the vocabulary in place
+fn _sort_features(X: &mut CSRArray,
+                  vocabulary: &mut FnvHashMap<String, i32>) {
+    let mut vocabulary_sorted: Vec<_> = vocabulary.iter().collect();
+    vocabulary_sorted.sort_unstable();
+    let mut idx_map: Array::<usize, _> = Array::zeros((vocabulary_sorted.len()));
+    for (idx_new, (term, idx_old)) in vocabulary_sorted.iter().enumerate() {
+        idx_map[**idx_old as usize] = idx_new;
+    }
+    for idx in (0..X.indices.len()) {
+        X.indices[idx] = idx_map[X.indices[idx]];
+    }
 }
 
 #[derive(Debug)]
@@ -107,8 +125,8 @@ impl CountVectorizer {
         self._fit_transform(X, true)
     }
 
+    /// Fit and transform (with optional fixed vocabulary)
     fn _fit_transform(&mut self, X: &[String], fixed_vocabulary: bool) -> CSRArray {
-        // Transform method
         let mut tf = ::math::CSRArray {
             indices: Vec::new(),
             indptr: Vec::new(),
@@ -157,6 +175,8 @@ impl CountVectorizer {
         for (key, value) in vocabulary.drain() {
             self.vocabulary.insert(key.to_owned(), value);
         }
+
+        _sort_features(&mut tf, &mut self.vocabulary);
 
         tf.sort_indices();
         tf
