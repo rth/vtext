@@ -1,6 +1,6 @@
 [package]
 name = "text-vectorize"
-version = "0.1.0"
+version = "0.1.0-alpha.1"
 authors = ["Roman Yurchak <rth.yurchak@pm.me>"]
 
 [profile.release]
