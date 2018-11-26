@@ -1,0 +1,3 @@
+setuptools
+setuptools-rust>=0.10.2
+numpy>=1.15.0
