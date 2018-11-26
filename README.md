@@ -35,7 +35,7 @@ text-vectorize = {"git" = "https://github.com/rth/text-vectorize"}
 ``` 
 A simple example can be found below,
 ```rust
-external crate text_vectorize;
+extern crate text_vectorize;
 
 use text_vectorize::CountVectorizer;
 
