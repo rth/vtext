@@ -1,28 +1,29 @@
 # py-text-vectorize
 
-This is a Python 
+This is a Python wrapper for the Rust text-vectorize crate.
 
-- Prerequirement
+WIP.
 
+## Installation
+
+### Manual install
+
+This requires Python 3.5+ as well as Rust nightly >=1.30.0
+(due to [rust-numpy](https://github.com/rust-numpy/rust-numpy) and
+[pyo3](https://github.com/PyO3/pyo3) requirements),
+
+To build the Python package, run,
 ```
-sudo pip3 install -r requirements.txt
-docker build -t py-text-vectorize-env .
-./start_docker_env.sh
-```
-
-- Build
-
-```
+pip install -r requirements.txt
 python3 setup.py develop --user
 ```
 
-- Run
+### Docker environment
 
-```python
-import numpy as np
-import rust_ext
+The easiest might be to use docker to setup a build environment,
 
-a = np.array([0.0, 1.0])
-b = np.array([2.0, 3.0])
-rust_ext(2.0, a, b)
+```
+docker build -t py-text-vectorize-env .
+./start_docker_env.sh
+python3 setup.py develop --user
 ```

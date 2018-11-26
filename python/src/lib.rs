@@ -26,6 +26,8 @@ fn _lib(_py: Python, m: &PyModule) -> PyResult<()> {
         indptr.push(1);
         values.push(1);
 
+        // XXX: add actual call to text_vectorize
+
 
         (indices.into_pyarray(_py).to_owned(),
          values.into_pyarray(_py).to_owned(),
