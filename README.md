@@ -29,12 +29,12 @@ In general, see https://github.com/rth/text-vectorize/issues. Comments and sugge
 ### Usage in Rust
 
 Add the following to `Cargo.toml`,
-```
+```toml
 [dependencies]
 text-vectorize = {"git" = "https://github.com/rth/text-vectorize"}
 ``` 
-
-```
+A simple example can be found below,
+```rust
 external crate text_vectorize;
 
 use text_vectorize::CountVectorizer;
@@ -79,4 +79,4 @@ a rough estimate for the possible performance improvements.
 
 ## License
 
-text-vectorize is release under the BSD 3-clause license.
+text-vectorize is released under the BSD 3-clause license.
