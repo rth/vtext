@@ -1,31 +1,37 @@
+#![feature(specialization)]
+
+#[macro_use]
+extern crate pyo3;
 extern crate ndarray;
 extern crate numpy;
-extern crate pyo3;
+extern crate text_vectorize;
 
-use ndarray::{ArrayD, ArrayViewD, ArrayViewMutD};
 use numpy::{IntoPyArray, PyArrayDyn};
 use pyo3::prelude::{pymodinit, Py, PyModule, PyResult, Python};
 
+use text_vectorize::tokenize;
+
 #[pymodinit]
 fn _lib(_py: Python, m: &PyModule) -> PyResult<()> {
-    // immutable example
-    fn axpy(a: f64, x: ArrayViewD<f64>, y: ArrayViewD<f64>) -> ArrayD<f64> {
-        a * &x + &y
-    }
+
+    #[pyfn(m, "count_vectorize")]
+    fn count_vectorize(
+        text: Py<PyArrayDyn<i32>>
+    ) -> (Py<PyArrayDyn<i32>>, Py<PyArrayDyn<i32>>, Py<PyArrayDyn<i32>>) {
+
+        let indices : Vec<i32> = Vec::new();
+        let indptr : Vec<i32> = Vec::new();
+        let values : Vec<i32>= Vec::new();
+        indices.push(0);
+        indptr.push(1);
+        values.push(1);
 
 
-    // wrapper of `axpy`
-    #[pyfn(m, "axpy")]
-    fn axpy_py(
-        py: Python,
-        a: f64,
-        x: &PyArrayDyn<f64>,
-        y: &PyArrayDyn<f64>,
-    ) -> Py<PyArrayDyn<f64>> {
-        let x = x.as_array();
-        let y = y.as_array();
-        axpy(a, x, y).into_pyarray(py).to_owned()
+        (indices.into_pyarray(_py).to_owned(),
+         values.into_pyarray(_py).to_owned(),
+         indptr.into_pyarray(_py).to_owned())
     }
+
 
     Ok(())
 }

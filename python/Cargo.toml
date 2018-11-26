@@ -9,6 +9,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 ndarray = "0.12"
+text-vectorize = {"path" = "../"}
 
 [dependencies.numpy]
 version = "0.4.0-alpha.1"
