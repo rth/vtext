@@ -33,12 +33,17 @@ jobs:
 
       - run:
           name: dependencies
-          command: rustup component add rustfmt-preview
+          command: |
+            rustup component add rustfmt-preview
+            pip3 install flake8
 
       - run:
           name: lint
           command: |
             cargo fmt -- --check
+            flake8 python/
+            cd python && cargo fmt -- --check
+
 
 workflows:
   version: 2

@@ -13,27 +13,29 @@ use text_vectorize::tokenize;
 
 #[pymodinit]
 fn _lib(_py: Python, m: &PyModule) -> PyResult<()> {
-
     #[pyfn(m, "count_vectorize")]
     fn count_vectorize(
-        text: Py<PyArrayDyn<i32>>
-    ) -> (Py<PyArrayDyn<i32>>, Py<PyArrayDyn<i32>>, Py<PyArrayDyn<i32>>) {
-
-        let indices : Vec<i32> = Vec::new();
-        let indptr : Vec<i32> = Vec::new();
-        let values : Vec<i32>= Vec::new();
+        text: Py<PyArrayDyn<i32>>,
+    ) -> (
+        Py<PyArrayDyn<i32>>,
+        Py<PyArrayDyn<i32>>,
+        Py<PyArrayDyn<i32>>,
+    ) {
+        let indices: Vec<i32> = Vec::new();
+        let indptr: Vec<i32> = Vec::new();
+        let values: Vec<i32> = Vec::new();
         indices.push(0);
         indptr.push(1);
         values.push(1);
 
         // XXX: add actual call to text_vectorize
 
-
-        (indices.into_pyarray(_py).to_owned(),
-         values.into_pyarray(_py).to_owned(),
-         indptr.into_pyarray(_py).to_owned())
+        (
+            indices.into_pyarray(_py).to_owned(),
+            values.into_pyarray(_py).to_owned(),
+            indptr.into_pyarray(_py).to_owned(),
+        )
     }
-
 
     Ok(())
 }
