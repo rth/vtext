@@ -1,6 +1,6 @@
 # text-vectorize
 
-[![CircleCI](https://circleci.com/gh/rth/text-vectorize.svg?style=svg)](https://circleci.com/gh/rth/text-vectorize)
+[![CircleCI](https://circleci.com/gh/rth/text-vectorize/tree/master.svg?style=svg)](https://circleci.com/gh/rth/text-vectorize/tree/master)
 
 Text vectorizers and TFIDF transforms in Rust with Python bindings (experimental)
 
