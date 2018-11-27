@@ -1,7 +1,7 @@
 version: 2
 
 jobs:
-  stable:
+  rust-stable:
     working_directory: ~/repo
     docker:
       - image: rust:1.30.1-slim-stretch
@@ -44,7 +44,6 @@ jobs:
       - run:
           name: test
           command: |
-            cargo test
             pytest text_vectorize
 
   lint:
@@ -74,6 +73,6 @@ workflows:
   version: 2
   build:
     jobs:
-      - stable
+      - rust-stable
       - python-wrapper
       - lint
