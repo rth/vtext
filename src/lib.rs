@@ -38,8 +38,8 @@ extern crate ndarray;
 extern crate sprs;
 
 use fnv::FnvHashMap;
-use ndarray::Array;
 use math::CSRArray;
+use ndarray::Array;
 use regex::Regex;
 
 const TOKEN_PATTERN_DEFAULT: &str = r"(?-u:\b)\w\w+(?-u:\b)";
@@ -68,15 +68,13 @@ pub fn tokenize(text: &String) -> (Vec<&str>) {
     RE.find_iter(text).map(|m| m.as_str()).collect::<Vec<_>>()
 }
 
-
 /// Sort features by name
 ///
 /// Returns a reordered matrix and modifies the vocabulary in place
-fn _sort_features(X: &mut CSRArray,
-                  vocabulary: &mut FnvHashMap<String, i32>) {
+fn _sort_features(X: &mut CSRArray, vocabulary: &mut FnvHashMap<String, i32>) {
     let mut vocabulary_sorted: Vec<_> = vocabulary.iter().collect();
     vocabulary_sorted.sort_unstable();
-    let mut idx_map: Array::<usize, _> = Array::zeros((vocabulary_sorted.len()));
+    let mut idx_map: Array<usize, _> = Array::zeros((vocabulary_sorted.len()));
     for (idx_new, (term, idx_old)) in vocabulary_sorted.iter().enumerate() {
         idx_map[**idx_old as usize] = idx_new;
     }
