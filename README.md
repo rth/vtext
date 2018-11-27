@@ -1,5 +1,7 @@
 # text-vectorize
 
+[![CircleCI](https://circleci.com/gh/rth/text-vectorize.svg?style=svg)](https://circleci.com/gh/rth/text-vectorize)
+
 Text vectorizers and TFIDF transforms in Rust with Python bindings (experimental)
 
 Work in progress, the API is unstable.

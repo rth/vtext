@@ -2,8 +2,8 @@ extern crate text_vectorize;
 
 use std::fs;
 use std::io::prelude::*;
-use text_vectorize::{CountVectorizer,HashingVectorizer};
 use std::time::SystemTime;
+use text_vectorize::{CountVectorizer, HashingVectorizer};
 
 fn main() {
     let _dirs_list = fs::read_dir("./data/").unwrap();
@@ -37,7 +37,10 @@ fn main() {
 
     let t_end = SystemTime::now();
     let dt = t_end.duration_since(t0).unwrap();
-    println!("CountVectorizer: vectorized {} documents in {:?}", n_documents, dt);
+    println!(
+        "CountVectorizer: vectorized {} documents in {:?}",
+        n_documents, dt
+    );
 
     let t0 = SystemTime::now();
 
@@ -46,5 +49,8 @@ fn main() {
 
     let t_end = SystemTime::now();
     let dt = t_end.duration_since(t0).unwrap();
-    println!("HashingVectorizer: vectorized {} documents in {:?}", n_documents, dt);
+    println!(
+        "HashingVectorizer: vectorized {} documents in {:?}",
+        n_documents, dt
+    );
 }

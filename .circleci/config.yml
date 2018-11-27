@@ -1,0 +1,48 @@
+version: 2
+
+defaults: &defaults
+  working_directory: ~/repo
+  docker:
+    - image: rust:1.30.1-slim-stretch
+
+jobs:
+  build:
+    <<: *defaults
+    steps:
+      - checkout
+      - run:
+          name: dependencies
+          command: |
+            apt-get update
+            apt-get install -y build-essential
+
+      - run:
+          name: build
+          command: |
+            cargo build
+
+      - run:
+          name: test
+          command: |
+            cargo test
+
+  lint:
+    <<: *defaults
+    steps:
+      - checkout
+
+      - run:
+          name: dependencies
+          command: rustup component add rustfmt-preview
+
+      - run:
+          name: lint
+          command: |
+            cargo fmt -- --check
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - build
+      - lint
