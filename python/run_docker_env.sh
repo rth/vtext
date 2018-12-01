@@ -1,2 +1,2 @@
 #!/bin/sh
-docker run --rm -v $PWD/../:/src -it py-text-vectorize-env:latest /bin/bash
+docker run --rm -v $PWD/../:/src -it rthz/rust-nightly-python37 /bin/bash
