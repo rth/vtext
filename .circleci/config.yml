@@ -61,13 +61,14 @@ jobs:
             apt-get update
             apt-get install -y python3-pip
             rustup component add rustfmt-preview
-            pip3 install flake8
+            pip3 install flake8 black
 
       - run:
           name: lint
           command: |
             cargo fmt -- --check
-            flake8 python/
+            flake8 python/ benchmarks/
+            black --check python/ benchmarks/
             cd python && cargo fmt -- --check
 
 

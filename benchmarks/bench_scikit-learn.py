@@ -7,11 +7,11 @@ from sklearn.feature_extraction.text import CountVectorizer
 
 from text_vectorize._lib import hash_vectorize
 
-if __name__ == '__main__':
-    input_files = list(glob('./data/*/*'))
+if __name__ == "__main__":
+    input_files = list(glob("./data/*/*"))
     data = []
     for file_path in input_files:
-        with open(file_path, 'rt') as fh:
+        with open(file_path, "rt") as fh:
             data.append(fh.read())
 
     t0 = time()
@@ -20,8 +20,10 @@ if __name__ == '__main__':
 
     dt = time() - t0
 
-    print("HashingVectorizer (text-vectorize): vectorized {} documents in {:.2f}s"
-          .format(len(data), dt))
+    print(
+        "HashingVectorizer (text-vectorize): vectorized {}"
+        "documents in {:.2f}s".format(len(data), dt)
+    )
 
     t0 = time()
     vect = HashingVectorizer(lowercase=False)
@@ -29,8 +31,10 @@ if __name__ == '__main__':
 
     dt = time() - t0
 
-    print("HashingVectorizer (scikit-learn): vectorized {} documents in {:.2f}s"
-          .format(len(data), dt))
+    print(
+        "HashingVectorizer (scikit-learn): vectorized {}"
+        "documents in {:.2f}s".format(len(data), dt)
+    )
 
     t0 = time()
     vect = CountVectorizer(lowercase=False)
@@ -38,7 +42,7 @@ if __name__ == '__main__':
 
     dt = time() - t0
 
-    print("CountVectorizer (scikit-learn): vectorized {} documents in {:.2f}s"
-          .format(len(data), dt))
-
-
+    print(
+        "CountVectorizer (scikit-learn): vectorized {}"
+        "documents in {:.2f}s".format(len(data), dt)
+    )

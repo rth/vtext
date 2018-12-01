@@ -12,11 +12,11 @@ def vectorize(text):
     return len(df)
 
 
-if __name__ == '__main__':
-    input_files = list(glob('./data/*/*'))
+if __name__ == "__main__":
+    input_files = list(glob("./data/*/*"))
     s = 0
     for file_path in input_files:
-        with open(file_path, 'rt', encoding='utf8') as fh:
+        with open(file_path, "rt", encoding="utf8") as fh:
             try:
                 s += vectorize(fh.read())
             except:
