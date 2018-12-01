@@ -19,6 +19,6 @@ if __name__ == "__main__":
         with open(file_path, "rt", encoding="utf8") as fh:
             try:
                 s += vectorize(fh.read())
-            except:
+            except:  # noqa
                 os.unlink(file_path)
     print(s)
