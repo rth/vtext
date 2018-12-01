@@ -9,7 +9,7 @@ extern crate text_vectorize;
 use numpy::{IntoPyArray, PyArray1};
 use pyo3::prelude::{pymodinit, ObjectProtocol, Py, PyModule, PyObject, PyResult, Python};
 use pyo3::types::PyIterator;
-use text_vectorize::CountVectorizer;
+use text_vectorize::HashingVectorizer;
 
 use text_vectorize::tokenize;
 
@@ -42,19 +42,17 @@ fn _lib(_py: Python, m: &PyModule) -> PyResult<()> {
             collection.push(document);
         }
 
-        let mut vect = CountVectorizer::new();
+        let mut vect = HashingVectorizer::new();
         let x = vect.fit_transform(&collection);
-
-        println!("{:?}", collection);
-        println!("{:?}", x);
 
         let indices = vec_usize_to_i32(x.indices);
         let indptr = vec_usize_to_i32(x.indptr);
+        let data = x.data;
 
         Ok((
             indices.into_pyarray(py).to_owned(),
             indptr.into_pyarray(py).to_owned(),
-            x.data.into_pyarray(py).to_owned(),
+            data.into_pyarray(py).to_owned(),
         ))
     }
 
