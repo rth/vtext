@@ -19,5 +19,6 @@ setup(
     ],
     install_requires=install_requires,
     packages=find_packages(),
+    python_requires='~=3.5',
     zip_safe=False,
 )
