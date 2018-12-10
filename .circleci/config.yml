@@ -1,13 +1,10 @@
 version: 2
 
-defaults: &defaults
-  working_directory: ~/repo
-  docker:
-    - image: rust:1.30.1-slim-stretch
-
 jobs:
-  build:
-    <<: *defaults
+  rust-stable:
+    working_directory: ~/repo
+    docker:
+      - image: rust:1.30.1-slim-stretch
     steps:
       - checkout
       - run:
@@ -26,23 +23,59 @@ jobs:
           command: |
             cargo test
 
+  python-wrapper:
+    working_directory: ~/repo
+    docker:
+      - image: rustlang/rust:nightly
+    steps:
+      - checkout
+      - run:
+          name: dependencies
+          command: |
+            apt-get update
+            apt-get install -y python3-pip
+            pip3 install -r python/requirements.txt
+            pip3 install pytest pytest-cov
+
+      - run:
+          name: build
+          command: |
+            cd python/
+            python3 setup.py develop
+
+      - run:
+          name: test
+          command: |
+            cd python
+            python3 -m pytest text_vectorize
+
   lint:
-    <<: *defaults
+    working_directory: ~/repo
+    docker:
+      - image: rthz/rust-nightly-python37
     steps:
       - checkout
 
       - run:
           name: dependencies
-          command: rustup component add rustfmt-preview
+          command: |
+            apt-get update
+            rustup component add rustfmt-preview
+            python -m pip install flake8 black
 
       - run:
           name: lint
           command: |
             cargo fmt -- --check
+            flake8 --max-line-length=88 python/ benchmarks/
+            black --check python/ benchmarks/
+            cd python && cargo fmt -- --check
+
 
 workflows:
   version: 2
   build:
     jobs:
-      - build
+      - rust-stable
+      - python-wrapper
       - lint

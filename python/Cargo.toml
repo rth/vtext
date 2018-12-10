@@ -1,0 +1,21 @@
+[package]
+name = "text-vectorize-py-wrapper"
+version = "0.1.0-alpha.1"
+authors = ["Roman Yurchak <rth.yurchak@pm.me>"]
+
+[lib]
+name = "rust_ext"
+crate-type = ["cdylib"]
+
+[dependencies]
+ndarray = "0.12"
+text-vectorize = {"path" = "../"}
+
+[dependencies.numpy]
+version = "0.4.0"
+git = "https://github.com/rust-numpy/rust-numpy"
+features = ["python3"]
+
+[dependencies.pyo3]
+version = "0.5.2"
+features = ["extension-module"]

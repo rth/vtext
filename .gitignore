@@ -19,6 +19,8 @@ wheels/
 .installed.cfg
 *.egg
 MANIFEST
+__pycache__/
+*.pyc
 
 # Unit test / coverage reports
 htmlcov/
