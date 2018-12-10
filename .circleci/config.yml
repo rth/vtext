@@ -67,7 +67,7 @@ jobs:
           name: lint
           command: |
             cargo fmt -- --check
-            flake8 python/ benchmarks/
+            flake8 --max-line-length=88 python/ benchmarks/
             black --check python/ benchmarks/
             cd python && cargo fmt -- --check
 
