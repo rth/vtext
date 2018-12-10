@@ -18,7 +18,7 @@ estimators in [scikit-learn](https://scikit-learn.org/).
 
 ### Planned
 
- - Python wrapper ([#1](https://github.com/rth/text-vectorize/pull/1))
+ - Python wrapper ([#6](https://github.com/rth/text-vectorize/pull/6))
  - Support for word and character n-grams ([#2](https://github.com/rth/text-vectorize/issues/2))
  - Binary Python wheels ([#3](https://github.com/rth/text-vectorize/issues/3<Paste>))
  - IDF transforms and TfidfVectorizer ([#4](https://github.com/rth/text-vectorize/issues/4))
