@@ -2,13 +2,11 @@
 
 This is a Python wrapper for the Rust text-vectorize crate.
 
-WIP.
-
 ## Installation
 
 ### Manual install
 
-This requires Python 3.5+ as well as Rust nightly >=1.30.0
+Building requires Python 3.5+ as well as Rust nightly >=1.30.0
 (due to [rust-numpy](https://github.com/rust-numpy/rust-numpy) and
 [pyo3](https://github.com/PyO3/pyo3) requirements),
 
