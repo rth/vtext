@@ -34,10 +34,20 @@ jobs:
           command: |
             python -m pip install tox
       - run:
-          name: build-test
+          name: test
           command: |
             cd python
             tox
+      - run:
+          name: build-wheels
+          command: |
+            python -m pip install pyo3-pack
+            cd python
+            pyo3-pack build -i python3.7
+            pyo3-pack build -i python3.6
+            pyo3-pack build -i python3.5
+      - store_artifacts:
+          path: /root/repo/python/target/wheels/
 
   lint:
     working_directory: ~/repo
