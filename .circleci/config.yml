@@ -47,7 +47,7 @@ jobs:
             pyo3-pack build -i python3.6
             pyo3-pack build -i python3.5
       - store_artifacts:
-          path: /home/circleci/repo/python/target/wheels/
+          path: /root/repo/python/target/wheels/
 
   lint:
     working_directory: ~/repo

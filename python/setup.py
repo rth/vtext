@@ -6,7 +6,7 @@ with open("./requirements.txt", "rt") as fh:
     install_requires = fh.read().splitlines()
 
 setup(
-    name="py-text-vectorize",
+    name="text-vectorize",
     version="0.1.0a1",
     description="Example of python-extension using rust-numpy",
     rust_extensions=[
