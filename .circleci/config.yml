@@ -30,6 +30,10 @@ jobs:
     steps:
       - checkout
       - run:
+          name: dependencies
+          command: |
+            python -m pip install tox
+      - run:
           name: build-test
           command: |
             cd python
