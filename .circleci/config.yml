@@ -37,7 +37,7 @@ jobs:
           name: build-test
           command: |
             cd python
-            tox -e py
+            tox
 
   lint:
     working_directory: ~/repo
