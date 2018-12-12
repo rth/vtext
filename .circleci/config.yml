@@ -26,28 +26,14 @@ jobs:
   python-wrapper:
     working_directory: ~/repo
     docker:
-      - image: rustlang/rust:nightly
+      - image: rthz/rust-nightly-python37
     steps:
       - checkout
       - run:
-          name: dependencies
-          command: |
-            apt-get update
-            apt-get install -y python3-pip
-            pip3 install -r python/requirements.txt
-            pip3 install pytest pytest-cov
-
-      - run:
-          name: build
-          command: |
-            cd python/
-            python3 setup.py develop
-
-      - run:
-          name: test
+          name: build-test
           command: |
             cd python
-            python3 -m pytest text_vectorize
+            tox -e py
 
   lint:
     working_directory: ~/repo
