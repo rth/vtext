@@ -68,6 +68,7 @@ pub fn tokenize<'a>(text: &'a String) -> impl Iterator<Item = &'a str> {
     RE.find_iter(text).map(|m| m.as_str())
 }
 
+
 /// Sort features by name
 ///
 /// Returns a reordered matrix and modifies the vocabulary in place
@@ -224,8 +225,9 @@ impl HashingVectorizer {
             FnvHashMap::with_capacity_and_hasher(1000, Default::default());
 
         let mut indices_local = Vec::new();
-        let mut nnz: u64 = 0;
+        let mut nnz: usize = 0;
         let mut bucket: i32 = 0;
+        let mut index_last: u32 = 0;
 
         for (_document_id, document) in X.iter().enumerate() {
             // String.to_lowercase() is very slow
@@ -241,21 +243,33 @@ impl HashingVectorizer {
                 let hash = fasthash::murmur3::hash32(&token);
                 let hash = hash % self.n_features;
 
-                // counter.entry(hash).and_modify(|e| *e += 1).or_insert(1);
                 indices_local.push(hash);
             }
             indices_local.sort_unstable();
 
             // sum duplicates
             bucket = 0;
-            for slice in indices_local.windows(2) {
-                //bucket += 1;
-                //if idx_prev == idx_next {
-                //    tf.indices.push(idx_prev);
-                //    tf.data.push(bucket+1);
-                //    bucket = 0;
-                //}
+            index_last = indices_local[0];
+
+            for index_current in indices_local.iter().skip(1) {
+                bucket += 1;
+                if *index_current != index_last {
+                    tf.indices.push(index_last as usize);
+                    tf.data.push(bucket);
+                    nnz += 1;
+                    index_last = *index_current;
+                    bucket = 0;
+                }
             }
+            tf.indices
+                .push(indices_local[indices_local.len() - 1] as usize);
+            if bucket == 0 {
+                bucket += 1
+            }
+            tf.data.push(bucket);
+            nnz += 1;
+
+            tf.indptr.push(nnz);
         }
         if tf.indptr.len() == 1 {
             // the dataset was empty
