@@ -176,6 +176,11 @@ impl CountVectorizer {
 
         _sort_features(&mut tf, &mut self.vocabulary);
 
+        if tf.indptr.len() == 1 {
+            // the dataset was empty
+            tf.indptr.clear()
+        }
+
         tf.sort_indices();
         tf
     }
@@ -245,6 +250,10 @@ impl HashingVectorizer {
                 tf.data.push(value);
             }
             tf.indptr.push(tf.data.len());
+        }
+        if tf.indptr.len() == 1 {
+            // the dataset was empty
+            tf.indptr.clear()
         }
         // this takes ~10% of the compute time
         tf.sort_indices();

@@ -1,7 +1,7 @@
 use *;
 
 #[test]
-fn count_vectorizer_simple() {
+fn test_count_vectorizer_simple() {
     // Example 1
 
     let documents = vec![String::from("cat dog cat")];
@@ -24,7 +24,7 @@ fn count_vectorizer_simple() {
 }
 
 #[test]
-fn hashing_vectorizer_simple() {
+fn test_hashing_vectorizer_simple() {
     // Results with scikit-learn 0.20.0
     // >>> vect = HashingVectorizer(norm=None, alternate_sign=False)
     // >>> X = vect.fit_transform(['the moon in the sky', 'The sky is blue'])
@@ -63,4 +63,23 @@ fn hashing_vectorizer_simple() {
     //assert_eq!(X.indices, X2.indices);
     assert_eq!(X.indptr, X2.indptr);
     assert_eq!(X.data, X2.data);
+}
+
+#[test]
+fn test_empty_dataset() {
+    let documents: Vec<String> = vec![];
+
+    let mut vectorizer = CountVectorizer::new();
+
+    let X = vectorizer.fit_transform(&documents);
+    assert_eq!(X.data, Vec::new());
+    assert_eq!(X.indices, Vec::new());
+    assert_eq!(X.indptr, Vec::new());
+
+    let vectorizer = HashingVectorizer::new();
+
+    let X = vectorizer.fit_transform(&documents);
+    assert_eq!(X.data, Vec::new());
+    assert_eq!(X.indices, Vec::new());
+    assert_eq!(X.indptr, Vec::new());
 }
