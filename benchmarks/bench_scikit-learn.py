@@ -4,6 +4,7 @@ from scipy.sparse import csr_matrix
 
 from sklearn.feature_extraction.text import HashingVectorizer
 from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 from text_vectorize._lib import hash_vectorize
 
@@ -28,7 +29,7 @@ if __name__ == "__main__":
     )
 
     t0 = time()
-    vect = HashingVectorizer(lowercase=False)
+    vect = HashingVectorizer(lowercase=False, norm=None)
     vect.fit_transform(data)
 
     dt = time() - t0
@@ -46,5 +47,15 @@ if __name__ == "__main__":
 
     print(
         "CountVectorizer (scikit-learn): vectorized {} "
+        "documents in {:.2f}s [{:.1f} MB/s]".format(len(data), dt, dataset_size / dt)
+    )
+    t0 = time()
+    vect = TfidfVectorizer(lowercase=False, norm=None)
+    vect.fit_transform(data)
+
+    dt = time() - t0
+
+    print(
+        "TfidfVectorizer (scikit-learn): vectorized {} "
         "documents in {:.2f}s [{:.1f} MB/s]".format(len(data), dt, dataset_size / dt)
     )
