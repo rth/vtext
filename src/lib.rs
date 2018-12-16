@@ -83,6 +83,33 @@ fn _sort_features(X: &mut CSRArray, vocabulary: &mut FnvHashMap<String, i32>) {
     }
 }
 
+/// Sum duplicates
+#[inline]
+fn _sum_duplicates(tf: &mut CSRArray, indices_local: &Vec<u32>, nnz: &mut usize) {
+    let mut bucket: i32 = 0;
+    let mut index_last = indices_local[0];
+
+    for index_current in indices_local.iter().skip(1) {
+        bucket += 1;
+        if *index_current != index_last {
+            tf.indices.push(index_last as usize);
+            tf.data.push(bucket);
+            *nnz += 1;
+            index_last = *index_current;
+            bucket = 0;
+        }
+    }
+    tf.indices
+        .push(indices_local[indices_local.len() - 1] as usize);
+    if bucket == 0 {
+        bucket += 1
+    }
+    tf.data.push(bucket);
+    *nnz += 1;
+
+    tf.indptr.push(*nnz);
+}
+
 #[derive(Debug)]
 pub struct HashingVectorizer {
     lowercase: bool,
@@ -137,8 +164,8 @@ impl CountVectorizer {
         let mut vocabulary: FnvHashMap<String, i32> =
             FnvHashMap::with_capacity_and_hasher(1000, Default::default());
 
-        let mut counter: FnvHashMap<i32, i32> =
-            FnvHashMap::with_capacity_and_hasher(1000, Default::default());
+        let mut nnz: usize = 0;
+        let mut indices_local = Vec::new();
 
         for (_document_id, document) in X.iter().enumerate() {
             let document = document.to_ascii_lowercase();
@@ -146,27 +173,18 @@ impl CountVectorizer {
             let tokens = tokenize(&document);
 
             let n_grams = analyze(tokens);
+            indices_local.clear();
             for token in n_grams {
                 let vocabulary_size = vocabulary.len() as i32;
                 let token_id = vocabulary
                     .entry(token.to_owned())
                     .or_insert(vocabulary_size);
-                counter
-                    .entry(*token_id)
-                    .and_modify(|e| *e += 1)
-                    .or_insert(1);
+                indices_local.push(*token_id as u32);
             }
-            // Here we use a counter to sum duplicates tokens, this re-hashes already
-            // the hashed values, but it means that we don't need to handle
-            // duplicates later on.
-            // The alternative is to insert them into indices vector as they are,
-            // and let the sparse library matrix to sort indices and sum duplicates
-            // as this is done in `scipy.sparse`.
-            for (key, value) in counter.drain() {
-                tf.indices.push(key as usize);
-                tf.data.push(value);
-            }
-            tf.indptr.push(tf.data.len());
+            // this takes 10-15% of the compute time
+            indices_local.sort_unstable();
+
+            _sum_duplicates(&mut tf, &mut indices_local, &mut nnz);
         }
 
         // Copy to the vocabulary in the struct and make it own data
@@ -223,6 +241,9 @@ impl HashingVectorizer {
         let mut counter: FnvHashMap<u32, i32> =
             FnvHashMap::with_capacity_and_hasher(1000, Default::default());
 
+        let mut indices_local = Vec::new();
+        let mut nnz: usize = 0;
+
         for (_document_id, document) in X.iter().enumerate() {
             // String.to_lowercase() is very slow
             // https://www.reddit.com/r/rust/comments/6wbru2/performance_issue_can_i_avoid_of_using_the_slow/
@@ -232,31 +253,22 @@ impl HashingVectorizer {
 
             let tokens = tokenize(&document);
             let n_grams = analyze(tokens);
+            indices_local.clear();
             for token in n_grams {
                 let hash = fasthash::murmur3::hash32(&token);
                 let hash = hash % self.n_features;
 
-                counter.entry(hash).and_modify(|e| *e += 1).or_insert(1);
+                indices_local.push(hash);
             }
+            // this takes 10-15% of the compute time
+            indices_local.sort_unstable();
 
-            // Here we use a counter to sum duplicates tokens, this means that we
-            // re-hash the hashed values, which is not great performance wise,
-            // but it means that we don't need to handle duplicates later on.
-            // The alternative is to insert them into indices vector as they are,
-            // and let the sparse library matrix to sort indices and sum duplicates
-            // as this is done in `scipy.sparse`.
-            for (key, value) in counter.drain() {
-                tf.indices.push(key as usize);
-                tf.data.push(value);
-            }
-            tf.indptr.push(tf.data.len());
+            _sum_duplicates(&mut tf, &mut indices_local, &mut nnz);
         }
         if tf.indptr.len() == 1 {
             // the dataset was empty
             tf.indptr.clear()
         }
-        // this takes ~10% of the compute time
-        tf.sort_indices();
         tf
     }
 
