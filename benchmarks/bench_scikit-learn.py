@@ -24,8 +24,7 @@ if __name__ == "__main__":
 
     print(
         "HashingVectorizer (text-vectorize): vectorized {} "
-        "documents in {:.2f}s [{:.1f} MB/s]"
-        .format(len(data), dt, dataset_size / dt)
+        "documents in {:.2f}s [{:.1f} MB/s]".format(len(data), dt, dataset_size / dt)
     )
 
     t0 = time()
@@ -36,8 +35,7 @@ if __name__ == "__main__":
 
     print(
         "HashingVectorizer (scikit-learn): vectorized {} "
-        "documents in {:.2f}s [{:.1f} MB/s]"
-        .format(len(data), dt, dataset_size / dt)
+        "documents in {:.2f}s [{:.1f} MB/s]".format(len(data), dt, dataset_size / dt)
     )
 
     t0 = time()
@@ -48,6 +46,5 @@ if __name__ == "__main__":
 
     print(
         "CountVectorizer (scikit-learn): vectorized {} "
-        "documents in {:.2f}s [{:.1f} MB/s]"
-        .format(len(data), dt, dataset_size / dt)
+        "documents in {:.2f}s [{:.1f} MB/s]".format(len(data), dt, dataset_size / dt)
     )
