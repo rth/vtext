@@ -223,6 +223,10 @@ impl HashingVectorizer {
         let mut counter: FnvHashMap<u32, i32> =
             FnvHashMap::with_capacity_and_hasher(1000, Default::default());
 
+        let mut indices_local = Vec::new();
+        let mut nnz: u64 = 0;
+        let mut bucket: i32 = 0;
+
         for (_document_id, document) in X.iter().enumerate() {
             // String.to_lowercase() is very slow
             // https://www.reddit.com/r/rust/comments/6wbru2/performance_issue_can_i_avoid_of_using_the_slow/
@@ -232,24 +236,26 @@ impl HashingVectorizer {
 
             let tokens = tokenize(&document);
             let n_grams = analyze(tokens);
+            indices_local.clear();
             for token in n_grams {
                 let hash = fasthash::murmur3::hash32(&token);
                 let hash = hash % self.n_features;
 
-                counter.entry(hash).and_modify(|e| *e += 1).or_insert(1);
+                // counter.entry(hash).and_modify(|e| *e += 1).or_insert(1);
+                indices_local.push(hash);
             }
+            indices_local.sort_unstable();
 
-            // Here we use a counter to sum duplicates tokens, this means that we
-            // re-hash the hashed values, which is not great performance wise,
-            // but it means that we don't need to handle duplicates later on.
-            // The alternative is to insert them into indices vector as they are,
-            // and let the sparse library matrix to sort indices and sum duplicates
-            // as this is done in `scipy.sparse`.
-            for (key, value) in counter.drain() {
-                tf.indices.push(key as usize);
-                tf.data.push(value);
+            // sum duplicates
+            bucket = 0;
+            for slice in indices_local.windows(2) {
+                //bucket += 1;
+                //if idx_prev == idx_next {
+                //    tf.indices.push(idx_prev);
+                //    tf.data.push(bucket+1);
+                //    bucket = 0;
+                //}
             }
-            tf.indptr.push(tf.data.len());
         }
         if tf.indptr.len() == 1 {
             // the dataset was empty
