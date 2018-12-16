@@ -84,6 +84,35 @@ fn _sort_features(X: &mut CSRArray, vocabulary: &mut FnvHashMap<String, i32>) {
     }
 }
 
+
+/// Sum duplicates
+#[inline]
+fn _sum_duplicates(tf: &mut CSRArray, indices_local: &Vec<u32>, nnz: &mut usize) {
+    let mut bucket: i32 = 0;
+    let mut index_last = indices_local[0];
+
+    for index_current in indices_local.iter().skip(1) {
+        bucket += 1;
+        if *index_current != index_last {
+            tf.indices.push(index_last as usize);
+            tf.data.push(bucket);
+            *nnz += 1;
+            index_last = *index_current;
+            bucket = 0;
+        }
+    }
+    tf.indices
+        .push(indices_local[indices_local.len() - 1] as usize);
+    if bucket == 0 {
+        bucket += 1
+    }
+    tf.data.push(bucket);
+    *nnz += 1;
+
+    tf.indptr.push(*nnz);
+
+}
+
 #[derive(Debug)]
 pub struct HashingVectorizer {
     lowercase: bool,
@@ -226,8 +255,6 @@ impl HashingVectorizer {
 
         let mut indices_local = Vec::new();
         let mut nnz: usize = 0;
-        let mut bucket: i32 = 0;
-        let mut index_last: u32 = 0;
 
         for (_document_id, document) in X.iter().enumerate() {
             // String.to_lowercase() is very slow
@@ -245,38 +272,16 @@ impl HashingVectorizer {
 
                 indices_local.push(hash);
             }
+            // this takes 10-15% of the compute time
             indices_local.sort_unstable();
 
-            // sum duplicates
-            bucket = 0;
-            index_last = indices_local[0];
+            _sum_duplicates(&mut tf, &mut indices_local, &mut nnz);
 
-            for index_current in indices_local.iter().skip(1) {
-                bucket += 1;
-                if *index_current != index_last {
-                    tf.indices.push(index_last as usize);
-                    tf.data.push(bucket);
-                    nnz += 1;
-                    index_last = *index_current;
-                    bucket = 0;
-                }
-            }
-            tf.indices
-                .push(indices_local[indices_local.len() - 1] as usize);
-            if bucket == 0 {
-                bucket += 1
-            }
-            tf.data.push(bucket);
-            nnz += 1;
-
-            tf.indptr.push(nnz);
         }
         if tf.indptr.len() == 1 {
             // the dataset was empty
             tf.indptr.clear()
         }
-        // this takes ~10% of the compute time
-        tf.sort_indices();
         tf
     }
 
