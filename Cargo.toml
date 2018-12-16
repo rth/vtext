@@ -2,6 +2,7 @@
 name = "text-vectorize"
 version = "0.1.0-alpha.1"
 authors = ["Roman Yurchak <rth.yurchak@pm.me>"]
+edition = "2018"
 
 [profile.release]
 opt-level = 3

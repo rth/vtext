@@ -37,8 +37,8 @@ extern crate regex;
 extern crate ndarray;
 extern crate sprs;
 
+use crate::math::CSRArray;
 use fnv::FnvHashMap;
-use math::CSRArray;
 use ndarray::Array;
 use regex::Regex;
 
@@ -75,7 +75,7 @@ fn _sort_features(X: &mut CSRArray, vocabulary: &mut FnvHashMap<String, i32>) {
     let mut vocabulary_sorted: Vec<_> = vocabulary.iter().collect();
     vocabulary_sorted.sort_unstable();
     let mut idx_map: Array<usize, _> = Array::zeros(vocabulary_sorted.len());
-    for (idx_new, (term, idx_old)) in vocabulary_sorted.iter().enumerate() {
+    for (idx_new, (_term, idx_old)) in vocabulary_sorted.iter().enumerate() {
         idx_map[**idx_old as usize] = idx_new;
     }
     for idx in 0..X.indices.len() {
@@ -124,8 +124,8 @@ impl CountVectorizer {
     }
 
     /// Fit and transform (with optional fixed vocabulary)
-    fn _fit_transform(&mut self, X: &[String], fixed_vocabulary: bool) -> CSRArray {
-        let mut tf = ::math::CSRArray {
+    fn _fit_transform(&mut self, X: &[String], _fixed_vocabulary: bool) -> CSRArray {
+        let mut tf = crate::math::CSRArray {
             indices: Vec::new(),
             indptr: Vec::new(),
             data: Vec::new(),
@@ -140,7 +140,7 @@ impl CountVectorizer {
         let mut counter: FnvHashMap<i32, i32> =
             FnvHashMap::with_capacity_and_hasher(1000, Default::default());
 
-        for (document_id, document) in X.iter().enumerate() {
+        for (_document_id, document) in X.iter().enumerate() {
             let document = document.to_ascii_lowercase();
 
             let tokens = tokenize(&document);
@@ -202,7 +202,7 @@ impl HashingVectorizer {
         }
     }
 
-    pub fn fit(self, X: &[String]) -> Self {
+    pub fn fit(self, _X: &[String]) -> Self {
         // Fit method
         //
         // The vectorizer is stateless, this has no effect
@@ -212,7 +212,7 @@ impl HashingVectorizer {
     pub fn transform(&self, X: &[String]) -> CSRArray {
         // Transform method
 
-        let mut tf = ::math::CSRArray {
+        let mut tf = crate::math::CSRArray {
             indices: Vec::new(),
             indptr: Vec::new(),
             data: Vec::new(),
@@ -223,7 +223,7 @@ impl HashingVectorizer {
         let mut counter: FnvHashMap<u32, i32> =
             FnvHashMap::with_capacity_and_hasher(1000, Default::default());
 
-        for (document_id, document) in X.iter().enumerate() {
+        for (_document_id, document) in X.iter().enumerate() {
             // String.to_lowercase() is very slow
             // https://www.reddit.com/r/rust/comments/6wbru2/performance_issue_can_i_avoid_of_using_the_slow/
             // https://github.com/rust-lang/rust/issues/26244

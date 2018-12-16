@@ -70,8 +70,7 @@ impl CSRArray {
 
 #[cfg(test)]
 mod tests {
-    use math::CSRArray;
-    use ndarray::Array2;
+    use crate::math::CSRArray;
 
     #[test]
     fn test_csr_sort_indices() {
@@ -94,7 +93,7 @@ mod tests {
 
     #[test]
     fn test_csr_to_dense() {
-        let mut X_csr = CSRArray {
+        let X_csr = CSRArray {
             indices: [3, 1, 1, 5].to_vec(),
             indptr: [0, 2, 4].to_vec(),
             data: [1, 2, 3, 4].to_vec(),

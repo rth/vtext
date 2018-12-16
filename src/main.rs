@@ -31,7 +31,7 @@ fn main() {
     let t0 = SystemTime::now();
 
     let mut vect = CountVectorizer::new();
-    let X = vect.fit_transform(&documents);
+    let _X = vect.fit_transform(&documents);
 
     let n_documents = documents.len();
 
@@ -44,8 +44,8 @@ fn main() {
 
     let t0 = SystemTime::now();
 
-    let mut vect = HashingVectorizer::new();
-    let X = vect.fit_transform(&documents);
+    let vect = HashingVectorizer::new();
+    let _X = vect.fit_transform(&documents);
 
     let t_end = SystemTime::now();
     let dt = t_end.duration_since(t0).unwrap();
