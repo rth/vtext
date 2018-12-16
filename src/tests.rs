@@ -1,4 +1,4 @@
-use *;
+use crate::*;
 
 #[test]
 fn test_count_vectorizer_simple() {
