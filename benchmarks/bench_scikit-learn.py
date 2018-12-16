@@ -14,6 +14,8 @@ if __name__ == "__main__":
         with open(file_path, "rt") as fh:
             data.append(fh.read())
 
+    dataset_size = 91  # MB for 20 newsgroup dataset
+
     t0 = time()
     indices, indptr, data_out = hash_vectorize(data)
     csr_matrix((data_out, indices, indptr))
@@ -21,8 +23,9 @@ if __name__ == "__main__":
     dt = time() - t0
 
     print(
-        "HashingVectorizer (text-vectorize): vectorized {}"
-        "documents in {:.2f}s".format(len(data), dt)
+        "HashingVectorizer (text-vectorize): vectorized {} "
+        "documents in {:.2f}s [{:.1f} MB/s]"
+        .format(len(data), dt, dataset_size / dt)
     )
 
     t0 = time()
@@ -32,8 +35,9 @@ if __name__ == "__main__":
     dt = time() - t0
 
     print(
-        "HashingVectorizer (scikit-learn): vectorized {}"
-        "documents in {:.2f}s".format(len(data), dt)
+        "HashingVectorizer (scikit-learn): vectorized {} "
+        "documents in {:.2f}s [{:.1f} MB/s]"
+        .format(len(data), dt, dataset_size / dt)
     )
 
     t0 = time()
@@ -43,6 +47,7 @@ if __name__ == "__main__":
     dt = time() - t0
 
     print(
-        "CountVectorizer (scikit-learn): vectorized {}"
-        "documents in {:.2f}s".format(len(data), dt)
+        "CountVectorizer (scikit-learn): vectorized {} "
+        "documents in {:.2f}s [{:.1f} MB/s]"
+        .format(len(data), dt, dataset_size / dt)
     )
