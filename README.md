@@ -66,12 +66,12 @@ though only a subset of features will be implemented.
 
 Below are some very preliminary benchmarks on the 20 newsgroups dataset of 19924 documents (~91 MB in total),
 
-| estimator         | implementation                    | run time (s) |
+| estimator         | implementation                    | speed        |
 |-------------------|-----------------------------------|--------------|
-| CountVectorizer   | scikit-learn 0.20 (Python)        | 6.8          |
-| CountVectorizer   | text-vectorize 0.1.0-alpha (Rust) | 2.7          |
-| HashingVectorizer | scikit-learn 0.20 (Python+Cython) | 5.1          |
-| HashingVectorizer | text-vectorize 0.1.0-alpha (Rust) | 1.6          |
+| CountVectorizer   | scikit-learn 0.20 (Python)        | 14 MB/s      |
+| CountVectorizer   | text-vectorize 0.1.0-alpha (Rust) | 40 MB/s      |
+| HashingVectorizer | scikit-learn 0.20 (Python+Cython) | 18 MB/s      |
+| HashingVectorizer | text-vectorize 0.1.0-alpha (Rust) | 75 MB/s      |
 
 see [benchmarks/README.md](./benchmarks/README.md) for more details.
 Note that these are not strictly equivalent, because
