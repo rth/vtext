@@ -68,7 +68,6 @@ pub fn tokenize<'a>(text: &'a String) -> impl Iterator<Item = &'a str> {
     RE.find_iter(text).map(|m| m.as_str())
 }
 
-
 /// Sort features by name
 ///
 /// Returns a reordered matrix and modifies the vocabulary in place
@@ -83,7 +82,6 @@ fn _sort_features(X: &mut CSRArray, vocabulary: &mut FnvHashMap<String, i32>) {
         X.indices[idx] = idx_map[X.indices[idx]];
     }
 }
-
 
 /// Sum duplicates
 #[inline]
@@ -110,7 +108,6 @@ fn _sum_duplicates(tf: &mut CSRArray, indices_local: &Vec<u32>, nnz: &mut usize)
     *nnz += 1;
 
     tf.indptr.push(*nnz);
-
 }
 
 #[derive(Debug)]
@@ -167,8 +164,8 @@ impl CountVectorizer {
         let mut vocabulary: FnvHashMap<String, i32> =
             FnvHashMap::with_capacity_and_hasher(1000, Default::default());
 
-        let mut counter: FnvHashMap<i32, i32> =
-            FnvHashMap::with_capacity_and_hasher(1000, Default::default());
+        let mut nnz: usize = 0;
+        let mut indices_local = Vec::new();
 
         for (_document_id, document) in X.iter().enumerate() {
             let document = document.to_ascii_lowercase();
@@ -176,27 +173,18 @@ impl CountVectorizer {
             let tokens = tokenize(&document);
 
             let n_grams = analyze(tokens);
+            indices_local.clear();
             for token in n_grams {
                 let vocabulary_size = vocabulary.len() as i32;
                 let token_id = vocabulary
                     .entry(token.to_owned())
                     .or_insert(vocabulary_size);
-                counter
-                    .entry(*token_id)
-                    .and_modify(|e| *e += 1)
-                    .or_insert(1);
+                indices_local.push(*token_id as u32);
             }
-            // Here we use a counter to sum duplicates tokens, this re-hashes already
-            // the hashed values, but it means that we don't need to handle
-            // duplicates later on.
-            // The alternative is to insert them into indices vector as they are,
-            // and let the sparse library matrix to sort indices and sum duplicates
-            // as this is done in `scipy.sparse`.
-            for (key, value) in counter.drain() {
-                tf.indices.push(key as usize);
-                tf.data.push(value);
-            }
-            tf.indptr.push(tf.data.len());
+            // this takes 10-15% of the compute time
+            indices_local.sort_unstable();
+
+            _sum_duplicates(&mut tf, &mut indices_local, &mut nnz);
         }
 
         // Copy to the vocabulary in the struct and make it own data
@@ -276,7 +264,6 @@ impl HashingVectorizer {
             indices_local.sort_unstable();
 
             _sum_duplicates(&mut tf, &mut indices_local, &mut nnz);
-
         }
         if tf.indptr.len() == 1 {
             // the dataset was empty
