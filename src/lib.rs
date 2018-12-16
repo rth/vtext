@@ -42,7 +42,7 @@ use math::CSRArray;
 use ndarray::Array;
 use regex::Regex;
 
-const TOKEN_PATTERN_DEFAULT: &str = r"(?-u:\b)\w\w+(?-u:\b)";
+const TOKEN_PATTERN_DEFAULT: &str = r"\b\w\w+\b";
 
 #[cfg(test)]
 mod tests;
@@ -53,19 +53,19 @@ mod math;
 ///
 /// Given a list of tokens (words or character groups) in a document,  
 /// this corresponding word or character n-grams.
-pub fn analyze(tokens: Vec<&str>) -> Vec<&str> {
+pub fn analyze<'a>(tokens: impl Iterator<Item = &'a str>) -> impl Iterator<Item = &'a str> {
     tokens
 }
 
 /// Tokenize text
 ///
 /// Convert a text document into a vector of string tokens.
-pub fn tokenize(text: &String) -> (Vec<&str>) {
+pub fn tokenize<'a>(text: &'a String) -> impl Iterator<Item = &'a str> {
     lazy_static! {
         static ref RE: Regex = Regex::new(TOKEN_PATTERN_DEFAULT).unwrap();
     }
 
-    RE.find_iter(text).map(|m| m.as_str()).collect::<Vec<_>>()
+    RE.find_iter(text).map(|m| m.as_str())
 }
 
 /// Sort features by name
@@ -74,11 +74,11 @@ pub fn tokenize(text: &String) -> (Vec<&str>) {
 fn _sort_features(X: &mut CSRArray, vocabulary: &mut FnvHashMap<String, i32>) {
     let mut vocabulary_sorted: Vec<_> = vocabulary.iter().collect();
     vocabulary_sorted.sort_unstable();
-    let mut idx_map: Array<usize, _> = Array::zeros((vocabulary_sorted.len()));
+    let mut idx_map: Array<usize, _> = Array::zeros(vocabulary_sorted.len());
     for (idx_new, (term, idx_old)) in vocabulary_sorted.iter().enumerate() {
         idx_map[**idx_old as usize] = idx_new;
     }
-    for idx in (0..X.indices.len()) {
+    for idx in 0..X.indices.len() {
         X.indices[idx] = idx_map[X.indices[idx]];
     }
 }
@@ -233,6 +233,7 @@ impl HashingVectorizer {
 
                 counter.entry(hash).and_modify(|e| *e += 1).or_insert(1);
             }
+
             // Here we use a counter to sum duplicates tokens, this means that we
             // re-hash the hashed values, which is not great performance wise,
             // but it means that we don't need to handle duplicates later on.
