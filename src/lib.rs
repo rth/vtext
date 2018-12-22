@@ -41,6 +41,8 @@ use crate::math::CSRArray;
 use fnv::FnvHashMap;
 use ndarray::Array;
 use regex::Regex;
+use sprs::CsMat;
+use std::cmp::max;
 
 const TOKEN_PATTERN_DEFAULT: &str = r"\b\w\w+\b";
 
@@ -146,12 +148,12 @@ impl CountVectorizer {
     /// Transform
     ///
     /// Converts a sequence of text documents to a CSR Matrix
-    pub fn transform(&mut self, X: &[String]) -> CSRArray {
+    pub fn transform(&mut self, X: &[String]) -> CsMat<i32> {
         self._fit_transform(X, true)
     }
 
     /// Fit and transform (with optional fixed vocabulary)
-    fn _fit_transform(&mut self, X: &[String], _fixed_vocabulary: bool) -> CSRArray {
+    fn _fit_transform(&mut self, X: &[String], _fixed_vocabulary: bool) -> CsMat<i32> {
         let mut tf = crate::math::CSRArray {
             indices: Vec::new(),
             indptr: Vec::new(),
@@ -194,16 +196,15 @@ impl CountVectorizer {
 
         _sort_features(&mut tf, &mut self.vocabulary);
 
-        if tf.indptr.len() == 1 {
-            // the dataset was empty
-            tf.indptr.clear()
-        }
-
-        tf.sort_indices();
-        tf
+        CsMat::new(
+            (tf.indptr.len() - 1, self.vocabulary.len()),
+            tf.indptr,
+            tf.indices,
+            tf.data,
+        )
     }
 
-    pub fn fit_transform(&mut self, X: &[String]) -> CSRArray {
+    pub fn fit_transform(&mut self, X: &[String]) -> CsMat<i32> {
         // Fit and transform
         //
         self._fit_transform(X, true)
@@ -227,7 +228,7 @@ impl HashingVectorizer {
         self
     }
 
-    pub fn transform(&self, X: &[String]) -> CSRArray {
+    pub fn transform(&self, X: &[String]) -> CsMat<i32> {
         // Transform method
 
         let mut tf = crate::math::CSRArray {
@@ -237,9 +238,6 @@ impl HashingVectorizer {
         };
 
         tf.indptr.push(0);
-
-        let mut counter: FnvHashMap<u32, i32> =
-            FnvHashMap::with_capacity_and_hasher(1000, Default::default());
 
         let mut indices_local = Vec::new();
         let mut nnz: usize = 0;
@@ -265,14 +263,16 @@ impl HashingVectorizer {
 
             _sum_duplicates(&mut tf, &mut indices_local, &mut nnz);
         }
-        if tf.indptr.len() == 1 {
-            // the dataset was empty
-            tf.indptr.clear()
-        }
-        tf
+
+        CsMat::new(
+            (tf.indptr.len() - 1, self.n_features as usize),
+            tf.indptr,
+            tf.indices,
+            tf.data,
+        )
     }
 
-    pub fn fit_transform(&self, X: &[String]) -> CSRArray {
+    pub fn fit_transform(&self, X: &[String]) -> CsMat<i32> {
         // Fit and transform
         //
         self.transform(X)

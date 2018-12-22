@@ -6,6 +6,7 @@ extern crate numpy;
 extern crate pyo3;
 extern crate text_vectorize;
 
+use ndarray::arr1;
 use numpy::{IntoPyArray, PyArray1};
 use pyo3::prelude::{pymodinit, ObjectProtocol, Py, PyModule, PyObject, PyResult, Python};
 use pyo3::types::PyIterator;
@@ -45,9 +46,12 @@ fn _lib(_py: Python, m: &PyModule) -> PyResult<()> {
         let mut vect = HashingVectorizer::new();
         let x = vect.fit_transform(&collection);
 
-        let indices = vec_usize_to_i32(x.indices);
-        let indptr = vec_usize_to_i32(x.indptr);
-        let data = x.data;
+        // TODO: 1. use slices directly instead of creating new arrays
+        //       2. Possibly avoid casing
+        //          https://github.com/rust-ndarray/ndarray/issues/493#issuecomment-424043912
+        let indices = arr1(x.indices()).mapv(|elem| elem as i32);
+        let indptr = arr1(x.indptr()).mapv(|elem| elem as i32);
+        let data = arr1(x.data());
 
         Ok((
             indices.into_pyarray(py).to_owned(),
