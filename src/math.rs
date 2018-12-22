@@ -9,7 +9,6 @@ pub struct CSRArray {
 }
 
 impl CSRArray {
-
     pub fn to_dense(&self) -> Array2<i32> {
         let n_rows = self.indptr.len() - 1;
         let mut n_columns: usize = 0;

@@ -196,10 +196,12 @@ impl CountVectorizer {
 
         _sort_features(&mut tf, &mut self.vocabulary);
 
-        CsMat::new((tf.indptr.len() - 1, self.vocabulary.len()),
-                    tf.indptr,
-                    tf.indices,
-                    tf.data)
+        CsMat::new(
+            (tf.indptr.len() - 1, self.vocabulary.len()),
+            tf.indptr,
+            tf.indices,
+            tf.data,
+        )
     }
 
     pub fn fit_transform(&mut self, X: &[String]) -> CsMat<i32> {
@@ -262,10 +264,12 @@ impl HashingVectorizer {
             _sum_duplicates(&mut tf, &mut indices_local, &mut nnz);
         }
 
-        CsMat::new((tf.indptr.len() - 1, self.n_features as usize),
-                    tf.indptr,
-                    tf.indices,
-                    tf.data)
+        CsMat::new(
+            (tf.indptr.len() - 1, self.n_features as usize),
+            tf.indptr,
+            tf.indices,
+            tf.data,
+        )
     }
 
     pub fn fit_transform(&self, X: &[String]) -> CsMat<i32> {
