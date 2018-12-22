@@ -41,6 +41,7 @@ use crate::math::CSRArray;
 use fnv::FnvHashMap;
 use ndarray::Array;
 use regex::Regex;
+use sprs::CsMat;
 
 const TOKEN_PATTERN_DEFAULT: &str = r"\b\w\w+\b";
 
@@ -227,7 +228,7 @@ impl HashingVectorizer {
         self
     }
 
-    pub fn transform(&self, X: &[String]) -> CSRArray {
+    pub fn transform(&self, X: &[String]) -> CsMat<i32> {
         // Transform method
 
         let mut tf = crate::math::CSRArray {
@@ -269,10 +270,13 @@ impl HashingVectorizer {
             // the dataset was empty
             tf.indptr.clear()
         }
-        tf
+        CsMat::new((tf.indptr.len() - 1, self.n_features as usize),
+                    tf.indptr,
+                    tf.indices,
+                    tf.data)
     }
 
-    pub fn fit_transform(&self, X: &[String]) -> CSRArray {
+    pub fn fit_transform(&self, X: &[String]) -> CsMat<i32> {
         // Fit and transform
         //
         self.transform(X)
