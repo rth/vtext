@@ -45,9 +45,9 @@ fn _lib(_py: Python, m: &PyModule) -> PyResult<()> {
         let mut vect = HashingVectorizer::new();
         let x = vect.fit_transform(&collection);
 
-        let indices = vec_usize_to_i32(x.indices);
-        let indptr = vec_usize_to_i32(x.indptr);
-        let data = x.data;
+        let indices = vec_usize_to_i32(x.indices();
+        let indptr = vec_usize_to_i32(x.indptr());
+        let data = x.data();
 
         Ok((
             indices.into_pyarray(py).to_owned(),
