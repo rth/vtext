@@ -196,11 +196,6 @@ impl CountVectorizer {
 
         _sort_features(&mut tf, &mut self.vocabulary);
 
-        if tf.indptr.len() == 1 {
-            // the dataset was empty
-            tf.indptr.clear()
-        }
-
         CsMat::new((tf.indptr.len() - 1, self.vocabulary.len()),
                     tf.indptr,
                     tf.indices,
@@ -241,9 +236,6 @@ impl HashingVectorizer {
         };
 
         tf.indptr.push(0);
-
-        let mut counter: FnvHashMap<u32, i32> =
-            FnvHashMap::with_capacity_and_hasher(1000, Default::default());
 
         let mut indices_local = Vec::new();
         let mut nnz: usize = 0;
