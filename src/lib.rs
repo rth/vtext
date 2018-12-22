@@ -42,6 +42,7 @@ use fnv::FnvHashMap;
 use ndarray::Array;
 use regex::Regex;
 use sprs::CsMat;
+use std::cmp::max;
 
 const TOKEN_PATTERN_DEFAULT: &str = r"\b\w\w+\b";
 
@@ -266,10 +267,7 @@ impl HashingVectorizer {
 
             _sum_duplicates(&mut tf, &mut indices_local, &mut nnz);
         }
-        if tf.indptr.len() == 1 {
-            // the dataset was empty
-            tf.indptr.clear()
-        }
+
         CsMat::new((tf.indptr.len() - 1, self.n_features as usize),
                     tf.indptr,
                     tf.indices,

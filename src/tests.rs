@@ -43,8 +43,8 @@ fn test_hashing_vectorizer_simple() {
     let vect = HashingVectorizer::new();
     let vect = vect.fit(&documents);
     let X = vect.transform(&documents);
-    assert_eq!(X.indptr(), vec![0, 4, 8]);
-    assert_eq!(X.data(), vec![1, 2, 1, 1, 1, 1, 1, 1]);
+    assert_eq!(X.indptr(), &[0, 4, 8]);
+    assert_eq!(X.data(), &[1, 2, 1, 1, 1, 1, 1, 1]);
     // this is not a thorough test because indices don't match exactly
     // as hashing is not exactly identical
     assert_eq!(X.data().len(), X.indices().len());
@@ -57,7 +57,7 @@ fn test_hashing_vectorizer_simple() {
     let mut indices = X.indices().to_vec();
     indices.sort();
     indices.dedup();
-    assert_eq!(indices_ref.len(), indices().len());
+    assert_eq!(indices_ref.len(), indices.len());
 
     let X2 = vect.fit_transform(&documents);
     //assert_eq!(X.indices, X2.indices);
@@ -79,7 +79,7 @@ fn test_empty_dataset() {
     let vectorizer = HashingVectorizer::new();
 
     let X = vectorizer.fit_transform(&documents);
-    assert_eq!(X.data, Vec::new());
-    assert_eq!(X.indices, Vec::new());
-    assert_eq!(X.indptr, Vec::new());
+    assert_eq!(X.data(), &[]);
+    assert_eq!(X.indices(), &[]);
+    assert_eq!(X.indptr(), &[0]);
 }
