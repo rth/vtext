@@ -148,12 +148,12 @@ impl CountVectorizer {
     /// Transform
     ///
     /// Converts a sequence of text documents to a CSR Matrix
-    pub fn transform(&mut self, X: &[String]) -> CSRArray {
+    pub fn transform(&mut self, X: &[String]) -> CsMat<i32> {
         self._fit_transform(X, true)
     }
 
     /// Fit and transform (with optional fixed vocabulary)
-    fn _fit_transform(&mut self, X: &[String], _fixed_vocabulary: bool) -> CSRArray {
+    fn _fit_transform(&mut self, X: &[String], _fixed_vocabulary: bool) -> CsMat<i32> {
         let mut tf = crate::math::CSRArray {
             indices: Vec::new(),
             indptr: Vec::new(),
@@ -201,11 +201,13 @@ impl CountVectorizer {
             tf.indptr.clear()
         }
 
-        tf.sort_indices();
-        tf
+        CsMat::new((tf.indptr.len() - 1, self.vocabulary.len()),
+                    tf.indptr,
+                    tf.indices,
+                    tf.data)
     }
 
-    pub fn fit_transform(&mut self, X: &[String]) -> CSRArray {
+    pub fn fit_transform(&mut self, X: &[String]) -> CsMat<i32> {
         // Fit and transform
         //
         self._fit_transform(X, true)

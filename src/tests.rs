@@ -72,9 +72,9 @@ fn test_empty_dataset() {
     let mut vectorizer = CountVectorizer::new();
 
     let X = vectorizer.fit_transform(&documents);
-    assert_eq!(X.data, Vec::new());
-    assert_eq!(X.indices, Vec::new());
-    assert_eq!(X.indptr, Vec::new());
+    assert_eq!(X.data(), &[]);
+    assert_eq!(X.indices(), &[]);
+    assert_eq!(X.indptr(), &[0]);
 
     let vectorizer = HashingVectorizer::new();
 
