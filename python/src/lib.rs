@@ -3,6 +3,7 @@
 #[macro_use]
 extern crate ndarray;
 extern crate numpy;
+#[macro_use]
 extern crate pyo3;
 extern crate text_vectorize;
 
@@ -10,8 +11,9 @@ use ndarray::arr1;
 use numpy::{IntoPyArray, PyArray1};
 use pyo3::prelude::{pymodinit, ObjectProtocol, Py, PyModule, PyObject, PyResult, Python};
 use pyo3::types::PyIterator;
-use text_vectorize::HashingVectorizer;
+use pyo3::prelude::*;
 
+use text_vectorize::HashingVectorizer;
 use text_vectorize::tokenize;
 
 fn vec_usize_to_i32(vec: Vec<usize>) -> Vec<i32> {
@@ -24,6 +26,17 @@ fn vec_usize_to_i32(vec: Vec<usize>) -> Vec<i32> {
         }
     }
     vect_out
+}
+
+#[pyclass]
+pub struct PyWrapper(HashingVectorizer);
+
+#[pymethods]
+impl PyWrapper {
+    #[new]
+    fn __new__(obj: &PyRawObject,) -> PyResult<()> {
+        obj.init(|_token| PyWrapper(HashingVectorizer {}))
+    }
 }
 
 #[pymodinit]
