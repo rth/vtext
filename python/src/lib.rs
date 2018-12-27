@@ -9,40 +9,27 @@ extern crate text_vectorize;
 
 use ndarray::arr1;
 use numpy::{IntoPyArray, PyArray1};
+use pyo3::prelude::*;
 use pyo3::prelude::{pymodinit, ObjectProtocol, Py, PyModule, PyObject, PyResult, Python};
 use pyo3::types::PyIterator;
-use pyo3::prelude::*;
 
 use text_vectorize::HashingVectorizer;
-use text_vectorize::tokenize;
-
-fn vec_usize_to_i32(vec: Vec<usize>) -> Vec<i32> {
-    let mut vect_out: Vec<i32> = Vec::new();
-    for element in vec.iter() {
-        if *element > std::i32::MAX as usize {
-            panic!("Cannot safely coerce indices to i32!");
-        } else {
-            vect_out.push(*element as i32);
-        }
-    }
-    vect_out
-}
 
 #[pyclass]
-pub struct PyWrapper(HashingVectorizer);
-
-#[pymethods]
-impl PyWrapper {
-    #[new]
-    fn __new__(obj: &PyRawObject,) -> PyResult<()> {
-        obj.init(|_token| PyWrapper(HashingVectorizer {}))
-    }
+pub struct _HashingVectorizerWrapper {
+    inner: HashingVectorizer,
 }
 
-#[pymodinit]
-fn _lib(_py: Python, m: &PyModule) -> PyResult<()> {
-    #[pyfn(m, "hash_vectorize")]
-    fn hash_vectorize(
+#[pymethods]
+impl _HashingVectorizerWrapper {
+    #[new]
+    fn __new__(obj: &PyRawObject) -> PyResult<()> {
+        let estimator = HashingVectorizer::new();
+        obj.init(|_token| _HashingVectorizerWrapper { inner: estimator })
+    }
+
+    fn transform(
+        &mut self,
         py: Python,
         x: PyObject,
     ) -> PyResult<(Py<PyArray1<i32>>, Py<PyArray1<i32>>, Py<PyArray1<i32>>)> {
@@ -72,6 +59,11 @@ fn _lib(_py: Python, m: &PyModule) -> PyResult<()> {
             data.into_pyarray(py).to_owned(),
         ))
     }
+}
+
+#[pymodinit]
+fn _lib(_py: Python, m: &PyModule) -> PyResult<()> {
+    m.add_class::<_HashingVectorizerWrapper>()?;
 
     Ok(())
 }
