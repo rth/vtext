@@ -9,7 +9,8 @@ name = "rust_ext"
 crate-type = ["cdylib"]
 
 [dependencies]
-ndarray = "0.12"
+ndarray = "~0.12.0"
+sprs = "0.6.2"
 text-vectorize = {"path" = "../"}
 
 [dependencies.numpy]

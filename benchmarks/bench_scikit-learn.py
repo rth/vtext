@@ -18,11 +18,9 @@ if __name__ == "__main__":
     dataset_size = 91  # MB for 20 newsgroup dataset
 
     t0 = time()
-    print(type(data), len(data))
 
     vect = text_vectorize.HashingVectorizer(norm=None)
     vect.fit_transform(data)
-    print(type(data), len(data))
 
     dt = time() - t0
 
