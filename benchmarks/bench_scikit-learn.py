@@ -1,12 +1,13 @@
 from time import time
 from glob import glob
-from scipy.sparse import csr_matrix
 
 from sklearn.feature_extraction.text import HashingVectorizer
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-from text_vectorize._lib import hash_vectorize
+import text_vectorize
+
+
 
 if __name__ == "__main__":
     input_files = list(glob("./data/*/*"))
@@ -18,8 +19,11 @@ if __name__ == "__main__":
     dataset_size = 91  # MB for 20 newsgroup dataset
 
     t0 = time()
-    indices, indptr, data_out = hash_vectorize(data)
-    csr_matrix((data_out, indices, indptr))
+    print(type(data), len(data))
+
+    vect = text_vectorize.HashingVectorizer(norm=None)
+    vect.fit_transform(data)
+    print(type(data), len(data))
 
     dt = time() - t0
 

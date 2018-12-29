@@ -274,7 +274,7 @@ class HashingVectorizer(BaseEstimator):
 
         self._validate_params()
 
-        indices, indptr, data = _lib.hash_vectorize(X)
+        indices, indptr, data = _lib._HashingVectorizerWrapper().transform(X)
         if self.binary:
             data.fill(1)
 
