@@ -15,6 +15,21 @@ use pyo3::types::PyIterator;
 
 use text_vectorize::HashingVectorizer;
 
+
+fn iterable_to_collection(text: PyIterator) -> PyResult<Vec<String>> {
+    // This should not be necessary, ideally PyIterator should be converted
+    // to a Rust iterator
+
+    let mut collection: Vec<String> = Vec::new();
+
+    for document in text {
+        let document = document?;
+        let document = ObjectProtocol::extract::<String>(document)?;
+        collection.push(document);
+    }
+    Ok(collection)
+}
+
 #[pyclass]
 pub struct _HashingVectorizerWrapper {
     inner: HashingVectorizer,
@@ -35,16 +50,9 @@ impl _HashingVectorizerWrapper {
     ) -> PyResult<(Py<PyArray1<i32>>, Py<PyArray1<i32>>, Py<PyArray1<i32>>)> {
         let text = PyIterator::from_object(py, &x)?;
 
-        let mut collection: Vec<String> = Vec::new();
+        let collection = iterable_to_collection(text)?;
 
-        for document in text {
-            let document = document?;
-            let document = ObjectProtocol::extract::<String>(document)?;
-            collection.push(document);
-        }
-
-        let mut vect = HashingVectorizer::new();
-        let x = vect.fit_transform(&collection);
+        let x = self.inner.fit_transform(&collection);
 
         // TODO: 1. use slices directly instead of creating new arrays
         //       2. Possibly avoid casing

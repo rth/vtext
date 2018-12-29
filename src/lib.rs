@@ -247,6 +247,7 @@ impl HashingVectorizer {
             // https://www.reddit.com/r/rust/comments/6wbru2/performance_issue_can_i_avoid_of_using_the_slow/
             // https://github.com/rust-lang/rust/issues/26244
             // Possibly use: https://github.com/JuliaStrings/utf8proc
+            // http://www.unicode.org/faq/casemap_charprop.html
             let document = document.to_ascii_lowercase();
 
             let tokens = tokenize(&document);
