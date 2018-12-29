@@ -8,7 +8,6 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 import text_vectorize
 
 
-
 if __name__ == "__main__":
     input_files = list(glob("./data/*/*"))
     data = []

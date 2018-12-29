@@ -15,7 +15,6 @@ use pyo3::types::PyIterator;
 
 use text_vectorize::HashingVectorizer;
 
-
 fn iterable_to_collection(text: PyIterator) -> PyResult<Vec<String>> {
     // This should not be necessary, ideally PyIterator should be converted
     // to a Rust iterator
