@@ -15,7 +15,7 @@ use pyo3::prelude::*;
 use pyo3::prelude::{pymodinit, ObjectProtocol, Py, PyModule, PyObject, PyResult, Python};
 use pyo3::types::PyIterator;
 
-use text_vectorize::HashingVectorizer;
+use text_vectorize::{HashingVectorizer, CountVectorizer};
 
 type PyCsrArray = (Py<PyArray1<i32>>, Py<PyArray1<i32>>, Py<PyArray1<i32>>);
 
@@ -50,7 +50,12 @@ fn result_to_csr(py: Python, x: CsMat<i32>) -> PyResult<PyCsrArray> {
 
 #[pyclass]
 pub struct _HashingVectorizerWrapper {
-    inner: HashingVectorizer,
+    inner: HashingVectorizer
+}
+
+#[pyclass]
+pub struct _CountVectorizerWrapper {
+    inner: CountVectorizer
 }
 
 #[pymethods]
@@ -72,9 +77,49 @@ impl _HashingVectorizerWrapper {
     }
 }
 
+
+#[pymethods]
+impl _CountVectorizerWrapper {
+    #[new]
+    fn __new__(obj: &PyRawObject) -> PyResult<()> {
+        let estimator = CountVectorizer::new();
+        obj.init(|_token| _CountVectorizerWrapper { inner: estimator })
+    }
+
+    fn fit(&mut self, py: Python, x: PyObject) -> PyResult<()> {
+        let text = PyIterator::from_object(py, &x)?;
+
+        let collection = iterable_to_collection(text)?;
+
+        self.inner.fit(&collection);
+        Ok(())
+    }
+
+    fn transform(&mut self, py: Python, x: PyObject) -> PyResult<PyCsrArray> {
+        let text = PyIterator::from_object(py, &x)?;
+
+        let collection = iterable_to_collection(text)?;
+
+        let x = self.inner.transform(&collection);
+
+        result_to_csr(py, x)
+    }
+
+    fn fit_transform(&mut self, py: Python, x: PyObject) -> PyResult<PyCsrArray> {
+        let text = PyIterator::from_object(py, &x)?;
+
+        let collection = iterable_to_collection(text)?;
+
+        let x = self.inner.fit_transform(&collection);
+
+        result_to_csr(py, x)
+    }
+}
+
 #[pymodinit]
 fn _lib(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<_HashingVectorizerWrapper>()?;
+    m.add_class::<_CountVectorizerWrapper>()?;
 
     Ok(())
 }
