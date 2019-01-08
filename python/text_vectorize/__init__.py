@@ -3,4 +3,4 @@ from .base import HashingVectorizer
 from .base import CountVectorizer
 
 
-__all__ = ['CountVectorizer', 'HashingVectorizer']
+__all__ = ["CountVectorizer", "HashingVectorizer"]
