@@ -1,12 +1,10 @@
 from time import time
 from glob import glob
-from scipy.sparse import csr_matrix
 
-from sklearn.feature_extraction.text import HashingVectorizer
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.feature_extraction.text import TfidfVectorizer
+import sklearn.feature_extraction.text as skt
 
-from text_vectorize._lib import hash_vectorize
+import text_vectorize
+
 
 if __name__ == "__main__":
     input_files = list(glob("./data/*/*"))
@@ -18,8 +16,9 @@ if __name__ == "__main__":
     dataset_size = 91  # MB for 20 newsgroup dataset
 
     t0 = time()
-    indices, indptr, data_out = hash_vectorize(data)
-    csr_matrix((data_out, indices, indptr))
+
+    vect = text_vectorize.HashingVectorizer(norm=None)
+    vect.fit_transform(data)
 
     dt = time() - t0
 
@@ -29,7 +28,7 @@ if __name__ == "__main__":
     )
 
     t0 = time()
-    vect = HashingVectorizer(lowercase=False, norm=None)
+    vect = skt.HashingVectorizer(lowercase=False, norm=None)
     vect.fit_transform(data)
 
     dt = time() - t0
@@ -40,7 +39,18 @@ if __name__ == "__main__":
     )
 
     t0 = time()
-    vect = CountVectorizer(lowercase=False)
+    vect = text_vectorize.CountVectorizer(lowercase=False)
+    vect.fit_transform(data)
+
+    dt = time() - t0
+
+    print(
+        "CountVectorizer (scikit-learn): vectorized {} "
+        "documents in {:.2f}s [{:.1f} MB/s]".format(len(data), dt, dataset_size / dt)
+    )
+
+    t0 = time()
+    vect = skt.CountVectorizer(lowercase=False)
     vect.fit_transform(data)
 
     dt = time() - t0
@@ -50,7 +60,7 @@ if __name__ == "__main__":
         "documents in {:.2f}s [{:.1f} MB/s]".format(len(data), dt, dataset_size / dt)
     )
     t0 = time()
-    vect = TfidfVectorizer(lowercase=False, norm=None)
+    vect = skt.TfidfVectorizer(lowercase=False, norm=None)
     vect.fit_transform(data)
 
     dt = time() - t0

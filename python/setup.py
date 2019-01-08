@@ -8,7 +8,7 @@ with open("./requirements.txt", "rt") as fh:
 setup(
     name="py-text-vectorize",
     version="0.1.0a1",
-    description="Example of python-extension using rust-numpy",
+    description="Text vectorization and TF-IDF",
     rust_extensions=[
         RustExtension(
             "text_vectorize._lib",
