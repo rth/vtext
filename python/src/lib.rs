@@ -94,7 +94,7 @@ impl _CountVectorizerWrapper {
         Ok(())
     }
 
-    fn get_n_features(&mut self, py: Python) -> PyResult<(usize)> {
+    fn get_n_features(&self, py: Python) -> PyResult<(usize)> {
         let n_features = self.inner.vocabulary.len();
         Ok(n_features)
     }
