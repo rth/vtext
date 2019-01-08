@@ -15,7 +15,7 @@ use pyo3::prelude::*;
 use pyo3::prelude::{pymodinit, ObjectProtocol, Py, PyModule, PyObject, PyResult, Python};
 use pyo3::types::PyIterator;
 
-use text_vectorize::{HashingVectorizer, CountVectorizer};
+use text_vectorize::{CountVectorizer, HashingVectorizer};
 
 type PyCsrArray = (Py<PyArray1<i32>>, Py<PyArray1<i32>>, Py<PyArray1<i32>>);
 
@@ -50,12 +50,12 @@ fn result_to_csr(py: Python, x: CsMat<i32>) -> PyResult<PyCsrArray> {
 
 #[pyclass]
 pub struct _HashingVectorizerWrapper {
-    inner: HashingVectorizer
+    inner: HashingVectorizer,
 }
 
 #[pyclass]
 pub struct _CountVectorizerWrapper {
-    inner: CountVectorizer
+    inner: CountVectorizer,
 }
 
 #[pymethods]
@@ -76,7 +76,6 @@ impl _HashingVectorizerWrapper {
         result_to_csr(py, x)
     }
 }
-
 
 #[pymethods]
 impl _CountVectorizerWrapper {
