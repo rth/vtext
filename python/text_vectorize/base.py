@@ -4,7 +4,7 @@ import numbers
 import numpy as np
 
 from . import _lib
-from scipy.sparse import csr_matrix
+import scipy.sparse as sp
 
 try:
     from sklearn.base import BaseEstimator
@@ -220,21 +220,6 @@ class HashingVectorizer(BaseEstimator):
         return self
 
     def _validate_params(self):
-        pass
-
-    def fit(self, X, y=None):
-        """Does nothing: this transformer is stateless.
-
-        Parameters
-        ----------
-        X : array-like, shape [n_samples, n_features]
-            Training data.
-        """
-        if isinstance(X, str):
-            raise ValueError(
-                "Iterable over raw text documents expected, string object received."
-            )
-
         if self.norm is not None:
             raise NotImplementedError
 
@@ -249,6 +234,19 @@ class HashingVectorizer(BaseEstimator):
 
         if self.encoding != "utf-8":
             raise NotImplementedError
+
+    def fit(self, X, y=None):
+        """Does nothing: this transformer is stateless.
+
+        Parameters
+        ----------
+        X : array-like, shape [n_samples, n_features]
+            Training data.
+        """
+        if isinstance(X, str):
+            raise ValueError(
+                "Iterable over raw text documents expected, string object received."
+            )
 
         self._validate_params()
 
@@ -281,7 +279,7 @@ class HashingVectorizer(BaseEstimator):
             data.fill(1)
 
         data = data.astype(self.dtype, copy=False)
-        return csr_matrix((data, indices, indptr), shape=(len(X), self.n_features))
+        return sp.csr_matrix((data, indices, indptr), shape=(len(X), self.n_features))
 
     def fit_transform(self, X, y=None):
         """Transform a sequence of documents to a document-term matrix.
@@ -473,13 +471,26 @@ class CountVectorizer(BaseEstimator):
     be safely removed using delattr or set to None before pickling.
     """
 
-    def __init__(self, input='content', encoding='utf-8',
-                 decode_error='strict', strip_accents=None,
-                 lowercase=True, preprocessor=None, tokenizer=None,
-                 stop_words=None, token_pattern=r"(?u)\b\w\w+\b",
-                 ngram_range=(1, 1), analyzer='word',
-                 max_df=1.0, min_df=1, max_features=None,
-                 vocabulary=None, binary=False, dtype=np.int64):
+    def __init__(
+        self,
+        input="content",
+        encoding="utf-8",
+        decode_error="strict",
+        strip_accents=None,
+        lowercase=True,
+        preprocessor=None,
+        tokenizer=None,
+        stop_words=None,
+        token_pattern=r"(?u)\b\w\w+\b",
+        ngram_range=(1, 1),
+        analyzer="word",
+        max_df=1.0,
+        min_df=1,
+        max_features=None,
+        vocabulary=None,
+        binary=False,
+        dtype=np.int64,
+    ):
         self.input = input
         self.encoding = encoding
         self.decode_error = decode_error
@@ -496,15 +507,35 @@ class CountVectorizer(BaseEstimator):
             raise ValueError("negative value for max_df or min_df")
         self.max_features = max_features
         if max_features is not None:
-            if (not isinstance(max_features, numbers.Integral) or
-                    max_features <= 0):
+            if not isinstance(max_features, numbers.Integral) or max_features <= 0:
                 raise ValueError(
                     "max_features=%r, neither a positive integer nor None"
-                    % max_features)
+                    % max_features
+                )
         self.ngram_range = ngram_range
         self.vocabulary = vocabulary
         self.binary = binary
         self.dtype = dtype
+
+    def _check_vocabulary(self):
+        pass
+
+    def _validate_vocabulary(self):
+        pass
+
+    def _validate_params(self):
+
+        if self.analyzer != "word":
+            raise NotImplementedError
+
+        if self.stop_words is not None:
+            raise NotImplementedError
+
+        if self.input != "content":
+            raise NotImplementedError
+
+        if self.encoding != "utf-8":
+            raise NotImplementedError
 
     def fit(self, raw_documents, y=None):
         """Learn a vocabulary dictionary of all tokens in the raw documents.
@@ -518,7 +549,8 @@ class CountVectorizer(BaseEstimator):
         -------
         self
         """
-        self.fit_transform(raw_documents)
+        self._vect = _lib._CountVectorizerWrapper()
+        self._vect.fit(raw_documents)
         return self
 
     def fit_transform(self, raw_documents, y=None):
@@ -542,40 +574,19 @@ class CountVectorizer(BaseEstimator):
         # TfidfVectorizer.
         if isinstance(raw_documents, str):
             raise ValueError(
-                "Iterable over raw text documents expected, "
-                "string object received.")
+                "Iterable over raw text documents expected, " "string object received."
+            )
 
         self._validate_params()
         self._validate_vocabulary()
-        max_df = self.max_df
-        min_df = self.min_df
-        max_features = self.max_features
 
-        vocabulary, X = self._count_vocab(raw_documents,
-                                          self.fixed_vocabulary_)
+        self._vect = _lib._CountVectorizerWrapper()
+        indices, indptr, data = self._vect.fit_transform(raw_documents)
+        n_features = self._vect.get_n_features()
+        X = sp.csr_matrix((data, indices, indptr), shape=(len(indptr) - 1, n_features))
 
         if self.binary:
             X.data.fill(1)
-
-        if not self.fixed_vocabulary_:
-            X = self._sort_features(X, vocabulary)
-
-            n_doc = X.shape[0]
-            max_doc_count = (max_df
-                             if isinstance(max_df, numbers.Integral)
-                             else max_df * n_doc)
-            min_doc_count = (min_df
-                             if isinstance(min_df, numbers.Integral)
-                             else min_df * n_doc)
-            if max_doc_count < min_doc_count:
-                raise ValueError(
-                    "max_df corresponds to < documents than min_df")
-            X, self.stop_words_ = self._limit_features(X, vocabulary,
-                                                       max_doc_count,
-                                                       min_doc_count,
-                                                       max_features)
-
-            self.vocabulary_ = vocabulary
 
         return X
 
@@ -597,22 +608,29 @@ class CountVectorizer(BaseEstimator):
         """
         if isinstance(raw_documents, str):
             raise ValueError(
-                "Iterable over raw text documents expected, "
-                "string object received.")
+                "Iterable over raw text documents expected, string object received."
+            )
+        if not hasattr(self, "_vect"):
+            raise ValueError("Model need to be fitted first!")
 
-        if not hasattr(self, 'vocabulary_'):
+        if not hasattr(self, "vocabulary_"):
             self._validate_vocabulary()
 
         self._check_vocabulary()
 
         # use the same matrix-building strategy as fit_transform
-        _, X = self._count_vocab(raw_documents, fixed_vocab=True)
+        indices, indptr, data = self._vect.transform(raw_documents)
+        n_features = self._vect.get_n_features()
+        X = sp.csr_matrix((data, indices, indptr), shape=(len(indptr) - 1, n_features))
+
         if self.binary:
             X.data.fill(1)
         return X
 
     def inverse_transform(self, X):
         """Return terms per document with nonzero entries in X.
+
+        .. note:: Not implemented
 
         Parameters
         ----------
@@ -623,31 +641,11 @@ class CountVectorizer(BaseEstimator):
         X_inv : list of arrays, len = n_samples
             List of arrays of terms.
         """
-        self._check_vocabulary()
-
-        if sp.issparse(X):
-            # We need CSR format for fast row manipulations.
-            X = X.tocsr()
-        else:
-            # We need to convert X to a matrix, so that the indexing
-            # returns 2D objects
-            X = np.asmatrix(X)
-        n_samples = X.shape[0]
-
-        terms = np.array(list(self.vocabulary_.keys()))
-        indices = np.array(list(self.vocabulary_.values()))
-        inverse_vocabulary = terms[np.argsort(indices)]
-
-        return [inverse_vocabulary[X[i, :].nonzero()[1]].ravel()
-                for i in range(n_samples)]
+        raise NotImplementedError()
 
     def get_feature_names(self):
-        """Array mapping from feature integer indices to feature name"""
-        if not hasattr(self, 'vocabulary_'):
-            self._validate_vocabulary()
+        """Array mapping from feature integer indices to feature name
 
-        self._check_vocabulary()
-
-        return [t for t, i in sorted(six.iteritems(self.vocabulary_),
-                                     key=itemgetter(1))]
-
+        .. note:: Not implemented
+        """
+        raise NotImplementedError()

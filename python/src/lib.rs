@@ -94,6 +94,11 @@ impl _CountVectorizerWrapper {
         Ok(())
     }
 
+    fn get_n_features(&mut self, py: Python) -> PyResult<(usize)> {
+        let n_features = self.inner.vocabulary.len();
+        Ok(n_features)
+    }
+
     fn transform(&mut self, py: Python, x: PyObject) -> PyResult<PyCsrArray> {
         let text = PyIterator::from_object(py, &x)?;
 

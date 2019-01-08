@@ -123,7 +123,7 @@ pub struct HashingVectorizer {
 pub struct CountVectorizer {
     lowercase: bool,
     token_pattern: String,
-    vocabulary: FnvHashMap<String, i32>,
+    pub vocabulary: FnvHashMap<String, i32>,
 }
 
 pub enum Vectorizer {}
