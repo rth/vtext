@@ -42,7 +42,6 @@ use fnv::FnvHashMap;
 use ndarray::Array;
 use regex::Regex;
 use sprs::CsMat;
-use std::cmp::max;
 
 const TOKEN_PATTERN_DEFAULT: &str = r"\b\w\w+\b";
 
@@ -62,7 +61,7 @@ pub fn analyze<'a>(tokens: impl Iterator<Item = &'a str>) -> impl Iterator<Item 
 /// Tokenize text
 ///
 /// Convert a text document into a vector of string tokens.
-pub fn tokenize<'a>(text: &'a String) -> impl Iterator<Item = &'a str> {
+pub fn tokenize<'a>(text: &'a str) -> impl Iterator<Item = &'a str> {
     lazy_static! {
         static ref RE: Regex = Regex::new(TOKEN_PATTERN_DEFAULT).unwrap();
     }
@@ -87,7 +86,7 @@ fn _sort_features(X: &mut CSRArray, vocabulary: &mut FnvHashMap<String, i32>) {
 
 /// Sum duplicates
 #[inline]
-fn _sum_duplicates(tf: &mut CSRArray, indices_local: &Vec<u32>, nnz: &mut usize) {
+fn _sum_duplicates(tf: &mut CSRArray, indices_local: &[u32], nnz: &mut usize) {
     let mut bucket: i32 = 0;
     let mut index_last = indices_local[0];
 
@@ -186,7 +185,7 @@ impl CountVectorizer {
             // this takes 10-15% of the compute time
             indices_local.sort_unstable();
 
-            _sum_duplicates(&mut tf, &mut indices_local, &mut nnz);
+            _sum_duplicates(&mut tf, &indices_local, &mut nnz);
         }
 
         // Copy to the vocabulary in the struct and make it own data
@@ -262,7 +261,7 @@ impl HashingVectorizer {
             // this takes 10-15% of the compute time
             indices_local.sort_unstable();
 
-            _sum_duplicates(&mut tf, &mut indices_local, &mut nnz);
+            _sum_duplicates(&mut tf, &indices_local, &mut nnz);
         }
 
         CsMat::new(
