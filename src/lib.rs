@@ -52,14 +52,6 @@ mod tests;
 mod math;
 pub mod tokenize;
 
-/// Analyze tokens
-///
-/// Given a list of tokens (words or character groups) in a document,  
-/// this corresponding word or character n-grams.
-pub fn analyze<'a>(tokens: impl Iterator<Item = &'a str>) -> impl Iterator<Item = &'a str> {
-    tokens
-}
-
 /// Sort features by name
 ///
 /// Returns a reordered matrix and modifies the vocabulary in place
@@ -168,12 +160,12 @@ impl CountVectorizer {
 
             let tokens = tokenizer.tokenize(&document);
 
-            let n_grams = analyze(tokens.iter());
             indices_local.clear();
-            for token in n_grams {
+            for token in tokens.iter() {
                 let vocabulary_size = vocabulary.len() as i32;
+                // TODO: don't convert to Sting here
                 let token_id = vocabulary
-                    .entry(token.to_owned())
+                    .entry(token.to_string())
                     .or_insert(vocabulary_size);
                 indices_local.push(*token_id as u32);
             }
@@ -249,9 +241,8 @@ impl HashingVectorizer {
             let document = document.to_ascii_lowercase();
 
             let tokens = tokenizer.tokenize(&document);
-            let n_grams = analyze(tokens.iter());
             indices_local.clear();
-            for token in n_grams {
+            for token in tokens.iter() {
                 let hash = fasthash::murmur3::hash32(&token);
                 let hash = hash % self.n_features;
 

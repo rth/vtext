@@ -3,7 +3,7 @@ from glob import glob
 
 import sklearn.feature_extraction.text as skt
 
-import text_vectorize
+import pytext_vectorize
 
 
 if __name__ == "__main__":
@@ -17,7 +17,7 @@ if __name__ == "__main__":
 
     t0 = time()
 
-    vect = text_vectorize.HashingVectorizer(norm=None)
+    vect = pytext_vectorize.HashingVectorizer(norm=None)
     vect.fit_transform(data)
 
     dt = time() - t0
@@ -39,7 +39,7 @@ if __name__ == "__main__":
     )
 
     t0 = time()
-    vect = text_vectorize.CountVectorizer(lowercase=False)
+    vect = pytext_vectorize.CountVectorizer(lowercase=False)
     vect.fit_transform(data)
 
     dt = time() - t0
