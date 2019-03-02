@@ -175,7 +175,6 @@ impl RegexpTokenizer {
     #[new]
     //    #[args(pattern = "\\b\\w\\w+\\b".to_string())]
     fn __new__(obj: &PyRawObject, pattern: String) -> PyResult<()> {
-
         let inner = text_vectorize::tokenize::RegexpTokenizer::new(pattern.to_owned());
 
         obj.init(|_token| RegexpTokenizer {
@@ -193,11 +192,9 @@ impl RegexpTokenizer {
     /// ## Returns
     ///  - tokens : List<str>
     fn tokenize(&self, py: Python, x: String) -> PyResult<(Vec<String>)> {
-        let x = x.to_string();
-
-        // let res = tokenizer.tokenize(&x);
-        // let res = res.iter().map(|s| s.to_string()).collect();
-        let res: Vec<String> = vec!["test".to_string()];
+        // TODO: reduce the number of copies here
+        let res = self.inner.tokenize(&x);
+        let res: Vec<String> = res.iter().map(|s| s.to_string()).collect();
         Ok((res))
     }
 }

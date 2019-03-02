@@ -17,7 +17,7 @@ if __name__ == "__main__":
 
     dataset_size = 91  # MB for 20 newsgroup dataset
 
-    print('# Tokenizing {} documents'.format(len(data)))
+    print("# Tokenizing {} documents".format(len(data)))
 
     def pyre_tokenizer(txt):
         return list(re.compile(token_regexp).findall(txt))
@@ -45,8 +45,4 @@ if __name__ == "__main__":
 
         dt = time() - t0
 
-        print(
-            "{:>45}: {:.2f}s [{:.1f} MB/s]".format(
-                label, dt, dataset_size / dt
-            )
-        )
+        print("{:>45}: {:.2f}s [{:.1f} MB/s]".format(label, dt, dataset_size / dt))
