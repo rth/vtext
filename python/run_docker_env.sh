@@ -1,2 +1,2 @@
 #!/bin/sh
-docker run --rm -v $PWD/../:/src -it rthz/rust-nightly-python37 /bin/bash
+docker run --rm -v $PWD/../:/src -it --entrypoint "/bin/bash" konstin2/pyo3-pack:0.5.0

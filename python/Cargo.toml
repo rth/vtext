@@ -1,11 +1,10 @@
 [package]
-name = "py-text-vectorize"
+name = "pytext-vectorize"
 version = "0.1.0-alpha.1"
 authors = ["Roman Yurchak <rth.yurchak@pm.me>"]
 edition = "2018"
 
 [lib]
-name = "rust_ext"
 crate-type = ["cdylib"]
 
 [dependencies]
