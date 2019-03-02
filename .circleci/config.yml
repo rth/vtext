@@ -32,8 +32,8 @@ jobs:
       - run:
           name: dependencies
           command: |
-            python -m pip install tox pytest setuptools-rust==0.10.6
-            python -m pip install -e python/
+            python3 -m pip install tox pytest setuptools-rust==0.10.6
+            rustup default nightly-2019-02-04
       - run:
           name: test
           command: |
@@ -42,9 +42,9 @@ jobs:
       - run:
           name: build-wheels
           command: |
-            python -m pip install wheel==0.31.1 auditwheel==2.0.0
+            python3 -m pip install wheel==0.31.1 auditwheel==2.0.0
             cd python
-            python setup.py bdist_wheel
+            python3 setup.py bdist_wheel
             for whl in dist/*.whl; do
                 auditwheel repair "$whl" -w dist/
             done
