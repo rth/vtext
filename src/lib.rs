@@ -42,7 +42,6 @@ extern crate sprs;
 use crate::math::CSRArray;
 use fnv::FnvHashMap;
 use ndarray::Array;
-use regex::Regex;
 use sprs::CsMat;
 
 const TOKEN_PATTERN_DEFAULT: &str = r"\b\w\w+\b";
@@ -52,25 +51,6 @@ mod tests;
 
 mod math;
 pub mod tokenize;
-
-/// Analyze tokens
-///
-/// Given a list of tokens (words or character groups) in a document,  
-/// this corresponding word or character n-grams.
-pub fn analyze<'a>(tokens: impl Iterator<Item = &'a str>) -> impl Iterator<Item = &'a str> {
-    tokens
-}
-
-/// Tokenize text
-///
-/// Convert a text document into a vector of string tokens.
-pub fn tokenize<'a>(text: &'a str) -> impl Iterator<Item = &'a str> {
-    lazy_static! {
-        static ref RE: Regex = Regex::new(TOKEN_PATTERN_DEFAULT).unwrap();
-    }
-
-    RE.find_iter(text).map(|m| m.as_str())
-}
 
 /// Sort features by name
 ///
@@ -171,17 +151,19 @@ impl CountVectorizer {
         let mut nnz: usize = 0;
         let mut indices_local = Vec::new();
 
+        let tokenizer = tokenize::RegexpTokenizer::new(TOKEN_PATTERN_DEFAULT.to_string());
+
         for (_document_id, document) in X.iter().enumerate() {
             let document = document.to_ascii_lowercase();
 
-            let tokens = tokenize(&document);
+            let tokens = tokenizer.tokenize(&document);
 
-            let n_grams = analyze(tokens);
             indices_local.clear();
-            for token in n_grams {
+            for token in tokens.iter() {
                 let vocabulary_size = vocabulary.len() as i32;
+                // TODO: don't convert to Sting here
                 let token_id = vocabulary
-                    .entry(token.to_owned())
+                    .entry(token.to_string())
                     .or_insert(vocabulary_size);
                 indices_local.push(*token_id as u32);
             }
@@ -244,6 +226,8 @@ impl HashingVectorizer {
         let mut indices_local = Vec::new();
         let mut nnz: usize = 0;
 
+        let tokenizer = tokenize::RegexpTokenizer::new(TOKEN_PATTERN_DEFAULT.to_string());
+
         for (_document_id, document) in X.iter().enumerate() {
             // String.to_lowercase() is very slow
             // https://www.reddit.com/r/rust/comments/6wbru2/performance_issue_can_i_avoid_of_using_the_slow/
@@ -252,10 +236,9 @@ impl HashingVectorizer {
             // http://www.unicode.org/faq/casemap_charprop.html
             let document = document.to_ascii_lowercase();
 
-            let tokens = tokenize(&document);
-            let n_grams = analyze(tokens);
+            let tokens = tokenizer.tokenize(&document);
             indices_local.clear();
-            for token in n_grams {
+            for token in tokens.iter() {
                 let hash = fasthash::murmur3::hash32(&token);
                 let hash = hash % self.n_features;
 

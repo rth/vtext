@@ -1,6 +1,7 @@
 import pytest
 
 from pytext_vectorize.tokenize import UnicodeSegmentTokenizer
+from pytext_vectorize.tokenize import RegexpTokenizer
 
 
 def test_unicode_segment_tokenize():
@@ -16,3 +17,9 @@ def test_unicode_segment_tokenize():
 
     with pytest.raises(TypeError):
         UnicodeSegmentTokenizer().tokenize(2)
+
+
+def test_regexp_tokenize():
+
+    tokenizer = RegexpTokenizer(pattern=r"\b\w\w+\b")
+    assert tokenizer.tokenize("Today, tomorrow") == ["Today", "tomorrow"]

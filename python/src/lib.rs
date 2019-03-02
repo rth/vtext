@@ -121,7 +121,7 @@ impl _CountVectorizerWrapper {
     }
 }
 
-/// Tokenize with Unicode Segmentation
+/// Unicode Segmentation tokenizer
 ///
 /// This implementation is a thin wrapper around the
 /// `unicode-segmentation` crate
@@ -131,7 +131,7 @@ impl _CountVectorizerWrapper {
 /// * [Unicode® Standard Annex #29](http://www.unicode.org/reports/tr29/)
 #[pyclass]
 pub struct UnicodeSegmentTokenizer {
-    word_bounds: bool,
+    pub word_bounds: bool,
 }
 
 #[pymethods]
@@ -153,9 +153,40 @@ impl UnicodeSegmentTokenizer {
     /// ## Returns
     ///  - tokens : List<str>
     fn tokenize(&self, py: Python, x: String) -> PyResult<(Vec<String>)> {
-        let tokenizer = text_vectorize::tokenize::UnicodeSegmentTokenizer {
-            word_bounds: self.word_bounds,
-        };
+        let tokenizer = text_vectorize::tokenize::UnicodeSegmentTokenizer::new(self.word_bounds);
+
+        let x = x.to_string();
+
+        let res = tokenizer.tokenize(&x);
+        let res = res.iter().map(|s| s.to_string()).collect();
+        Ok((res))
+    }
+}
+
+/// Tokenize a document using regular expressions
+#[pyclass]
+pub struct RegexpTokenizer {
+    pub pattern: String,
+}
+
+#[pymethods]
+impl RegexpTokenizer {
+    #[new]
+    //    #[args(pattern = "\\b\\w\\w+\\b".to_string())]
+    fn __new__(obj: &PyRawObject, pattern: String) -> PyResult<()> {
+        obj.init(|_token| RegexpTokenizer { pattern: pattern })
+    }
+
+    /// Tokenize a string
+    ///
+    /// ## Parameters
+    ///  - x : bool
+    ///    the string to tokenize
+    ///
+    /// ## Returns
+    ///  - tokens : List<str>
+    fn tokenize(&self, py: Python, x: String) -> PyResult<(Vec<String>)> {
+        let tokenizer = text_vectorize::tokenize::RegexpTokenizer::new(self.pattern.to_owned());
 
         let x = x.to_string();
 
@@ -170,6 +201,7 @@ fn _lib(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<_HashingVectorizerWrapper>()?;
     m.add_class::<_CountVectorizerWrapper>()?;
     m.add_class::<UnicodeSegmentTokenizer>()?;
+    m.add_class::<RegexpTokenizer>()?;
 
     Ok(())
 }
