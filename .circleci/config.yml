@@ -32,7 +32,7 @@ jobs:
       - run:
           name: dependencies
           command: |
-            python3 -m pip install tox pytest setuptools-rust==0.10.6
+            python3 -m pip install tox
             rustup default nightly-2019-02-04
       - run:
           name: test
@@ -42,9 +42,10 @@ jobs:
       - run:
           name: build-wheels
           command: |
-            python3 -m pip install wheel==0.31.1 auditwheel==2.0.0
             cd python
-            python3 setup.py bdist_wheel
+            for PYBIN in python3.{5,6,7}; do
+                "$PYBIN" -m pip install wheel==0.31.1 auditwheel==2.0.0
+                "$PYBIN" setup.py bdist_wheel
             for whl in dist/*.whl; do
                 auditwheel repair "$whl" -w dist/
             done
