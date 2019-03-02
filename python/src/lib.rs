@@ -167,6 +167,7 @@ impl UnicodeSegmentTokenizer {
 #[pyclass]
 pub struct RegexpTokenizer {
     pub pattern: String,
+    inner: text_vectorize::tokenize::RegexpTokenizer,
 }
 
 #[pymethods]
@@ -174,7 +175,13 @@ impl RegexpTokenizer {
     #[new]
     //    #[args(pattern = "\\b\\w\\w+\\b".to_string())]
     fn __new__(obj: &PyRawObject, pattern: String) -> PyResult<()> {
-        obj.init(|_token| RegexpTokenizer { pattern: pattern })
+
+        let inner = text_vectorize::tokenize::RegexpTokenizer::new(pattern.to_owned());
+
+        obj.init(|_token| RegexpTokenizer {
+            pattern: pattern,
+            inner: inner,
+        })
     }
 
     /// Tokenize a string
@@ -186,12 +193,11 @@ impl RegexpTokenizer {
     /// ## Returns
     ///  - tokens : List<str>
     fn tokenize(&self, py: Python, x: String) -> PyResult<(Vec<String>)> {
-        let tokenizer = text_vectorize::tokenize::RegexpTokenizer::new(self.pattern.to_owned());
-
         let x = x.to_string();
 
-        let res = tokenizer.tokenize(&x);
-        let res = res.iter().map(|s| s.to_string()).collect();
+        // let res = tokenizer.tokenize(&x);
+        // let res = res.iter().map(|s| s.to_string()).collect();
+        let res: Vec<String> = vec!["test".to_string()];
         Ok((res))
     }
 }
