@@ -18,6 +18,12 @@ pub struct UnicodeSegmentTokenizer {
 }
 
 impl UnicodeSegmentTokenizer {
+    /// Create a new instance
+    pub fn new(word_bounds: bool) -> UnicodeSegmentTokenizer {
+        UnicodeSegmentTokenizer {
+            word_bounds: word_bounds,
+        }
+    }
     /// Tokenize a string
     pub fn tokenize<'a>(&self, text: &'a str) -> Vec<&'a str> {
         if self.word_bounds {
@@ -29,23 +35,27 @@ impl UnicodeSegmentTokenizer {
     }
 }
 
-const TOKEN_PATTERN_DEFAULT: &str = r"\b\w\w+\b";
-
 /// Regular expression tokenizer
 ///
 #[derive(Debug)]
 pub struct RegexpTokenizer {
     pub pattern: String,
+    regexp: Regex,
 }
 
 impl RegexpTokenizer {
+    /// Create a new instance
+    pub fn new(pattern: String) -> RegexpTokenizer {
+        let regexp = Regex::new(&pattern).unwrap();
+
+        RegexpTokenizer {
+            pattern: pattern,
+            regexp: regexp,
+        }
+    }
     /// Tokenize a string
     pub fn tokenize<'a>(&self, text: &'a str) -> Vec<&'a str> {
-        lazy_static! {
-            static ref RE: Regex = Regex::new(TOKEN_PATTERN_DEFAULT).unwrap();
-        }
-
-        RE.find_iter(text).map(|m| m.as_str()).collect() //.collect::Vec<&str>
+        self.regexp.find_iter(text).map(|m| m.as_str()).collect() //.collect::Vec<&str>
     }
 }
 
@@ -77,9 +87,7 @@ mod tests {
     fn test_regexp_tokenizer() {
         let s = "fox can't jump 32.3 feet, right?";
 
-        let tokenizer = RegexpTokenizer {
-            pattern: r"\b\w\w+\b".to_string(),
-        };
+        let tokenizer = RegexpTokenizer::new(r"\b\w\w+\b".to_string());
         let tokens = tokenizer.tokenize(s);
         let b: &[_] = &["fox", "can", "jump", "32", "feet", "right"];
         assert_eq!(tokens, b);

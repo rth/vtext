@@ -151,9 +151,7 @@ impl CountVectorizer {
         let mut nnz: usize = 0;
         let mut indices_local = Vec::new();
 
-        let tokenizer = tokenize::RegexpTokenizer {
-            pattern: TOKEN_PATTERN_DEFAULT.to_string(),
-        };
+        let tokenizer = tokenize::RegexpTokenizer::new(TOKEN_PATTERN_DEFAULT.to_string());
 
         for (_document_id, document) in X.iter().enumerate() {
             let document = document.to_ascii_lowercase();
@@ -228,9 +226,7 @@ impl HashingVectorizer {
         let mut indices_local = Vec::new();
         let mut nnz: usize = 0;
 
-        let tokenizer = tokenize::RegexpTokenizer {
-            pattern: TOKEN_PATTERN_DEFAULT.to_string(),
-        };
+        let tokenizer = tokenize::RegexpTokenizer::new(TOKEN_PATTERN_DEFAULT.to_string());
 
         for (_document_id, document) in X.iter().enumerate() {
             // String.to_lowercase() is very slow
