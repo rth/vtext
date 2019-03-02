@@ -28,6 +28,8 @@ let documents = vec![
 ```
 */
 
+#![allow(non_snake_case)]
+
 #[macro_use]
 extern crate lazy_static;
 extern crate fasthash;

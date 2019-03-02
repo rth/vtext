@@ -1,3 +1,5 @@
+#![allow(non_snake_case)]
+
 use ndarray::Array2;
 use sprs::indexing::SpIndex;
 
