@@ -13,5 +13,5 @@ variables:
   imageName: 'rthz/rust-nightly-python37:$(build.buildId)'
 
 steps:
-- script: cd python && docker build -f Dockerfile -t $(imageName) .
-  displayName: 'docker build'
+- script: cd python
+  displayName: 'skip step'

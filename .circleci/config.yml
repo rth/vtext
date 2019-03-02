@@ -33,7 +33,7 @@ jobs:
           name: dependencies
           command: |
             python -m pip install tox pytest setuptools-rust==0.10.6
-            python -m pip install -e .
+            python -m pip install -e python/
       - run:
           name: test
           command: |
