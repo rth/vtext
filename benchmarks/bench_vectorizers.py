@@ -4,7 +4,6 @@ from glob import glob
 import sklearn.feature_extraction.text as skt
 
 import pytext_vectorize
-from pytext_vectorize.tokenize import RegexpTokenizer
 
 
 if __name__ == "__main__":
