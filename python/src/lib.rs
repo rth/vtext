@@ -13,10 +13,10 @@ use sprs::CsMat;
 
 use pyo3::prelude::*;
 use pyo3::prelude::{pymodinit, ObjectProtocol, Py, PyModule, PyObject, PyResult, Python};
-use pyo3::types::{PyIterator,PyString};
+use pyo3::types::{PyIterator, PyString};
 
-use text_vectorize::{CountVectorizer, HashingVectorizer};
 use text_vectorize::tokenize;
+use text_vectorize::{CountVectorizer, HashingVectorizer};
 
 type PyCsrArray = (Py<PyArray1<i32>>, Py<PyArray1<i32>>, Py<PyArray1<i32>>);
 
@@ -131,16 +131,17 @@ impl _CountVectorizerWrapper {
 /// * [Unicode® Standard Annex #29](http://www.unicode.org/reports/tr29/)
 #[pyclass]
 pub struct UnicodeSegmentTokenizer {
-    word_bounds : bool
+    word_bounds: bool,
 }
 
 #[pymethods]
 impl UnicodeSegmentTokenizer {
     #[new]
-    #[args(word_bounds=true)]
+    #[args(word_bounds = true)]
     fn __new__(obj: &PyRawObject, word_bounds: bool) -> PyResult<()> {
-        
-        obj.init(|_token| UnicodeSegmentTokenizer { word_bounds: word_bounds })
+        obj.init(|_token| UnicodeSegmentTokenizer {
+            word_bounds: word_bounds,
+        })
     }
 
     /// Tokenize a string
@@ -152,18 +153,17 @@ impl UnicodeSegmentTokenizer {
     /// ## Returns
     ///  - tokens : List<str>
     fn tokenize(&self, py: Python, x: String) -> PyResult<(Vec<String>)> {
-
-        let tokenizer = text_vectorize::tokenize::UnicodeSegmentTokenizer { word_bounds: self.word_bounds };
+        let tokenizer = text_vectorize::tokenize::UnicodeSegmentTokenizer {
+            word_bounds: self.word_bounds,
+        };
 
         let x = x.to_string();
 
         let res = tokenizer.tokenize(&x);
         let res = res.iter().map(|s| s.to_string()).collect();
         Ok((res))
-
     }
 }
-
 
 #[pymodinit]
 fn _lib(_py: Python, m: &PyModule) -> PyResult<()> {
