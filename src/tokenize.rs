@@ -1,5 +1,5 @@
-extern crate unicode_segmentation;
 extern crate regex;
+extern crate unicode_segmentation;
 
 use regex::Regex;
 use unicode_segmentation::UnicodeSegmentation;
@@ -51,7 +51,7 @@ impl RegexpTokenizer {
 
 #[cfg(test)]
 mod tests {
-    use crate::tokenize::{UnicodeSegmentTokenizer,RegexpTokenizer};
+    use crate::tokenize::{RegexpTokenizer, UnicodeSegmentTokenizer};
 
     #[test]
     fn test_unicode_tokenizer() {
@@ -77,7 +77,9 @@ mod tests {
     fn test_regexp_tokenizer() {
         let s = "fox can't jump 32.3 feet, right?";
 
-        let tokenizer = RegexpTokenizer { pattern: r"\b\w\w+\b".to_string() };
+        let tokenizer = RegexpTokenizer {
+            pattern: r"\b\w\w+\b".to_string(),
+        };
         let tokens = tokenizer.tokenize(s);
         let b: &[_] = &["fox", "can", "jump", "32", "feet", "right"];
         assert_eq!(tokens, b);
