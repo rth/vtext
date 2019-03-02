@@ -41,13 +41,13 @@ jobs:
       - run:
           name: build-wheels
           command: |
-            python -m pip install pyo3-pack
+            python -m pip install wheel==0.31.1 auditwheel==2.0.0 setuptools-rust==0.10.6
             cd python
-            pyo3-pack build -i python3.7
-            pyo3-pack build -i python3.6
-            pyo3-pack build -i python3.5
+            for whl in dist/*.whl; do
+                auditwheel repair "$whl" -w dist/
+            done
       - store_artifacts:
-          path: /root/repo/python/target/wheels/
+          path: /root/repo/python/
 
   lint:
     working_directory: ~/repo
