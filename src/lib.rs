@@ -51,7 +51,7 @@ const TOKEN_PATTERN_DEFAULT: &str = r"\b\w\w+\b";
 mod tests;
 
 mod math;
-mod tokenize;
+pub mod tokenize;
 
 /// Analyze tokens
 ///

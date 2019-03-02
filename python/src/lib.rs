@@ -13,9 +13,10 @@ use sprs::CsMat;
 
 use pyo3::prelude::*;
 use pyo3::prelude::{pymodinit, ObjectProtocol, Py, PyModule, PyObject, PyResult, Python};
-use pyo3::types::PyIterator;
+use pyo3::types::{PyIterator,PyString};
 
 use text_vectorize::{CountVectorizer, HashingVectorizer};
+use text_vectorize::tokenize;
 
 type PyCsrArray = (Py<PyArray1<i32>>, Py<PyArray1<i32>>, Py<PyArray1<i32>>);
 
@@ -53,11 +54,6 @@ pub struct _HashingVectorizerWrapper {
     inner: HashingVectorizer,
 }
 
-#[pyclass]
-pub struct _CountVectorizerWrapper {
-    inner: CountVectorizer,
-}
-
 #[pymethods]
 impl _HashingVectorizerWrapper {
     #[new]
@@ -75,6 +71,11 @@ impl _HashingVectorizerWrapper {
 
         result_to_csr(py, x)
     }
+}
+
+#[pyclass]
+pub struct _CountVectorizerWrapper {
+    inner: CountVectorizer,
 }
 
 #[pymethods]
@@ -120,10 +121,55 @@ impl _CountVectorizerWrapper {
     }
 }
 
+/// Tokenize with Unicode Segmentation
+///
+/// This implementation is a thin wrapper around the
+/// `unicode-segmentation` crate
+///
+/// ## References
+///
+/// * [Unicode® Standard Annex #29](http://www.unicode.org/reports/tr29/)
+#[pyclass]
+pub struct UnicodeSegmentTokenizer {
+    word_bounds : bool
+}
+
+#[pymethods]
+impl UnicodeSegmentTokenizer {
+    #[new]
+    #[args(word_bounds=true)]
+    fn __new__(obj: &PyRawObject, word_bounds: bool) -> PyResult<()> {
+        
+        obj.init(|_token| UnicodeSegmentTokenizer { word_bounds: word_bounds })
+    }
+
+    /// Tokenize a string
+    ///
+    /// ## Parameters
+    ///  - x : bool
+    ///    the string to tokenize
+    ///
+    /// ## Returns
+    ///  - tokens : List<str>
+    fn tokenize(&self, py: Python, x: String) -> PyResult<(Vec<String>)> {
+
+        let tokenizer = text_vectorize::tokenize::UnicodeSegmentTokenizer { word_bounds: self.word_bounds };
+
+        let x = x.to_string();
+
+        let res = tokenizer.tokenize(&x);
+        let res = res.iter().map(|s| s.to_string()).collect();
+        Ok((res))
+
+    }
+}
+
+
 #[pymodinit]
 fn _lib(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<_HashingVectorizerWrapper>()?;
     m.add_class::<_CountVectorizerWrapper>()?;
+    m.add_class::<UnicodeSegmentTokenizer>()?;
 
     Ok(())
 }
