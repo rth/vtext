@@ -23,3 +23,7 @@ def test_regexp_tokenize():
 
     tokenizer = RegexpTokenizer(pattern=r"\b\w\w+\b")
     assert tokenizer.tokenize("Today, tomorrow") == ["Today", "tomorrow"]
+
+    # check default pattern
+    tokenizer = RegexpTokenizer()
+    assert tokenizer.tokenize("Today, tomorrow") == ["Today", "tomorrow"]
