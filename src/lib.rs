@@ -38,11 +38,14 @@ extern crate regex;
 #[macro_use]
 extern crate ndarray;
 extern crate sprs;
+extern crate rayon;
 
 use crate::math::CSRArray;
 use fnv::FnvHashMap;
 use ndarray::Array;
 use sprs::CsMat;
+
+use rayon::prelude::*;
 
 const TOKEN_PATTERN_DEFAULT: &str = r"\b\w\w+\b";
 
@@ -158,12 +161,13 @@ impl CountVectorizer {
             tokenizer.tokenize(&doc).map(|x| x.to_string()).collect()
         };
 
-        let pipe = X
-            .iter()
+        let pipe: Vec<Vec<String>> = X
+            .par_iter()
             .map(|doc| doc.to_ascii_lowercase())
-            .map(|doc| tokenize(doc));
+            .map(|doc| tokenize(doc))
+            .collect();
 
-        for (_document_id, tokens) in pipe.enumerate() {
+        for (_document_id, tokens) in pipe.iter().enumerate() {
             indices_local.clear();
             for token in tokens {
                 let vocabulary_size = vocabulary.len() as i32;
@@ -244,12 +248,13 @@ impl HashingVectorizer {
         // Possibly use: https://github.com/JuliaStrings/utf8proc
         // http://www.unicode.org/faq/casemap_charprop.html
         //
-        let pipe = X
-            .iter()
+        let pipe: Vec<Vec<String>> = X
+            .par_iter()
             .map(|doc| doc.to_ascii_lowercase())
-            .map(|doc| tokenize(doc));
+            .map(|doc| tokenize(doc))
+            .collect();
 
-        for (_document_id, tokens) in pipe.enumerate() {
+        for (_document_id, tokens) in pipe.iter().enumerate() {
             indices_local.clear();
             for token in tokens {
                 let hash = fasthash::murmur3::hash32(&token);
