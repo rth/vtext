@@ -215,7 +215,7 @@ pub struct SnowballStemmer {
 #[pymethods]
 impl SnowballStemmer {
     #[new]
-    #[args(lang="\"english\"")]
+    #[args(lang = "\"english\"")]
     fn __new__(obj: &PyRawObject, lang: &str) -> PyResult<()> {
         let algorithm = match lang {
             "arabic" => Ok(rust_stemmers::Algorithm::Arabic),

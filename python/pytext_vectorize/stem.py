@@ -1,3 +1,3 @@
 from ._lib import SnowballStemmer
 
-__all__ = ['SnowballStemmer']
+__all__ = ["SnowballStemmer"]
