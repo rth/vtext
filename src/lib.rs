@@ -153,9 +153,9 @@ impl CountVectorizer {
 
         let tokenizer = tokenize::RegexpTokenizer::new(TOKEN_PATTERN_DEFAULT.to_string());
 
-        for (_document_id, document) in X.iter().enumerate() {
-            let document = document.to_ascii_lowercase();
+        let pipe = X.iter().map(|doc| doc.to_ascii_lowercase());
 
+        for (_document_id, document) in pipe.enumerate() {
             let tokens = tokenizer.tokenize(&document);
 
             indices_local.clear();
@@ -228,14 +228,14 @@ impl HashingVectorizer {
 
         let tokenizer = tokenize::RegexpTokenizer::new(TOKEN_PATTERN_DEFAULT.to_string());
 
-        for (_document_id, document) in X.iter().enumerate() {
-            // String.to_lowercase() is very slow
-            // https://www.reddit.com/r/rust/comments/6wbru2/performance_issue_can_i_avoid_of_using_the_slow/
-            // https://github.com/rust-lang/rust/issues/26244
-            // Possibly use: https://github.com/JuliaStrings/utf8proc
-            // http://www.unicode.org/faq/casemap_charprop.html
-            let document = document.to_ascii_lowercase();
+        // String.to_lowercase() is very slow
+        // https://www.reddit.com/r/rust/comments/6wbru2/performance_issue_can_i_avoid_of_using_the_slow/
+        // https://github.com/rust-lang/rust/issues/26244
+        // Possibly use: https://github.com/JuliaStrings/utf8proc
+        // http://www.unicode.org/faq/casemap_charprop.html
+        let pipe = X.iter().map(|doc| doc.to_ascii_lowercase());
 
+        for (_document_id, document) in pipe.enumerate() {
             let tokens = tokenizer.tokenize(&document);
             indices_local.clear();
             for token in tokens {
