@@ -5,12 +5,14 @@ extern crate ndarray;
 extern crate numpy;
 #[macro_use]
 extern crate pyo3;
+extern crate rust_stemmers;
 extern crate text_vectorize;
 
 use ndarray::arr1;
 use numpy::{IntoPyArray, PyArray1};
 use sprs::CsMat;
 
+use pyo3::exceptions;
 use pyo3::prelude::*;
 use pyo3::prelude::{pymodinit, ObjectProtocol, Py, PyModule, PyObject, PyResult, Python};
 use pyo3::types::{PyIterator, PyString};
@@ -173,12 +175,12 @@ pub struct RegexpTokenizer {
 #[pymethods]
 impl RegexpTokenizer {
     #[new]
-    //    #[args(pattern = "\\b\\w\\w+\\b".to_string())]
-    fn __new__(obj: &PyRawObject, pattern: String) -> PyResult<()> {
+    #[args(pattern = "\"\\\\b\\\\w\\\\w+\\\\b\"")]
+    fn __new__(obj: &PyRawObject, pattern: &str) -> PyResult<()> {
         let inner = text_vectorize::tokenize::RegexpTokenizer::new(pattern.to_owned());
 
         obj.init(|_token| RegexpTokenizer {
-            pattern: pattern,
+            pattern: pattern.to_string(),
             inner: inner,
         })
     }
@@ -199,12 +201,76 @@ impl RegexpTokenizer {
     }
 }
 
+/// Snowball stemmer
+///
+/// Wraps the rust-stemmers crate that uses an implementation generated
+/// by the [Snowball compiler](https://github.com/snowballstem/snowball)
+/// for Rust.
+#[pyclass]
+pub struct SnowballStemmer {
+    pub lang: String,
+    inner: rust_stemmers::Stemmer,
+}
+
+#[pymethods]
+impl SnowballStemmer {
+    #[new]
+    #[args(lang="\"english\"")]
+    fn __new__(obj: &PyRawObject, lang: &str) -> PyResult<()> {
+        let algorithm = match lang {
+            "arabic" => Ok(rust_stemmers::Algorithm::Arabic),
+            "danish" => Ok(rust_stemmers::Algorithm::Danish),
+            "dutch" => Ok(rust_stemmers::Algorithm::Dutch),
+            "english" => Ok(rust_stemmers::Algorithm::English),
+            "french" => Ok(rust_stemmers::Algorithm::French),
+            "german" => Ok(rust_stemmers::Algorithm::German),
+            "greek" => Ok(rust_stemmers::Algorithm::Greek),
+            "hungarian" => Ok(rust_stemmers::Algorithm::Hungarian),
+            "italian" => Ok(rust_stemmers::Algorithm::Italian),
+            "portuguese" => Ok(rust_stemmers::Algorithm::Portuguese),
+            "romanian" => Ok(rust_stemmers::Algorithm::Romanian),
+            "russian" => Ok(rust_stemmers::Algorithm::Russian),
+            "spanish" => Ok(rust_stemmers::Algorithm::Spanish),
+            "swedish" => Ok(rust_stemmers::Algorithm::Swedish),
+            "tamil" => Ok(rust_stemmers::Algorithm::Tamil),
+            "turkish" => Ok(rust_stemmers::Algorithm::Turkish),
+            _ => Err(exceptions::ValueError::py_err(format!(
+                "lang={} is unsupported!",
+                lang
+            ))),
+        }?;
+
+        let stemmer = rust_stemmers::Stemmer::create(algorithm);
+
+        obj.init(|_token| SnowballStemmer {
+            lang: lang.to_string(),
+            inner: stemmer,
+        })
+    }
+
+    /// Stem a string
+    ///
+    /// ## Parameters
+    ///
+    /// word : str
+    ///    the string to tokenize
+    ///
+    /// ## Returns
+    ///
+    /// word_stemmed : str
+    ///      stemmed word
+    fn stem(&self, py: Python, word: &str) -> PyResult<(String)> {
+        let res = self.inner.stem(word).to_string();
+        Ok((res))
+    }
+}
+
 #[pymodinit]
 fn _lib(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<_HashingVectorizerWrapper>()?;
     m.add_class::<_CountVectorizerWrapper>()?;
     m.add_class::<UnicodeSegmentTokenizer>()?;
     m.add_class::<RegexpTokenizer>()?;
-
+    m.add_class::<SnowballStemmer>()?;
     Ok(())
 }
