@@ -37,8 +37,8 @@ extern crate fnv;
 extern crate regex;
 #[macro_use]
 extern crate ndarray;
-extern crate sprs;
 extern crate rayon;
+extern crate sprs;
 
 use crate::math::CSRArray;
 use fnv::FnvHashMap;
