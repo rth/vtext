@@ -1,17 +1,20 @@
 from time import time
 from glob import glob
+from pathlib import Path
 import re
 
 from pytext_vectorize.tokenize import RegexpTokenizer
 from pytext_vectorize.tokenize import UnicodeSegmentTokenizer
 
+base_dir = Path(__file__).parent.parent.resolve()
 
 if __name__ == "__main__":
-    input_files = list(glob("./data/*/*"))
+    input_files = list(glob(str(base_dir / "data" / "*" / "*")))
     data = []
     for file_path in input_files:
         with open(file_path, "rt") as fh:
             data.append(fh.read())
+    assert len(data) > 0
 
     token_regexp = r"\b\w\w+\b"
 

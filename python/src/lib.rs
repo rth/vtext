@@ -158,7 +158,7 @@ impl UnicodeSegmentTokenizer {
         let x = x.to_string();
 
         let res = tokenizer.tokenize(&x);
-        let res = res.iter().map(|s| s.to_string()).collect();
+        let res = res.map(|s| s.to_string()).collect();
         Ok((res))
     }
 }
@@ -194,7 +194,7 @@ impl RegexpTokenizer {
     fn tokenize(&self, py: Python, x: String) -> PyResult<(Vec<String>)> {
         // TODO: reduce the number of copies here
         let res = self.inner.tokenize(&x);
-        let res: Vec<String> = res.iter().map(|s| s.to_string()).collect();
+        let res: Vec<String> = res.map(|s| s.to_string()).collect();
         Ok((res))
     }
 }
