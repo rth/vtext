@@ -25,12 +25,12 @@ impl UnicodeSegmentTokenizer {
         }
     }
     /// Tokenize a string
-    pub fn tokenize<'a>(&self, text: &'a str) -> Vec<&'a str> {
+    pub fn tokenize<'a>(&self, text: &'a str) -> Box<Iterator<Item = &'a str> + 'a> {
         if self.word_bounds {
             let res = text.split_word_bounds().filter(|x| x != &" ");
-            return res.collect::<Vec<&str>>();
+            return Box::new(res);
         } else {
-            return text.unicode_words().collect::<Vec<&str>>();
+            return Box::new(text.unicode_words());
         }
     }
 }
@@ -54,8 +54,8 @@ impl RegexpTokenizer {
         }
     }
     /// Tokenize a string
-    pub fn tokenize<'a>(&self, text: &'a str) -> Vec<&'a str> {
-        self.regexp.find_iter(text).map(|m| m.as_str()).collect() //.collect::Vec<&str>
+    pub fn tokenize<'a>(&'a self, text: &'a str) -> impl Iterator<Item = &'a str> {
+        self.regexp.find_iter(text).map(|m| m.as_str())
     }
 }
 
@@ -68,14 +68,14 @@ mod tests {
         let s = "The quick (\"brown\") fox can't jump 32.3 feet, right?";
 
         let tokenizer = UnicodeSegmentTokenizer { word_bounds: false };
-        let tokens = tokenizer.tokenize(s);
+        let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
         let b: &[_] = &[
             "The", "quick", "brown", "fox", "can't", "jump", "32.3", "feet", "right",
         ];
         assert_eq!(tokens, b);
 
         let tokenizer = UnicodeSegmentTokenizer { word_bounds: true };
-        let tokens = tokenizer.tokenize(s);
+        let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
         let b: &[_] = &[
             "The", "quick", "(", "\"", "brown", "\"", ")", "fox", "can't", "jump", "32.3", "feet",
             ",", "right", "?",
@@ -88,7 +88,7 @@ mod tests {
         let s = "fox can't jump 32.3 feet, right?";
 
         let tokenizer = RegexpTokenizer::new(r"\b\w\w+\b".to_string());
-        let tokens = tokenizer.tokenize(s);
+        let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
         let b: &[_] = &["fox", "can", "jump", "32", "feet", "right"];
         assert_eq!(tokens, b);
     }

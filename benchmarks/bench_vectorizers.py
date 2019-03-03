@@ -1,13 +1,15 @@
 from time import time
 from glob import glob
+from pathlib import Path
 
 import sklearn.feature_extraction.text as skt
 
 import pytext_vectorize
 
+base_dir = Path(__file__).parent.parent.resolve()
 
 if __name__ == "__main__":
-    input_files = list(glob("./data/*/*"))
+    input_files = list(glob(str(base_dir / "data" / "*" / "*")))
     data = []
     for file_path in input_files:
         with open(file_path, "rt") as fh:

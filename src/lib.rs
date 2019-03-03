@@ -159,7 +159,7 @@ impl CountVectorizer {
             let tokens = tokenizer.tokenize(&document);
 
             indices_local.clear();
-            for token in tokens.iter() {
+            for token in tokens {
                 let vocabulary_size = vocabulary.len() as i32;
                 // TODO: don't convert to Sting here
                 let token_id = vocabulary
@@ -238,7 +238,7 @@ impl HashingVectorizer {
 
             let tokens = tokenizer.tokenize(&document);
             indices_local.clear();
-            for token in tokens.iter() {
+            for token in tokens {
                 let hash = fasthash::murmur3::hash32(&token);
                 let hash = hash % self.n_features;
 
