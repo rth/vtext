@@ -2,29 +2,47 @@
 
 [![CircleCI](https://circleci.com/gh/rth/text-vectorize/tree/master.svg?style=svg)](https://circleci.com/gh/rth/text-vectorize/tree/master)
 
-Text vectorizers and TFIDF transforms in Rust with Python bindings (experimental)
+Text vectorizers and TFIDF transforms for Rust and Python
 
-Work in progress, the API is unstable.
+This package aims to provide a convenient and high performance toolkit for ingesting textual data for
+machine learning applications.
+
+The API is currently unstable.
+
+## Features
+
+**Tokenization**
+
+ - Regexp tokenizer
+ - Unicode segmentation tokenizer
+
+**Stemming**
+
+ - Snowball Stemmer: in Python 15-20x faster than NLTK
+
+**Analyzers**
+
+ - *Planned*: word and character n-grams, skip grams
+
+**Token counting**
+
+These estimators take as input a list of tokens, and convert it to a sparse CSR
+array that can be used in machine learning applications.
+
+ - `CountVectorizer` 
+ - `HashingVectorizer` using MurmurHash3
 
 API and implementation inspired by `CountVectorizer` and `HashingVectorizer`
 estimators in [scikit-learn](https://scikit-learn.org/).
 
-## Features
+**Feature selection**
 
-### Implemented
+ - *Planned:*  filtering vocabulary by document frequency (`df`)
 
- - bag of word vectorization of text documents
- - hashing vectorizer using MurmurHash3
+**Feature weighting**
 
-### Planned
-
- - Python wrapper ([#6](https://github.com/rth/text-vectorize/pull/6))
- - Support for word and character n-grams ([#2](https://github.com/rth/text-vectorize/issues/2))
- - Binary Python wheels ([#3](https://github.com/rth/text-vectorize/issues/3<Paste>))
- - IDF transforms and TfidfVectorizer ([#4](https://github.com/rth/text-vectorize/issues/4))
-
-In general, see https://github.com/rth/text-vectorize/issues. Comments and suggestions are very welcome.
-
+ - *Planned:*  feature weighting based on document frequency (TF-IDF),
+   supervised term weighting (e.g. TF-IGM), feature normalization
 
 ## Usage
 
