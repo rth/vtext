@@ -22,6 +22,9 @@ The easiest might be to use docker to setup a build environment,
 
 ```
 docker build -t py-text-vectorize-env .
-./start_docker_env.sh
-python3 setup.py develop --user
+./run_docker_env.sh
+rustup toolchain add nightly-2019-02-04
+rustup default nightly-2019-02-04-x86_64-unknown-linux-gnu
+python3.7 -m pip install -r /src/python/requirements.txt
+python3.7 -m pip install -e /src/python
 ```
