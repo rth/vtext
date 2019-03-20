@@ -33,14 +33,14 @@ let documents = vec![
 #[macro_use]
 extern crate lazy_static;
 extern crate fasthash;
-extern crate fnv;
 extern crate regex;
 #[macro_use]
 extern crate ndarray;
+extern crate hashbrown;
 extern crate sprs;
 
 use crate::math::CSRArray;
-use fnv::FnvHashMap;
+use hashbrown::HashMap;
 use ndarray::Array;
 use sprs::CsMat;
 
@@ -55,7 +55,7 @@ pub mod tokenize;
 /// Sort features by name
 ///
 /// Returns a reordered matrix and modifies the vocabulary in place
-fn _sort_features(X: &mut CSRArray, vocabulary: &mut FnvHashMap<String, i32>) {
+fn _sort_features(X: &mut CSRArray, vocabulary: &mut HashMap<String, i32>) {
     let mut vocabulary_sorted: Vec<_> = vocabulary.iter().collect();
     vocabulary_sorted.sort_unstable();
     let mut idx_map: Array<usize, _> = Array::zeros(vocabulary_sorted.len());
@@ -105,7 +105,7 @@ pub struct HashingVectorizer {
 pub struct CountVectorizer {
     lowercase: bool,
     token_pattern: String,
-    pub vocabulary: FnvHashMap<String, i32>,
+    pub vocabulary: HashMap<String, i32>,
 }
 
 pub enum Vectorizer {}
@@ -116,7 +116,7 @@ impl CountVectorizer {
         CountVectorizer {
             lowercase: true,
             token_pattern: String::from(TOKEN_PATTERN_DEFAULT),
-            vocabulary: FnvHashMap::with_capacity_and_hasher(1000, Default::default()),
+            vocabulary: HashMap::with_capacity_and_hasher(1000, Default::default()),
         }
     }
 
@@ -145,8 +145,8 @@ impl CountVectorizer {
         tf.indptr.push(0);
 
         // we use a localy scoped vocabulary
-        let mut vocabulary: FnvHashMap<String, i32> =
-            FnvHashMap::with_capacity_and_hasher(1000, Default::default());
+        let mut vocabulary: HashMap<String, i32> =
+            HashMap::with_capacity_and_hasher(1000, Default::default());
 
         let mut nnz: usize = 0;
         let mut indices_local = Vec::new();
