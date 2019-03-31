@@ -1,6 +1,6 @@
 import pytest
 
-from pytext_vectorize.stem import SnowballStemmer
+from vtext.stem import SnowballStemmer
 
 
 def test_snowball_stemmer():

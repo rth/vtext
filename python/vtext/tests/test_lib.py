@@ -3,7 +3,7 @@ import pickle
 from numpy.testing import assert_array_equal
 
 import pytest
-from pytext_vectorize import HashingVectorizer, CountVectorizer
+from vtext import HashingVectorizer, CountVectorizer
 
 
 def test_count_vectorizer():

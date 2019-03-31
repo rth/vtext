@@ -1,7 +1,7 @@
 import pytest
 
-from pytext_vectorize.tokenize import UnicodeSegmentTokenizer
-from pytext_vectorize.tokenize import RegexpTokenizer
+from vtext.tokenize import UnicodeSegmentTokenizer
+from vtext.tokenize import RegexpTokenizer
 
 
 def test_unicode_segment_tokenize():

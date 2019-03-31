@@ -156,7 +156,7 @@ class HashingVectorizer(BaseEstimator):
 
     Examples
     --------
-    >>> from text_vectorize import HashingVectorizer
+    >>> from vtext import HashingVectorizer
     >>> corpus = [
     ...     'This is the first document.',
     ...     'This document is the second document.',
@@ -443,7 +443,7 @@ class CountVectorizer(BaseEstimator):
 
     Examples
     --------
-    >>> from text_vectorize import CountVectorizer
+    >>> from vtext import CountVectorizer
     >>> corpus = [
     ...     'This is the first document.',
     ...     'This document is the second document.',

@@ -3,8 +3,8 @@ from glob import glob
 from pathlib import Path
 import re
 
-from pytext_vectorize.tokenize import RegexpTokenizer
-from pytext_vectorize.tokenize import UnicodeSegmentTokenizer
+from vtext.tokenize import RegexpTokenizer
+from vtext.tokenize import UnicodeSegmentTokenizer
 
 base_dir = Path(__file__).parent.parent.resolve()
 

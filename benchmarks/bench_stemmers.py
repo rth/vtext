@@ -5,7 +5,7 @@ import re
 
 from nltk.stem import PorterStemmer, SnowballStemmer
 
-import pytext_vectorize
+import vtext
 
 base_dir = Path(__file__).parent.parent.resolve()
 
@@ -26,12 +26,12 @@ if __name__ == "__main__":
         (r"nltk.stem.SnowballStemmer('english')", SnowballStemmer("english").stem),
         (r"nltk.stem.SnowballStemmer('french')", SnowballStemmer("french").stem),
         (
-            "pytext_vectorize.stem.SnowballStemmer('english')",
-            pytext_vectorize.stem.SnowballStemmer("english").stem,
+            "vtext.stem.SnowballStemmer('english')",
+            vtext.stem.SnowballStemmer("english").stem,
         ),
         (
-            "pytext_vectorize.stem.SnowballStemmer('french')",
-            pytext_vectorize.stem.SnowballStemmer("french").stem,
+            "vtext.stem.SnowballStemmer('french')",
+            vtext.stem.SnowballStemmer("french").stem,
         ),
     ]:
         tokens = [re.compile(r"\b\w\w+\b").findall(txt) for txt in data]
