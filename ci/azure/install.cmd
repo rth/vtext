@@ -24,11 +24,13 @@ curl -sSf -o rustup-init.exe https://win.rustup.rs
 rustup-init.exe -y --default-toolchain nightly-2019-02-04
 set PATH=%PATH%;%USERPROFILE%\.cargo\bin
 echo "##vso[task.setvariable variable=PATH;]%PATH%;%USERPROFILE%\.cargo\bin"
+rustup target add x86_64-unknown-linux-musl
 
 @rem Install the build and runtime dependencies of the project.
-@rem python setup.py bdist_wheel bdist_wininst -b doc\logos\scikit-learn-logo.bmp
+cd python/
+python setup.py bdist_wheel
 
 @rem Install the generated wheel package to test it
-@rem pip install --pre --no-index --find-links dist\ scikit-learn
+pip install --pre --no-index --find-links dist\ vtextpy
 
 if %errorlevel% neq 0 exit /b %errorlevel%
