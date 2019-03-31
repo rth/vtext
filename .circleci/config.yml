@@ -33,7 +33,7 @@ jobs:
           name: dependencies
           command: |
             python3.7 -m pip install tox
-            rustup default nightly-2019-03-30
+            rustup default nightly-2019-02-28
             rustup target add x86_64-unknown-linux-musl
       - run:
           name: test

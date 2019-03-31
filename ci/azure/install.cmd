@@ -18,7 +18,7 @@ python --version
 pip --version
 
 curl -sSf -o rustup-init.exe https://win.rustup.rs
-rustup-init.exe -y --default-toolchain nightly-2019-03-30
+rustup-init.exe -y --default-toolchain nightly-2019-02-28
 set PATH=%PATH%;%USERPROFILE%\.cargo\bin
 echo "##vso[task.setvariable variable=PATH;]%PATH%;%USERPROFILE%\.cargo\bin"
 rustup target add x86_64-unknown-linux-musl
