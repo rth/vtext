@@ -1,17 +1,13 @@
-# Docker image
-# Build a Docker image to deploy, run, or push to a container registry.
-# Add steps that use Docker Compose, tag images, push to a registry, run an image, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
-
-trigger:
-- master
-
-pool:
-  vmImage: 'Ubuntu-16.04'
-
-variables:
-  imageName: 'rthz/rust-nightly-python37:$(build.buildId)'
-
-steps:
-- script: cd python
-  displayName: 'skip step'
+# Adapted from the scikit-learn setup
+jobs:
+- template: ci/azure/windows.yml
+  parameters:
+    name: Windows
+    vmImage: vs2017-win2016
+    matrix:
+      py37_64:
+        PYTHON_VERSION: '3.7'
+        PYTHON_ARCH: '64'
+      py36_64:
+        PYTHON_VERSION: '3.6'
+        PYTHON_ARCH: '64'
