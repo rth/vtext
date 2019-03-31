@@ -21,7 +21,6 @@ curl -sSf -o rustup-init.exe https://win.rustup.rs
 rustup-init.exe -y --default-toolchain nightly-2019-02-28
 set PATH=%PATH%;%USERPROFILE%\.cargo\bin
 echo "##vso[task.setvariable variable=PATH;]%PATH%;%USERPROFILE%\.cargo\bin"
-rustup target add x86_64-unknown-linux-musl
 
 @rem Install the build and runtime dependencies of the project.
 cd python/
