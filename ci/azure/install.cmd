@@ -6,28 +6,26 @@ set PIP_INSTALL=pip install -q
 
 @echo on
 
-IF "%PYTHON_ARCH%"=="64" (
-    @rem Deactivate any environment
-    call deactivate
-    @rem Clean up any left-over from a previous build
-    conda remove --all -q -y -n %VIRTUALENV%
-    conda create -n %VIRTUALENV% -q -y python=%PYTHON_VERSION% numpy scipy cython pytest wheel pillow joblib
+@rem Deactivate any environment
+call deactivate
+@rem Clean up any left-over from a previous build
+conda remove --all -q -y -n %VIRTUALENV%
+conda create -n %VIRTUALENV% -q -y python=%PYTHON_VERSION% numpy==1.15.0 scipy==1.1.0 pytest==4.3.1 wheel==0.33.1
 
-    call activate %VIRTUALENV%
-) else (
-    pip install numpy scipy cython pytest wheel pillow joblib
-)
+call activate %VIRTUALENV%
+
 python --version
 pip --version
 
 curl -sSf -o rustup-init.exe https://win.rustup.rs
-rustup-init.exe -y --default-toolchain nightly-2019-02-04
+rustup-init.exe -y --default-toolchain nightly-2019-03-30
 set PATH=%PATH%;%USERPROFILE%\.cargo\bin
 echo "##vso[task.setvariable variable=PATH;]%PATH%;%USERPROFILE%\.cargo\bin"
 rustup target add x86_64-unknown-linux-musl
 
 @rem Install the build and runtime dependencies of the project.
 cd python/
+pip install -r requirements.txt
 python setup.py bdist_wheel
 
 @rem Install the generated wheel package to test it
