@@ -1,6 +1,6 @@
-# py-text-vectorize
+# vtextpy
 
-This is a Python wrapper for the Rust text-vectorize crate.
+This is a Python wrapper for the Rust vtext crate.
 
 ## Installation
 
@@ -21,7 +21,7 @@ python3 setup.py develop --user
 The easiest might be to use docker to setup a build environment,
 
 ```
-docker build -t py-text-vectorize-env .
+docker build -t vtextpy-env .
 ./run_docker_env.sh
 rustup toolchain add nightly-2019-02-04
 rustup default nightly-2019-02-04-x86_64-unknown-linux-gnu

@@ -4,7 +4,7 @@ from pathlib import Path
 
 import sklearn.feature_extraction.text as skt
 
-import pytext_vectorize
+import vtext
 
 base_dir = Path(__file__).parent.parent.resolve()
 
@@ -21,16 +21,16 @@ if __name__ == "__main__":
 
     for label, vect in [
         (
-            "HashingVectorizer (text-vectorize)",
-            pytext_vectorize.HashingVectorizer(norm=None),
+            "HashingVectorizer (vtext)",
+            vtext.HashingVectorizer(norm=None),
         ),
         (
             "HashingVectorizer (scikit-learn)",
             skt.HashingVectorizer(lowercase=False, norm=None),
         ),
         (
-            "CountVectorizer (text-vectorize)",
-            pytext_vectorize.CountVectorizer(lowercase=False),
+            "CountVectorizer (vtext)",
+            vtext.CountVectorizer(lowercase=False),
         ),
         ("CountVectorizer (scikit-learn)", skt.CountVectorizer(lowercase=False)),
     ]:

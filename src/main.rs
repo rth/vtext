@@ -1,11 +1,11 @@
 #![allow(non_snake_case)]
 
-extern crate text_vectorize;
+extern crate vtext;
 
 use std::fs;
 use std::io::prelude::*;
 use std::time::SystemTime;
-use text_vectorize::{CountVectorizer, HashingVectorizer};
+use vtext::{CountVectorizer, HashingVectorizer};
 
 fn main() {
     let _dirs_list = fs::read_dir("./data/").unwrap();

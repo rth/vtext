@@ -6,7 +6,7 @@ extern crate numpy;
 #[macro_use]
 extern crate pyo3;
 extern crate rust_stemmers;
-extern crate text_vectorize;
+extern crate vtext;
 
 use ndarray::arr1;
 use numpy::{IntoPyArray, PyArray1};
@@ -17,8 +17,8 @@ use pyo3::prelude::*;
 use pyo3::prelude::{pymodinit, ObjectProtocol, Py, PyModule, PyObject, PyResult, Python};
 use pyo3::types::{PyIterator, PyString};
 
-use text_vectorize::tokenize;
-use text_vectorize::{CountVectorizer, HashingVectorizer};
+use vtext::tokenize;
+use vtext::{CountVectorizer, HashingVectorizer};
 
 type PyCsrArray = (Py<PyArray1<i32>>, Py<PyArray1<i32>>, Py<PyArray1<i32>>);
 
@@ -155,7 +155,7 @@ impl UnicodeSegmentTokenizer {
     /// ## Returns
     ///  - tokens : List<str>
     fn tokenize(&self, py: Python, x: String) -> PyResult<(Vec<String>)> {
-        let tokenizer = text_vectorize::tokenize::UnicodeSegmentTokenizer::new(self.word_bounds);
+        let tokenizer = vtext::tokenize::UnicodeSegmentTokenizer::new(self.word_bounds);
 
         let x = x.to_string();
 
@@ -169,7 +169,7 @@ impl UnicodeSegmentTokenizer {
 #[pyclass]
 pub struct RegexpTokenizer {
     pub pattern: String,
-    inner: text_vectorize::tokenize::RegexpTokenizer,
+    inner: vtext::tokenize::RegexpTokenizer,
 }
 
 #[pymethods]
@@ -177,7 +177,7 @@ impl RegexpTokenizer {
     #[new]
     #[args(pattern = "\"\\\\b\\\\w\\\\w+\\\\b\"")]
     fn __new__(obj: &PyRawObject, pattern: &str) -> PyResult<()> {
-        let inner = text_vectorize::tokenize::RegexpTokenizer::new(pattern.to_owned());
+        let inner = vtext::tokenize::RegexpTokenizer::new(pattern.to_owned());
 
         obj.init(|_token| RegexpTokenizer {
             pattern: pattern.to_string(),

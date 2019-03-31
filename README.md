@@ -1,6 +1,6 @@
-# text-vectorize
+# vtext
 
-[![CircleCI](https://circleci.com/gh/rth/text-vectorize/tree/master.svg?style=svg)](https://circleci.com/gh/rth/text-vectorize/tree/master)
+[![CircleCI](https://circleci.com/gh/rth/vtext/tree/master.svg?style=svg)](https://circleci.com/gh/rth/vtext/tree/master)
 
 Text vectorizers and TFIDF transforms for Rust and Python
 
@@ -51,13 +51,13 @@ estimators in [scikit-learn](https://scikit-learn.org/).
 Add the following to `Cargo.toml`,
 ```toml
 [dependencies]
-text-vectorize = {"git" = "https://github.com/rth/text-vectorize"}
+text-vectorize = {"git" = "https://github.com/rth/vtext"}
 ``` 
 A simple example can be found below,
 ```rust
-extern crate text_vectorize;
+extern crate vtext;
 
-use text_vectorize::CountVectorizer;
+use vtext::CountVectorizer;
 
 let documents = vec![
     String::from("Some text input"),

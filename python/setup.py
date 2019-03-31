@@ -6,12 +6,12 @@ with open("./requirements.txt", "rt") as fh:
     install_requires = fh.read().splitlines()
 
 setup(
-    name="pytext-vectorize",
+    name="vtextpy",
     version="0.1.0a1",
     description="Text vectorization and TF-IDF",
     rust_extensions=[
         RustExtension(
-            "pytext_vectorize._lib",
+            "vtext._lib",
             "./Cargo.toml",
             rustc_flags=["--cfg=Py_3"],
             features=["numpy/python3"],

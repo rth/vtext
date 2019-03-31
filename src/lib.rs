@@ -1,5 +1,5 @@
 /*!
-# text-vectorize
+# vtext
 
 Text vectorizers and TF-IDF transforms
 
