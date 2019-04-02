@@ -14,8 +14,7 @@ vtext = {"path" = "../"}
 rust-stemmers = "1.1.0"
 
 [dependencies.numpy]
-version = "0.4.0"
-git = "https://github.com/rust-numpy/rust-numpy"
+version = "0.4.1"
 features = ["python3"]
 
 [dependencies.pyo3]
