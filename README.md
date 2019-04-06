@@ -2,47 +2,24 @@
 
 [![CircleCI](https://circleci.com/gh/rth/vtext/tree/master.svg?style=svg)](https://circleci.com/gh/rth/vtext/tree/master)
 
-Text vectorizers and TFIDF transforms for Rust and Python
+Fast NLP in Rust with Python bindings
 
 This package aims to provide a convenient and high performance toolkit for ingesting textual data for
-machine learning applications.
+machine learning applications. Making existing NLP Rust crates accesible in Python with a common API is another goal of this project.
 
 The API is currently unstable.
 
-## Features
+### Features
 
-**Tokenization**
-
- - Regexp tokenizer
- - Unicode segmentation tokenizer
-
-**Stemming**
-
- - Snowball Stemmer: in Python 15-20x faster than NLTK
-
-**Analyzers**
-
- - *Planned*: word and character n-grams, skip grams
-
-**Token counting**
-
-These estimators take as input a list of tokens, and convert it to a sparse CSR
-array that can be used in machine learning applications.
-
- - `CountVectorizer` 
- - `HashingVectorizer` using MurmurHash3
-
-API and implementation inspired by `CountVectorizer` and `HashingVectorizer`
-estimators in [scikit-learn](https://scikit-learn.org/).
-
-**Feature selection**
-
- - *Planned:*  filtering vocabulary by document frequency (`df`)
-
-**Feature weighting**
-
- - *Planned:*  feature weighting based on document frequency (TF-IDF),
-   supervised term weighting (e.g. TF-IGM), feature normalization
+ - Tokenization: Regexp tokenizer, Unicode segmentation
+ - Stemming: Snowball (in Python 15-20x faster than NLTK)
+ - Analyzers (*planned*): word and character n-grams, skip grams
+ - Token counting: converting token counts to sparse matrices for use
+   in machine learning libraries. Similar to `CountVectorizer` and
+   `HashingVectorizer` in scikit-learn.
+ - Feature weighting (*planned*): feature weighting based on document
+   frequency (TF-IDF), supervised term weighting (e.g. TF-IGM),
+   feature normalization
 
 ## Usage
 
@@ -72,7 +49,6 @@ where `X` is a `CSRArray` struct with the following attributes
 
 ### Usage in Python
 
-Not implemented yet, see [#1](https://github.com/rth/text-vectorize/pull/1).
 
 The API aims to be compatible with scikit-learn's
 [CountVectorizer](https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.CountVectorizer.html)
