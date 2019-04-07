@@ -28,5 +28,5 @@ jobs:
         ci\\azure\\test_rust.cmd
       displayName: 'Test rust'
     - script: |
-        ci\\azure\\test_script.cmd
-      displayName: 'Test pytest'
+        ci\\azure\\test_python.cmd
+      displayName: 'Test python'
