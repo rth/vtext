@@ -18,7 +18,7 @@ overflow-checks = false
 [dependencies]
 regex = "1"
 lazy_static = "1.2.0"
-fasthash = "0.3"
+seahash = "3.0.6"
 ndarray = "0.12.1"
 sprs = "0.6.3"
 unicode-segmentation = "1.2.1"
