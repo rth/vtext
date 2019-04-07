@@ -10,7 +10,7 @@ set PIP_INSTALL=pip install -q
 call deactivate
 @rem Clean up any left-over from a previous build
 conda remove --all -q -y -n %VIRTUALENV%
-conda create -n %VIRTUALENV% -q -y python=%PYTHON_VERSION% numpy==1.15.0 scipy==1.1.0 pytest==4.3.1 wheel==0.33.1
+conda create -n %VIRTUALENV% -q -y python=%PYTHON_VERSION% numpy>=1.12.0 scipy>=1.0.0 pytest>=4.0.0 wheel>=0.31.1
 
 call activate %VIRTUALENV%
 
