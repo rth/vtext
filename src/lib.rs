@@ -32,7 +32,7 @@ let documents = vec![
 
 #[macro_use]
 extern crate lazy_static;
-extern crate fasthash;
+extern crate seahash;
 extern crate regex;
 #[macro_use]
 extern crate ndarray;
@@ -239,7 +239,7 @@ impl HashingVectorizer {
             let tokens = tokenizer.tokenize(&document);
             indices_local.clear();
             for token in tokens {
-                let hash = fasthash::murmur3::hash32(&token);
+                let hash = seahash::hash_seeded(token.as_bytes(), 1, 1000, 200, 89) as u32;
                 let hash = hash % self.n_features;
 
                 indices_local.push(hash);
