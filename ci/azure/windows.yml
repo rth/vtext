@@ -25,5 +25,8 @@ jobs:
         ci\\azure\\install.cmd
       displayName: 'Install'
     - script: |
+        ci\\azure\\test_rust.cmd
+      displayName: 'Test rust'
+    - script: |
         ci\\azure\\test_script.cmd
-      displayName: 'Test Library'
+      displayName: 'Test pytest'

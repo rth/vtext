@@ -11,3 +11,6 @@ jobs:
       py36_64:
         PYTHON_VERSION: '3.6'
         PYTHON_ARCH: '64'
+      py35_64:
+        PYTHON_VERSION: '3.5'
+        PYTHON_ARCH: '64'
