@@ -23,13 +23,13 @@ jobs:
       displayName: Add conda to PATH
       condition: eq(variables['DISTRIB'], 'conda')
     - script: |
-        build_tools/azure/install.sh
+        ci/azure/install.sh
       displayName: 'Install'
     - script: |
-        build_tools/azure/test_rust.sh
+        ci/azure/test_rust.sh
       displayName: 'Test rust'
     - script: |
-        build_tools/azure/test_python.sh
+        ci/azure/test_python.sh
       displayName: 'Test python'
     - task: PublishTestResults@2
       inputs:
