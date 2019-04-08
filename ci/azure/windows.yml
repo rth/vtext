@@ -1,0 +1,36 @@
+
+parameters:
+  name: ''
+  vmImage: ''
+  matrix: []
+
+jobs:
+- job: ${{ parameters.name }}
+  pool:
+    vmImage: ${{ parameters.vmImage }}
+  variables:
+    VIRTUALENV: 'testvenv'
+    JUNITXML: 'test-data.xml'
+    SKLEARN_SKIP_NETWORK_TESTS: '1'
+    TMP_FOLDER: '$(Agent.WorkFolder)\tmp_folder'
+  strategy:
+    matrix:
+      ${{ insert }}: ${{ parameters.matrix }}
+
+  steps:
+    - powershell: Write-Host "##vso[task.prependpath]$env:CONDA\Scripts"
+      displayName: Add conda to PATH for 64 bit Python
+      condition: eq(variables['PYTHON_ARCH'], '64')
+    - script: |
+        ci\\azure\\install.cmd
+      displayName: 'Install'
+    - script: |
+        ci\\azure\\test_rust.cmd
+      displayName: 'Test rust'
+    - script: |
+        ci\\azure\\test_python.cmd
+      displayName: 'Test python'
+    - task: PublishPipelineArtifact@0
+      inputs:
+        artifactName: "${{ parameters.name }}-$(PYTHON_VERSION)-wheels"
+        targetPath: python\\dist\\
