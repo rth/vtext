@@ -6,12 +6,12 @@ jobs:
     name: macOS
     vmImage: xcode9-macos10.13
     matrix:
-      py37_x67:
+      py37:
         PYTHON_VERSION: '3.7'
-      py36_x67:
-        PYTHON_VERSION: '3.7'
-      py35_x67:
-        PYTHON_VERSION: '3.7'
+      py36:
+        PYTHON_VERSION: '3.6'
+      py35:
+        PYTHON_VERSION: '3.5'
 
 
 - template: ci/azure/windows.yml
@@ -21,10 +21,7 @@ jobs:
     matrix:
       py37_64:
         PYTHON_VERSION: '3.7'
-        PYTHON_ARCH: '64'
       py36_64:
         PYTHON_VERSION: '3.6'
-        PYTHON_ARCH: '64'
       py35_64:
         PYTHON_VERSION: '3.5'
-        PYTHON_ARCH: '64'

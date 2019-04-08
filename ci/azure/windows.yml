@@ -32,5 +32,5 @@ jobs:
       displayName: 'Test python'
     - task: PublishPipelineArtifact@0
       inputs:
-        artifactName: "${{ parameters.name }} - wheels"
+        artifactName: "${{ parameters.name }}-$(PYTHON_VERSION)-wheels"
         targetPath: python\\dist\\
