@@ -34,8 +34,8 @@ jobs:
       displayName: 'Publish Test Results'
       condition: succeededOrFailed()
     - task: PublishBuildArtifacts@1
-        inputs:
-          pathtoPublish: '$(Build.ArtifactStagingDirectory)' 
-          artifactName: 'wheels' 
-          publishLocation: filePath
-          targetPath: python/dist/
+      inputs:
+        pathtoPublish: '$(Build.ArtifactStagingDirectory)' 
+        artifactName: 'wheels' 
+        publishLocation: filePath
+        targetPath: python/dist/
