@@ -35,5 +35,5 @@ jobs:
       condition: succeededOrFailed()
     - task: PublishPipelineArtifact@0
       inputs:
-        artifactName: 'wheels'
+        artifactName: "${{ parameters.name }} wheels"
         targetPath: python/dist/
