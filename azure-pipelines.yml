@@ -9,13 +9,6 @@ jobs:
       pylatest_conda:
         PYTHON_VERSION: '3.7'
 
-- template: ci/azure/posix.yml
-  parameters:
-    name: Linux
-    vmImage: ubuntu-16.04
-    matrix:
-      py35_np_atlas:
-        PYTHON_VERSION: '3.7'
 
 - template: ci/azure/windows.yml
   parameters:

@@ -10,12 +10,14 @@ set PIP_INSTALL=pip install -q
 call deactivate
 @rem Clean up any left-over from a previous build
 conda remove --all -q -y -n %VIRTUALENV%
-conda create -n %VIRTUALENV% -q -y python=%PYTHON_VERSION% numpy>=1.12.0 scipy>=1.0.0 pytest>=4.0.0 wheel>=0.31.1
+conda create -n %VIRTUALENV% -q -y python=%PYTHON_VERSION%
 
 call activate %VIRTUALENV%
 
 python --version
 pip --version
+
+pip install numpy>=1.12.0 scipy>=1.0.0 pytest>=4.0.0 wheel>=0.31.1
 
 curl -sSf -o rustup-init.exe https://win.rustup.rs
 rustup-init.exe -y --default-toolchain nightly-2019-02-28
