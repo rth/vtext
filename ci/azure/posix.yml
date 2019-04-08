@@ -33,3 +33,9 @@ jobs:
         testRunTitle: ${{ format('{0}-$(Agent.JobName)', parameters.name) }}
       displayName: 'Publish Test Results'
       condition: succeededOrFailed()
+    - task: PublishBuildArtifacts@1
+        inputs:
+          pathtoPublish: '$(Build.ArtifactStagingDirectory)' 
+          artifactName: 'wheels' 
+          publishLocation: filePath
+          targetPath: python/dist/

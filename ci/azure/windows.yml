@@ -30,3 +30,9 @@ jobs:
     - script: |
         ci\\azure\\test_python.cmd
       displayName: 'Test python'
+    - task: PublishBuildArtifacts@1
+        inputs:
+          pathtoPublish: '$(Build.ArtifactStagingDirectory)' 
+          artifactName: 'wheels' 
+          publishLocation: filePath
+          targetPath: python\\dist\\

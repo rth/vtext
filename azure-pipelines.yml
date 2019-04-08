@@ -6,7 +6,11 @@ jobs:
     name: macOS
     vmImage: xcode9-macos10.13
     matrix:
-      pylatest_conda:
+      py37_x67:
+        PYTHON_VERSION: '3.7'
+      py36_x67:
+        PYTHON_VERSION: '3.7'
+      py35_x67:
         PYTHON_VERSION: '3.7'
 
 
