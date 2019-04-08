@@ -85,10 +85,10 @@ impl VTextTokenizer {
         let mut res: Vec<&'a str> = Vec::new();
         for tok in tokens {
             let n_chars = tok.chars().count();
-            if tok.ends_with(&"n't") {
+            if tok.ends_with(&"n't") || tok.ends_with(&"n’t") {
                res.push(&tok[0..n_chars-3]);
                res.push(&tok[n_chars-3..n_chars]);
-            } else if tok.ends_with(&"'s") {
+            } else if tok.ends_with(&"'s") || tok.ends_with(&"’s") {
                res.push(&tok[0..n_chars-2]);
                res.push(&tok[n_chars-2..n_chars]);
             } else {
