@@ -10,6 +10,11 @@ try:
 except ImportError:
     sacremoses = None
 
+try:
+    import spacy
+except ImportError:
+    spacy = None
+
 
 base_dir = Path(__file__).parent.parent.resolve()
 
@@ -48,6 +53,11 @@ if __name__ == "__main__":
 
     if sacremoses is not None:
         db.append(('MosesTokenizer()', sacremoses.MosesTokenizer().tokenize))
+    if spacy is not None:
+        nlp = spacy.load('en_core_web_sm', parser=False, entity=False)
+        from spacy.tokenizer import Tokenizer
+        tokenizer = Tokenizer(nlp.vocab)
+        db.append(("Spacy en", tokenizer))
 
 
     for label, func in db:

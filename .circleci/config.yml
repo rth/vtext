@@ -74,7 +74,7 @@ jobs:
           command: |
             cargo fmt -- --check
             flake8 --max-line-length=88 python/ benchmarks/
-            black --check python/ benchmarks/
+            black --check python/ benchmarks/ evaluation/
             cd python && cargo fmt -- --check
 
 
