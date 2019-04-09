@@ -75,7 +75,7 @@ impl VTextTokenizer {
     /// Create a new instance
     pub fn new(lang: &str) -> VTextTokenizer {
         VTextTokenizer {
-            lang: lang.to_string()
+            lang: lang.to_string(),
         }
     }
     /// Tokenize a string
@@ -84,7 +84,6 @@ impl VTextTokenizer {
 
         let mut res: Vec<&'a str> = Vec::new();
         for tok in tokens {
-
             // Handle contractions
             if let Some(apostroph_idx) = tok.find(&"'") {
                 let mut apostroph_idx = apostroph_idx;
@@ -103,15 +102,15 @@ impl VTextTokenizer {
                 res.push(&tok[..apostroph_idx]);
                 res.push(&tok[apostroph_idx..]);
             } else {
-               res.push(tok);
+                res.push(tok);
             }
+        }
 
         // remove whitespace tokens
         let res = res.into_iter().filter(|x| x != &" ");
         return Box::new(res);
     }
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -149,7 +148,6 @@ mod tests {
 
     #[test]
     fn test_vtext_tokenizer_en() {
-
         let tokenizer = VTextTokenizer::new("en");
 
         let s = "We can't";
