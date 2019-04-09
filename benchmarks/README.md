@@ -1,6 +1,6 @@
 # vtext benchmarks
 
-This folder includes benchmark scripts for text-vectorize.
+This folder includes benchmark scripts for vtext
 
 To run the benchmarks download an (adapted) copy of the 20 newsgroup dataset
 [here](https://s3-eu-west-1.amazonaws.com/public-sym/20newsgoups.zip), then extract

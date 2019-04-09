@@ -58,19 +58,20 @@ though only a subset of features will be implemented.
 
 ## Benchmarks
 
+#### Vectorization
+
 Below are some very preliminary benchmarks on the 20 newsgroups dataset of 19924 documents (~91 MB in total),
 
-| estimator         | implementation                    | speed        |
-|-------------------|-----------------------------------|--------------|
-| CountVectorizer   | scikit-learn 0.20 (Python)        | 14 MB/s      |
-| CountVectorizer   | text-vectorize 0.1.0-alpha (Rust) | 33 MB/s      |
-| HashingVectorizer | scikit-learn 0.20 (Python+Cython) | 18 MB/s      |
-| HashingVectorizer | text-vectorize 0.1.0-alpha (Rust) | 68 MB/s      |
+|                   | CountVectorizer      | HashingVectorizer|
+|-------------------|----------------------|------------------|
+| CountVectorizer   | scikit-learn 0.20.1  | 14 MB/s          |
+| CountVectorizer   | vtext 0.1.0-a1       | 33 MB/s          |
+| HashingVectorizer | scikit-learn 0.20.1  | 18 MB/s          |
+| HashingVectorizer | vtext 0.1.0-a1       | 68 MB/s          |
 
 see [benchmarks/README.md](./benchmarks/README.md) for more details.
-Note that these are not strictly equivalent, because
-they do not account for cost of passing data from Rust to Python. Instead they are meant a
-a rough estimate for the possible performance improvements.
+Note that these are not strictly equivalent, and are meant as a
+rough estimate for the possible performance improvements.
 
 
 ## License

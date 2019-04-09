@@ -52,5 +52,8 @@ if __name__ == "__main__":
 
         n_tokens = sum(len(tok) for tok in out)
 
-        print("{:>45}: {:.2f}s [{:.1f} MB/s, {:.0f} kWPS]"
-              .format(label, dt, dataset_size / dt, n_tokens*1e-3 / dt))
+        print(
+            "{:>45}: {:.2f}s [{:.1f} MB/s, {:.0f} kWPS]".format(
+                label, dt, dataset_size / dt, n_tokens * 1e-3 / dt
+            )
+        )

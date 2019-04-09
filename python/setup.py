@@ -6,9 +6,6 @@ with open("./requirements.txt", "rt") as fh:
     install_requires = fh.read().splitlines()
 
 setup(
-    name="vtextpy",
-    version="0.1.0a1",
-    description="Text vectorization and TF-IDF",
     rust_extensions=[
         RustExtension(
             "vtext._lib",
@@ -19,6 +16,4 @@ setup(
     ],
     install_requires=install_requires,
     packages=find_packages(),
-    python_requires="~=3.5",
-    zip_safe=False,
 )
