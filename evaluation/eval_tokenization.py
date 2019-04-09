@@ -8,6 +8,11 @@ import numpy as np
 
 from vtext.tokenize import UnicodeSegmentTokenizer, VTextTokenizer
 
+try:
+    import sacremoses
+except ImportError:
+    sacremoses = None
+
 base_dir = Path("/home/rth/nlp/ud-treebanks-v2.3/")
 
 
@@ -38,6 +43,15 @@ tb_list = [('English-GUM', 'UD_English-GUM/en_gum-ud-train.conllu'),
            #('Japanese-PUD', 'UD_Japanese-PUD/ja_pud-ud-test.conllu')
            ]
 
+
+tok_db = [#('whitespace', lambda x: x.split(' ')),
+          ('regexp', re.compile(r'\b\w\w+\b').findall),
+          ('UnicodeSegment', UnicodeSegmentTokenizer(word_bounds=True).tokenize),
+          ("VTextTokenizer", VTextTokenizer("en").tokenize)]
+
+if sacremoses is not None:
+    tok_db.append(('MosesTokenizer', sacremoses.MosesTokenizer().tokenize))
+
 out = []
 for tb_name, tb_path in tb_list:
 
@@ -45,10 +59,7 @@ for tb_name, tb_path in tb_list:
         t0 = time()
         tb = conllu.parse(fh.read())
         print(f'Loaded {tb_name} in {time() - t0:.2f}s')
-    for name, tokenizer in [#('whitespace', lambda x: x.split(' ')),
-                            ('regexp', re.compile(r'\b\w\w+\b').findall),
-                            ('UnicodeSegment', UnicodeSegmentTokenizer(word_bounds=True).tokenize),
-                            ("VTextTokenizer", VTextTokenizer("en").tokenize)]:
+    for name, tokenizer in tok_db:
         t0 = time()
         res = evaluate_tokenizer(tb, tokenizer)
         print(f'{tb_name} done with {name} in {time() - t0:.2f}s')

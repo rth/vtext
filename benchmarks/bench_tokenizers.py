@@ -5,6 +5,11 @@ import re
 
 from vtext.tokenize import RegexpTokenizer
 from vtext.tokenize import UnicodeSegmentTokenizer
+try:
+    import sacremoses
+except ImportError:
+    sacremoses = None
+
 
 base_dir = Path(__file__).parent.parent.resolve()
 
@@ -25,7 +30,7 @@ if __name__ == "__main__":
     def pyre_tokenizer(txt):
         return list(re.compile(token_regexp).findall(txt))
 
-    for label, func in [
+    db = [
         (r"Python re.findall(r'\b\w\w+\b', ...)", pyre_tokenizer),
         (
             r"RegexpTokenizer(r'\b\w\w+\b')",
@@ -39,8 +44,13 @@ if __name__ == "__main__":
             "UnicodeSegmentTokenizer(word_bounds=True)",
             UnicodeSegmentTokenizer(word_bounds=True).tokenize,
         ),
-    ]:
+    ]
 
+    if sacremoses is not None:
+        db.append(('MosesTokenizer()', sacremoses.MosesTokenizer().tokenize))
+
+
+    for label, func in db:
         t0 = time()
 
         out = []
