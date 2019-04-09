@@ -43,9 +43,14 @@ if __name__ == "__main__":
 
         t0 = time()
 
+        out = []
+
         for idx, doc in enumerate(data):
-            func(doc)
+            out.append(func(doc))
 
         dt = time() - t0
 
-        print("{:>45}: {:.2f}s [{:.1f} MB/s]".format(label, dt, dataset_size / dt))
+        n_tokens = sum(len(tok) for tok in out)
+
+        print("{:>45}: {:.2f}s [{:.1f} MB/s, {:.0f} kWPS]"
+              .format(label, dt, dataset_size / dt, n_tokens*1e-3 / dt))
