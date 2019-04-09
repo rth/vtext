@@ -165,7 +165,6 @@ impl UnicodeSegmentTokenizer {
     }
 }
 
-
 /// VText tokenizer
 ///
 /// A tokenization that extends `unicode-segmentation` crate
@@ -182,9 +181,7 @@ pub struct VTextTokenizer {
 impl VTextTokenizer {
     #[new]
     fn __new__(obj: &PyRawObject, lang: String) -> PyResult<()> {
-        obj.init(|_token| VTextTokenizer {
-            lang: lang,
-        })
+        obj.init(|_token| VTextTokenizer { lang: lang })
     }
 
     /// Tokenize a string
@@ -205,7 +202,6 @@ impl VTextTokenizer {
         Ok((res))
     }
 }
-
 
 /// Tokenize a document using regular expressions
 #[pyclass]
