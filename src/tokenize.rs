@@ -166,4 +166,16 @@ mod tests {
         assert_eq!(tokens, tokens_ref);
     }
 
+    #[test]
+    fn test_vtext_tokenizer_all_lang() {
+        let tokenizer = VTextTokenizer::new("en");
+
+        let s = "name@domain.com";
+        let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
+        let tokens_ref: &[_] = &["name@domain.com"];
+        // TODO
+        // assert_eq!(tokens, tokens_ref);
+
+    }
+
 }
