@@ -165,6 +165,48 @@ impl UnicodeSegmentTokenizer {
     }
 }
 
+
+/// VText tokenizer
+///
+/// A tokenization that extends `unicode-segmentation` crate
+///
+/// ## References
+///
+/// * [Unicode® Standard Annex #29](http://www.unicode.org/reports/tr29/)
+#[pyclass]
+pub struct VTextTokenizer {
+    pub lang: String,
+}
+
+#[pymethods]
+impl VTextTokenizer {
+    #[new]
+    fn __new__(obj: &PyRawObject, lang: String) -> PyResult<()> {
+        obj.init(|_token| VTextTokenizer {
+            lang: lang,
+        })
+    }
+
+    /// Tokenize a string
+    ///
+    /// ## Parameters
+    ///  - x : bool
+    ///    the string to tokenize
+    ///
+    /// ## Returns
+    ///  - tokens : List<str>
+    fn tokenize(&self, py: Python, x: String) -> PyResult<(Vec<String>)> {
+        let tokenizer = vtext::tokenize::VTextTokenizer::new(self.lang);
+
+        let x = x.to_string();
+
+        let res = tokenizer.tokenize(&x);
+        let res = res.map(|s| s.to_string()).collect();
+        Ok((res))
+    }
+}
+
+
 /// Tokenize a document using regular expressions
 #[pyclass]
 pub struct RegexpTokenizer {
@@ -271,6 +313,7 @@ fn _lib(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<_CountVectorizerWrapper>()?;
     m.add_class::<UnicodeSegmentTokenizer>()?;
     m.add_class::<RegexpTokenizer>()?;
+    m.add_class::<VTextTokenizer>()?;
     m.add_class::<SnowballStemmer>()?;
     Ok(())
 }
