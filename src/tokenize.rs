@@ -152,18 +152,20 @@ mod tests {
 
         let s = "We can't";
         let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
-        let tokens_ref: &[_] = &["We", "ca", "n't"];
-        assert_eq!(tokens, tokens_ref);
+        assert_eq!(tokens, &["We", "ca", "n't"]);
 
         let s = "it's";
         let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
-        let tokens_ref: &[_] = &["it", "'s"];
-        assert_eq!(tokens, tokens_ref);
+        assert_eq!(tokens, &["it", "'s"]);
 
         let s = "it’s";
         let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
-        let tokens_ref: &[_] = &["it", "’s"];
-        assert_eq!(tokens, tokens_ref);
+        assert_eq!(tokens, &["it", "’s"]);
+
+        let s = "N.Y.";
+        let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
+        // TODO
+        // assert_eq!(tokens, &["N.Y."]);
     }
 
     #[test]
@@ -172,9 +174,8 @@ mod tests {
 
         let s = "name@domain.com";
         let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
-        let tokens_ref: &[_] = &["name@domain.com"];
         // TODO
-        // assert_eq!(tokens, tokens_ref);
+        // assert_eq!(tokens, &["name@domain.com"]);
 
     }
 
