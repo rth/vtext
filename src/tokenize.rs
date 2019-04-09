@@ -84,17 +84,28 @@ impl VTextTokenizer {
 
         let mut res: Vec<&'a str> = Vec::new();
         for tok in tokens {
-            let n_chars = tok.chars().count();
-            if tok.ends_with(&"n't") || tok.ends_with(&"n’t") {
-               res.push(&tok[0..n_chars-3]);
-               res.push(&tok[n_chars-3..n_chars]);
-            } else if tok.ends_with(&"'s") || tok.ends_with(&"’s") {
-               res.push(&tok[0..n_chars-2]);
-               res.push(&tok[n_chars-2..n_chars]);
+
+            // Handle contractions
+            if let Some(apostroph_idx) = tok.find(&"'") {
+                let mut apostroph_idx = apostroph_idx;
+                if tok.ends_with(&"n't") {
+                    // also include the "n" from "n't"
+                    apostroph_idx = apostroph_idx - 1;
+                }
+                res.push(&tok[..apostroph_idx]);
+                res.push(&tok[apostroph_idx..]);
+            } else if let Some(apostroph_idx) = tok.find(&"’") {
+                let mut apostroph_idx = apostroph_idx;
+                if tok.ends_with(&"n’t") {
+                    // also include the "n" from "n't"
+                    apostroph_idx = apostroph_idx - 1;
+                }
+                res.push(&tok[..apostroph_idx]);
+                res.push(&tok[apostroph_idx..]);
             } else {
                res.push(tok);
             }
-        }
+
         // remove whitespace tokens
         let res = res.into_iter().filter(|x| x != &" ");
         return Box::new(res);
@@ -137,7 +148,7 @@ mod tests {
     }
 
     #[test]
-    fn test_vtext_tokenizer() {
+    fn test_vtext_tokenizer_en() {
 
         let tokenizer = VTextTokenizer::new("en");
 
@@ -149,6 +160,11 @@ mod tests {
         let s = "it's";
         let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
         let tokens_ref: &[_] = &["it", "'s"];
+        assert_eq!(tokens, tokens_ref);
+
+        let s = "it’s";
+        let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
+        let tokens_ref: &[_] = &["it", "’s"];
         assert_eq!(tokens, tokens_ref);
     }
 
