@@ -32,16 +32,16 @@ def evaluate_tokenizer(treebank, tokenizer):
         tokens = [str(el) for el in tokenizer(txt)]
         tokens_ref = [el["form"] for el in sentence]
         similarity = tokens_similarity(tokens_ref, tokens)
-        # if similarity != 1:
-        #    print(f'Expected: {tokens_ref}')
-        #    print(f'Got:      {tokens}')
+        if similarity != 1:
+           print(f'Expected: {tokens_ref}')
+           print(f'Got:      {tokens}')
         scores.append(similarity)
     scores = np.mean(scores)
     return scores
 
 
 tb_list = [
-    ("English-GUM", "UD_English-GUM/en_gum-ud-train.conllu"),
+#    ("English-GUM", "UD_English-GUM/en_gum-ud-train.conllu"),
     ("English-EWT", "UD_English-EWT/en_ewt-ud-train.conllu"),
     # ('UD_French-GSD', 'UD_French-GSD/fr_gsd-ud-train.conllu'),
     # ('Japanese-PUD', 'UD_Japanese-PUD/ja_pud-ud-test.conllu')
@@ -49,15 +49,15 @@ tb_list = [
 
 
 tok_db = [  # ('whitespace', lambda x: x.split(' ')),
-    ("regexp", re.compile(r"\b\w\w+\b").findall),
-    ("UnicodeSegment", UnicodeSegmentTokenizer(word_bounds=True).tokenize),
+ #   ("regexp", re.compile(r"\b\w\w+\b").findall),
+ #   ("UnicodeSegment", UnicodeSegmentTokenizer(word_bounds=True).tokenize),
     ("VTextTokenizer", VTextTokenizer("en").tokenize),
 ]
 
 if sacremoses is not None:
     tok_db.append(("MosesTokenizer", sacremoses.MosesTokenizer().tokenize))
 
-if spacy is not None:
+if spacy is not None and False:
     nlp = spacy.load("en_core_web_sm", parser=False, entity=False)
     tok_db.append(("spacy en", nlp.tokenizer))
 
