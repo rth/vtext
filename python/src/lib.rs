@@ -193,7 +193,7 @@ impl VTextTokenizer {
     /// ## Returns
     ///  - tokens : List<str>
     fn tokenize(&self, py: Python, x: String) -> PyResult<(Vec<String>)> {
-        let tokenizer = vtext::tokenize::VTextTokenizer::new(self.lang);
+        let tokenizer = vtext::tokenize::VTextTokenizer::new(&self.lang);
 
         let x = x.to_string();
 
