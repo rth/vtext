@@ -5,6 +5,7 @@ import re
 
 from vtext.tokenize import RegexpTokenizer
 from vtext.tokenize import UnicodeSegmentTokenizer
+from vtext.tokenize import VTextTokenizer
 
 base_dir = Path(__file__).parent.parent.resolve()
 
@@ -39,6 +40,7 @@ if __name__ == "__main__":
             "UnicodeSegmentTokenizer(word_bounds=True)",
             UnicodeSegmentTokenizer(word_bounds=True).tokenize,
         ),
+        ("VTextTokenizer('en')", VTextTokenizer("en").tokenize),
     ]:
 
         t0 = time()
