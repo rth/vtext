@@ -40,10 +40,7 @@ if __name__ == "__main__":
             "UnicodeSegmentTokenizer(word_bounds=True)",
             UnicodeSegmentTokenizer(word_bounds=True).tokenize,
         ),
-        (
-            "VTextTokenizer('en')",
-            VTextTokenizer("en").tokenize,
-        ),
+        ("VTextTokenizer('en')", VTextTokenizer("en").tokenize),
     ]:
 
         t0 = time()
