@@ -166,6 +166,11 @@ mod tests {
         let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
         // TODO
         // assert_eq!(tokens, &["N.Y."]);
+
+        let s = "Hello :)";
+        let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
+        // TODO
+        //assert_eq!(tokens, &["Hello", ":)"]);
     }
 
     #[test]
@@ -176,7 +181,6 @@ mod tests {
         let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
         // TODO
         // assert_eq!(tokens, &["name@domain.com"]);
-
     }
 
 }
