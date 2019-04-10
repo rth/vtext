@@ -5,6 +5,8 @@ import re
 
 from vtext.tokenize import RegexpTokenizer
 from vtext.tokenize import UnicodeSegmentTokenizer
+from vtext.tokenize import VTextTokenizer
+
 try:
     import sacremoses
 except ImportError:
@@ -49,16 +51,17 @@ if __name__ == "__main__":
             "UnicodeSegmentTokenizer(word_bounds=True)",
             UnicodeSegmentTokenizer(word_bounds=True).tokenize,
         ),
+        ("VTextTokenizer('en')", VTextTokenizer("en").tokenize),
     ]
 
     if sacremoses is not None:
-        db.append(('MosesTokenizer()', sacremoses.MosesTokenizer().tokenize))
+        db.append(("MosesTokenizer()", sacremoses.MosesTokenizer().tokenize))
     if spacy is not None:
-        nlp = spacy.load('en_core_web_sm', parser=False, entity=False)
+        nlp = spacy.load("en_core_web_sm", parser=False, entity=False)
         from spacy.tokenizer import Tokenizer
+
         tokenizer = Tokenizer(nlp.vocab)
         db.append(("Spacy en", tokenizer))
-
 
     for label, func in db:
         t0 = time()
@@ -72,5 +75,8 @@ if __name__ == "__main__":
 
         n_tokens = sum(len(tok) for tok in out)
 
-        print("{:>45}: {:.2f}s [{:.1f} MB/s, {:.0f} kWPS]"
-              .format(label, dt, dataset_size / dt, n_tokens*1e-3 / dt))
+        print(
+            "{:>45}: {:.2f}s [{:.1f} MB/s, {:.0f} kWPS]".format(
+                label, dt, dataset_size / dt, n_tokens * 1e-3 / dt
+            )
+        )
