@@ -18,7 +18,8 @@ try:
 except ImportError:
     spacy = None
 
-base_dir = Path("/home/rth/nlp/ud-treebanks-v2.3/")
+base_dir = Path(__file__).parent.parent
+base_dir = base_dir / "ud-treebanks-v2.3/"
 
 
 def tokens_similarity(tokens_ref, tokens):
@@ -33,15 +34,15 @@ def evaluate_tokenizer(treebank, tokenizer):
         tokens_ref = [el["form"] for el in sentence]
         similarity = tokens_similarity(tokens_ref, tokens)
         if similarity != 1:
-           print(f'Expected: {tokens_ref}')
-           print(f'Got:      {tokens}')
+            print(f"Expected: {tokens_ref}")
+            print(f"Got:      {tokens}")
         scores.append(similarity)
     scores = np.mean(scores)
     return scores
 
 
 tb_list = [
-#    ("English-GUM", "UD_English-GUM/en_gum-ud-train.conllu"),
+    #    ("English-GUM", "UD_English-GUM/en_gum-ud-train.conllu"),
     ("English-EWT", "UD_English-EWT/en_ewt-ud-train.conllu"),
     # ('UD_French-GSD', 'UD_French-GSD/fr_gsd-ud-train.conllu'),
     # ('Japanese-PUD', 'UD_Japanese-PUD/ja_pud-ud-test.conllu')
@@ -49,9 +50,9 @@ tb_list = [
 
 
 tok_db = [  # ('whitespace', lambda x: x.split(' ')),
- #   ("regexp", re.compile(r"\b\w\w+\b").findall),
- #   ("UnicodeSegment", UnicodeSegmentTokenizer(word_bounds=True).tokenize),
-    ("VTextTokenizer", VTextTokenizer("en").tokenize),
+    #   ("regexp", re.compile(r"\b\w\w+\b").findall),
+    #   ("UnicodeSegment", UnicodeSegmentTokenizer(word_bounds=True).tokenize),
+    ("VTextTokenizer", VTextTokenizer("en").tokenize)
 ]
 
 if sacremoses is not None:

@@ -83,7 +83,10 @@ impl VTextTokenizer {
         let tokens = text.split_word_bounds();
 
         let mut res: Vec<&'a str> = Vec::new();
-        for tok in tokens {
+
+        let tok_prev = -1;
+
+        for (idx, tok) in tokens.enumerate() {
             // Handle contractions
             if let Some(apostroph_idx) = tok.find(&"'") {
                 let mut apostroph_idx = apostroph_idx;
@@ -101,6 +104,9 @@ impl VTextTokenizer {
                 }
                 res.push(&tok[..apostroph_idx]);
                 res.push(&tok[apostroph_idx..]);
+            } else if tok.len() == 1 {
+               // skip
+            
             } else {
                 res.push(tok);
             }
