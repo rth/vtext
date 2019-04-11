@@ -137,7 +137,6 @@ impl VTextTokenizer {
             } else {
                 res.push(tok);
             }
-
         }
 
         if punct_start_seq >= 0 {
@@ -231,7 +230,6 @@ mod tests {
         let s = ", o ! o";
         let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
         assert_eq!(tokens, &[",", "o", "!", "o"]);
-
 
         let s = "... ok.";
         let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
