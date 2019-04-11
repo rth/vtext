@@ -26,5 +26,6 @@ docker build -t vtextpy-env .
 rustup toolchain add nightly-2019-02-04
 rustup default nightly-2019-02-04-x86_64-unknown-linux-gnu
 python3.7 -m pip install -r /src/python/requirements.txt
-python3.7 -m pip install -e /src/python
+cd /src/python && python3.7 setup.py install
+python3.7 -m pip install pandas conllu
 ```

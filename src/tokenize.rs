@@ -1,6 +1,8 @@
 extern crate regex;
 extern crate unicode_segmentation;
 
+use std::cmp;
+
 use regex::Regex;
 use unicode_segmentation::UnicodeSegmentation;
 
@@ -83,27 +85,62 @@ impl VTextTokenizer {
         let tokens = text.split_word_bounds();
 
         let mut res: Vec<&'a str> = Vec::new();
-        for tok in tokens {
-            // Handle contractions
-            if let Some(apostroph_idx) = tok.find(&"'") {
-                let mut apostroph_idx = apostroph_idx;
-                if tok.ends_with(&"n't") {
-                    // also include the "n" from "n't"
-                    apostroph_idx = apostroph_idx - 1;
+
+        let mut punct_start_seq: i64 = -1;
+        let mut punct_last = 'X';
+        let mut str_idx: usize = 0;
+
+        for (idx, tok) in tokens.enumerate() {
+            let tok_len = tok.len();
+            str_idx += tok_len;
+            if (tok_len == 1) & (tok != " ") {
+                // Handle punctuation
+                let ch = tok.chars().next().unwrap();
+                if ch.is_ascii_punctuation() {
+                    if ch != punct_last {
+                        if punct_start_seq >= 0 {
+                            res.push(&text[punct_start_seq as usize..str_idx - tok_len]);
+                        }
+                        punct_start_seq = (str_idx as i64) - (tok_len as i64);
+                    }
+                    punct_last = ch;
+                    continue;
                 }
-                res.push(&tok[..apostroph_idx]);
-                res.push(&tok[apostroph_idx..]);
-            } else if let Some(apostroph_idx) = tok.find(&"’") {
-                let mut apostroph_idx = apostroph_idx;
-                if tok.ends_with(&"n’t") {
-                    // also include the "n" from "n't"
-                    apostroph_idx = apostroph_idx - 1;
+            }
+            if punct_start_seq >= 0 {
+                res.push(&text[punct_start_seq as usize..str_idx - tok_len]);
+                punct_start_seq = -1;
+                punct_last = 'X';
+            }
+
+            if &self.lang == "en" {
+                // Handle English contractions
+                if let Some(apostroph_idx) = tok.find(&"'") {
+                    let mut apostroph_idx = apostroph_idx;
+                    if tok.ends_with(&"n't") {
+                        // also include the "n" from "n't"
+                        apostroph_idx = apostroph_idx - 1;
+                    }
+                    res.push(&tok[..apostroph_idx]);
+                    res.push(&tok[apostroph_idx..]);
+                } else if let Some(apostroph_idx) = tok.find(&"’") {
+                    let mut apostroph_idx = apostroph_idx;
+                    if tok.ends_with(&"n’t") {
+                        // also include the "n" from "n't"
+                        apostroph_idx = apostroph_idx - 1;
+                    }
+                    res.push(&tok[..apostroph_idx]);
+                    res.push(&tok[apostroph_idx..]);
+                } else {
+                    res.push(tok);
                 }
-                res.push(&tok[..apostroph_idx]);
-                res.push(&tok[apostroph_idx..]);
             } else {
                 res.push(tok);
             }
+        }
+
+        if punct_start_seq >= 0 {
+            res.push(&text[punct_start_seq as usize..]);
         }
 
         // remove whitespace tokens
@@ -166,21 +203,53 @@ mod tests {
         let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
         // TODO
         // assert_eq!(tokens, &["N.Y."]);
-
-        let s = "Hello :)";
-        let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
-        // TODO
-        //assert_eq!(tokens, &["Hello", ":)"]);
     }
 
     #[test]
     fn test_vtext_tokenizer_all_lang() {
         let tokenizer = VTextTokenizer::new("en");
 
+        // float numbers
+        let s = "23.2 meters";
+        let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
+        assert_eq!(tokens, &["23.2", "meters"]);
+
+        let s = "11,2 meters";
+        let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
+        assert_eq!(tokens, &["11,2", "meters"]);
+
+        // repeated punctuation
+        let s = "1 ..";
+        let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
+        assert_eq!(tokens, &["1", ".."]);
+
+        let s = "I ...";
+        let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
+        assert_eq!(tokens, &["I", "..."]);
+
+        let s = ", o ! o";
+        let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
+        assert_eq!(tokens, &[",", "o", "!", "o"]);
+
+        let s = "... ok.";
+        let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
+        assert_eq!(tokens, &["...", "ok", "."]);
+
+        // dash separated words
+        let s = "porte-manteau";
+        let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
+        // TODO
+        //assert_eq!(tokens, &["porte-manteau"]);
+
         let s = "name@domain.com";
         let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
         // TODO
         // assert_eq!(tokens, &["name@domain.com"]);
+        //
+        let s = "Hello :)";
+        let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
+        // TODO
+        //assert_eq!(tokens, &["Hello", ":)"]);
     }
 
 }
