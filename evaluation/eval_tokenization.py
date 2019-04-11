@@ -59,7 +59,7 @@ tok_db = [  # ('whitespace', lambda x: x.split(' ')),
 ]
 
 if sacremoses is not None:
-    tok_db.append(("MosesTokenizer", sacremoses.MosesTokenizer().tokenize))
+    tok_db.append(("MosesTokenizer", lambda lang: sacremoses.MosesTokenizer().tokenize))
 
 if spacy is not None:
     tok_db.append(
