@@ -1,6 +1,8 @@
 extern crate regex;
 extern crate unicode_segmentation;
 
+use std::cmp;
+
 use regex::Regex;
 use unicode_segmentation::UnicodeSegmentation;
 
@@ -84,32 +86,37 @@ impl VTextTokenizer {
 
         let mut res: Vec<&'a str> = Vec::new();
 
-        let mut punct_repeat = -1;
+        let mut punct_start_seq: i64 = -1;
         let mut punct_last = 'X';
+        let mut str_idx: usize = 0;
+        println!("# Processing {}", text);
 
         for (idx, tok) in tokens.enumerate() {
             // Handle contractions
-            if tok.len() == 1 {
-               // skip
-               let ch = tok.chars().next().unwrap();
-               if ch.is_ascii_punctuation() {
-                   if ch == punct_last {
-                       punct_repeat += 1;
-                   } else  {
-                       let tok_old  = (0..punct_repeat+1).map(|_| punct_last).collect::<String>();
-                       res.push(&tok_old);
-                       punct_repeat = 0;
-                       punct_last = ch;
-                   }
-                   continue;
-               }
+            let tok_len = tok.len();
+            println!("Starting processing of {}", tok);
+            str_idx += tok_len;
+            if (tok_len == 1) & (tok != " ") {
+                // Handle punctuation
+                let ch = tok.chars().next().unwrap();
+                println!("{} {}", tok_len, ch);
+                println!("punct_start_seq {}, str_idx {}", punct_start_seq, str_idx);
+                if ch.is_ascii_punctuation() {
+                    if ch != punct_last {
+                        if punct_start_seq >= 0 {
+                            res.push(&text[punct_start_seq as usize..str_idx + 1 - tok_len]);
+                        }
+                        punct_start_seq = (str_idx as i64) - (tok_len as i64);
+                    }
+                    punct_last = ch;
+                    continue;
+                }
             }
-            if punct_repeat >= 0 {
-                let tok_old = (0..punct_repeat+1).map(|_| punct_last).collect::<String>();
-                res.push(&tok_old);
-                punct_repeat = -1;
-                punct_last = 'X';
+            if punct_start_seq >= 0 {
+                res.push(&text[punct_start_seq as usize..str_idx + 1 - tok_len]);
+                punct_start_seq = -1;
             }
+            println!("Continuing computation for {}", tok);
 
             if let Some(apostroph_idx) = tok.find(&"'") {
                 let mut apostroph_idx = apostroph_idx;
@@ -130,6 +137,10 @@ impl VTextTokenizer {
             } else {
                 res.push(tok);
             }
+        }
+
+        if punct_start_seq >= 0 {
+            res.push(&text[punct_start_seq as usize..]);
         }
 
         // remove whitespace tokens
@@ -192,7 +203,6 @@ mod tests {
         let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
         // TODO
         // assert_eq!(tokens, &["N.Y."]);
-
     }
 
     #[test]
@@ -209,11 +219,11 @@ mod tests {
         assert_eq!(tokens, &["11,2", "meters"]);
 
         // repeated punctuation
-        let s = "..";
+        let s = "1 ..";
         let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
-        assert_eq!(tokens, &["About", ".."]);
+        assert_eq!(tokens, &["1", ".."]);
 
-        let s = "...";
+        let s = "I ...";
         let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
         assert_eq!(tokens, &["I", "..."]);
 
