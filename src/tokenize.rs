@@ -89,22 +89,17 @@ impl VTextTokenizer {
         let mut punct_start_seq: i64 = -1;
         let mut punct_last = 'X';
         let mut str_idx: usize = 0;
-        println!("# Processing {}", text);
 
         for (idx, tok) in tokens.enumerate() {
-            // Handle contractions
             let tok_len = tok.len();
-            println!("Starting processing of {}", tok);
             str_idx += tok_len;
             if (tok_len == 1) & (tok != " ") {
                 // Handle punctuation
                 let ch = tok.chars().next().unwrap();
-                println!("{} {}", tok_len, ch);
-                println!("punct_start_seq {}, str_idx {}", punct_start_seq, str_idx);
                 if ch.is_ascii_punctuation() {
                     if ch != punct_last {
                         if punct_start_seq >= 0 {
-                            res.push(&text[punct_start_seq as usize..str_idx + 1 - tok_len]);
+                            res.push(&text[punct_start_seq as usize..str_idx - tok_len]);
                         }
                         punct_start_seq = (str_idx as i64) - (tok_len as i64);
                     }
@@ -113,30 +108,36 @@ impl VTextTokenizer {
                 }
             }
             if punct_start_seq >= 0 {
-                res.push(&text[punct_start_seq as usize..str_idx + 1 - tok_len]);
+                res.push(&text[punct_start_seq as usize..str_idx - tok_len]);
                 punct_start_seq = -1;
+                punct_last = 'X';
             }
-            println!("Continuing computation for {}", tok);
 
-            if let Some(apostroph_idx) = tok.find(&"'") {
-                let mut apostroph_idx = apostroph_idx;
-                if tok.ends_with(&"n't") {
-                    // also include the "n" from "n't"
-                    apostroph_idx = apostroph_idx - 1;
+            if &self.lang == "en" {
+                // Handle English contractions
+                if let Some(apostroph_idx) = tok.find(&"'") {
+                    let mut apostroph_idx = apostroph_idx;
+                    if tok.ends_with(&"n't") {
+                        // also include the "n" from "n't"
+                        apostroph_idx = apostroph_idx - 1;
+                    }
+                    res.push(&tok[..apostroph_idx]);
+                    res.push(&tok[apostroph_idx..]);
+                } else if let Some(apostroph_idx) = tok.find(&"’") {
+                    let mut apostroph_idx = apostroph_idx;
+                    if tok.ends_with(&"n’t") {
+                        // also include the "n" from "n't"
+                        apostroph_idx = apostroph_idx - 1;
+                    }
+                    res.push(&tok[..apostroph_idx]);
+                    res.push(&tok[apostroph_idx..]);
+                } else {
+                    res.push(tok);
                 }
-                res.push(&tok[..apostroph_idx]);
-                res.push(&tok[apostroph_idx..]);
-            } else if let Some(apostroph_idx) = tok.find(&"’") {
-                let mut apostroph_idx = apostroph_idx;
-                if tok.ends_with(&"n’t") {
-                    // also include the "n" from "n't"
-                    apostroph_idx = apostroph_idx - 1;
-                }
-                res.push(&tok[..apostroph_idx]);
-                res.push(&tok[apostroph_idx..]);
             } else {
                 res.push(tok);
             }
+
         }
 
         if punct_start_seq >= 0 {
@@ -226,6 +227,15 @@ mod tests {
         let s = "I ...";
         let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
         assert_eq!(tokens, &["I", "..."]);
+
+        let s = ", o ! o";
+        let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
+        assert_eq!(tokens, &[",", "o", "!", "o"]);
+
+
+        let s = "... ok.";
+        let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
+        assert_eq!(tokens, &["...", "ok", "."]);
 
         // dash separated words
         let s = "porte-manteau";

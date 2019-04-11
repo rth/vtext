@@ -33,43 +33,43 @@ def evaluate_tokenizer(treebank, tokenizer):
         tokens = [str(el) for el in tokenizer(txt)]
         tokens_ref = [el["form"] for el in sentence]
         similarity = tokens_similarity(tokens_ref, tokens)
-        if similarity != 1:
-            print(f"Expected: {tokens_ref}")
-            print(f"Got:      {tokens}")
+        #if similarity != 1:
+        #    print(f"Expected: {tokens_ref}")
+        #    print(f"Got:      {tokens}")
         scores.append(similarity)
     scores = np.mean(scores)
     return scores
 
 
 tb_list = [
-    #    ("English-GUM", "UD_English-GUM/en_gum-ud-train.conllu"),
-    ("English-EWT", "UD_English-EWT/en_ewt-ud-train.conllu"),
-    # ('UD_French-GSD', 'UD_French-GSD/fr_gsd-ud-train.conllu'),
-    # ('Japanese-PUD', 'UD_Japanese-PUD/ja_pud-ud-test.conllu')
+    ("English-GUM", "UD_English-GUM/en_gum-ud-train.conllu", "en"),
+    ("English-EWT", "UD_English-EWT/en_ewt-ud-train.conllu", "en"),
+    ('UD_French-GSD', 'UD_French-GSD/fr_gsd-ud-train.conllu', "fr"),
+    # ('Japanese-PUD', 'UD_Japanese-PUD/ja_pud-ud-test.conllu', "jp")
 ]
 
 
 tok_db = [  # ('whitespace', lambda x: x.split(' ')),
-    #   ("regexp", re.compile(r"\b\w\w+\b").findall),
-    #   ("UnicodeSegment", UnicodeSegmentTokenizer(word_bounds=True).tokenize),
-    ("VTextTokenizer", VTextTokenizer("en").tokenize)
+        ("regexp", lambda lang: re.compile(r"\b\w\w+\b").findall),
+        ("unicode-segmentation", lambda lang: UnicodeSegmentTokenizer(word_bounds=True).tokenize),
+        ("vtext", lambda lang: VTextTokenizer(lang).tokenize)
 ]
 
 if sacremoses is not None:
     tok_db.append(("MosesTokenizer", sacremoses.MosesTokenizer().tokenize))
 
-if spacy is not None and False:
-    nlp = spacy.load("en_core_web_sm", parser=False, entity=False)
-    tok_db.append(("spacy en", nlp.tokenizer))
+if spacy is not None:
+    tok_db.append(("spacy", lambda lang: spacy.load(lang, parser=False, entity=False).tokenizer))
 
 out = []
-for tb_name, tb_path in tb_list:
+for tb_name, tb_path, lang in tb_list:
 
     with (base_dir / tb_path).open("rt") as fh:
         t0 = time()
         tb = conllu.parse(fh.read())
         print(f"Loaded {tb_name} in {time() - t0:.2f}s")
-    for name, tokenizer in tok_db:
+    for name, get_tokenizer in tok_db:
+        tokenizer = get_tokenizer(lang)
         t0 = time()
         res = evaluate_tokenizer(tb, tokenizer)
         print(f"{tb_name} done with {name} in {time() - t0:.2f}s")
