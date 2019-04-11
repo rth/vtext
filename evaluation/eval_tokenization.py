@@ -33,7 +33,7 @@ def evaluate_tokenizer(treebank, tokenizer):
         tokens = [str(el) for el in tokenizer(txt)]
         tokens_ref = [el["form"] for el in sentence]
         similarity = tokens_similarity(tokens_ref, tokens)
-        #if similarity != 1:
+        # if similarity != 1:
         #    print(f"Expected: {tokens_ref}")
         #    print(f"Got:      {tokens}")
         scores.append(similarity)
@@ -44,22 +44,27 @@ def evaluate_tokenizer(treebank, tokenizer):
 tb_list = [
     ("English-GUM", "UD_English-GUM/en_gum-ud-train.conllu", "en"),
     ("English-EWT", "UD_English-EWT/en_ewt-ud-train.conllu", "en"),
-    ('UD_French-GSD', 'UD_French-GSD/fr_gsd-ud-train.conllu', "fr"),
+    ("UD_French-GSD", "UD_French-GSD/fr_gsd-ud-train.conllu", "fr"),
     # ('Japanese-PUD', 'UD_Japanese-PUD/ja_pud-ud-test.conllu', "jp")
 ]
 
 
 tok_db = [  # ('whitespace', lambda x: x.split(' ')),
-        ("regexp", lambda lang: re.compile(r"\b\w\w+\b").findall),
-        ("unicode-segmentation", lambda lang: UnicodeSegmentTokenizer(word_bounds=True).tokenize),
-        ("vtext", lambda lang: VTextTokenizer(lang).tokenize)
+    ("regexp", lambda lang: re.compile(r"\b\w\w+\b").findall),
+    (
+        "unicode-segmentation",
+        lambda lang: UnicodeSegmentTokenizer(word_bounds=True).tokenize,
+    ),
+    ("vtext", lambda lang: VTextTokenizer(lang).tokenize),
 ]
 
 if sacremoses is not None:
     tok_db.append(("MosesTokenizer", sacremoses.MosesTokenizer().tokenize))
 
 if spacy is not None:
-    tok_db.append(("spacy", lambda lang: spacy.load(lang, parser=False, entity=False).tokenizer))
+    tok_db.append(
+        ("spacy", lambda lang: spacy.load(lang, parser=False, entity=False).tokenizer)
+    )
 
 out = []
 for tb_name, tb_path, lang in tb_list:
