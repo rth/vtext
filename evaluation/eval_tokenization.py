@@ -33,18 +33,18 @@ def evaluate_tokenizer(treebank, tokenizer):
         tokens = [str(el) for el in tokenizer(txt)]
         tokens_ref = [el["form"] for el in sentence]
         similarity = tokens_similarity(tokens_ref, tokens)
-        # if similarity != 1:
-        #   print(f"Expected: {tokens_ref}")
-        #   print(f"Got:      {tokens}")
+        if similarity != 1:
+          print(f"Expected: {tokens_ref}")
+          print(f"Got:      {tokens}")
         scores.append(similarity)
     scores = np.mean(scores)
     return scores
 
 
 tb_list = [
-    ("English-GUM", "UD_English-GUM/en_gum-ud-train.conllu", "en"),
+    #("English-GUM", "UD_English-GUM/en_gum-ud-train.conllu", "en"),
     ("English-EWT", "UD_English-EWT/en_ewt-ud-train.conllu", "en"),
-    ("UD_French-Sequoia", "UD_French-Sequoia/fr_sequoia-ud-train.conllu", "fr"),
+    #("UD_French-Sequoia", "UD_French-Sequoia/fr_sequoia-ud-train.conllu", "fr"),
     # ("UD_Russian-GSD", "UD_Russian-GSD/ru_gsd-ud-train.conllu", "ru")
     # ('Japanese-PUD', 'UD_Japanese-PUD/ja_pud-ud-test.conllu', "jp")
 ]

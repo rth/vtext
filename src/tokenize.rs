@@ -155,14 +155,12 @@ impl VTextTokenizer {
                 let tok1 = res[res.len() - 2];
                 let tok2 = res[res.len() - 1];
                 // merge on dashes, /, or @
-                if ((tok1 == "-") | (tok1 == "@") | (tok1 == "/"))
-                    & (tok0 != " ")
-                    & (tok2 != " ")
-                    & (tok0.len() > 0)
-                    & (tok2.len() > 0)
-                {
-                    if tok0.chars().last().unwrap().is_alphanumeric()
-                        & tok2.chars().next().unwrap().is_alphanumeric()
+                if (tok0 != " ") & (tok2 != " ") & (tok0.len() > 0) & (tok2.len() > 0) {
+                    let char0_last = tok0.chars().last().unwrap();
+                    let char2_first = tok0.chars().next().unwrap();
+                    if ((tok1 == "-") | (tok1 == "@") | (tok1 == "/"))
+                        & char0_last.is_alphanumeric()
+                        & char2_first.is_alphanumeric()
                     {
                         res.truncate(res.len() - 3);
                         res.push(&text[str_idx - tok0.len() - tok1.len() - tok2.len()..str_idx]);
