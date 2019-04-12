@@ -125,6 +125,7 @@ impl VTextTokenizer {
                     res.push(&tok[apostroph_idx..]);
                     continue;
                 } else if let Some(apostroph_idx) = tok.find(&"’") {
+                    // TODO: refactor to avoid repetitions
                     let mut apostroph_idx = apostroph_idx;
                     if tok.ends_with(&"n’t") {
                         // also include the "n" from "n't"
@@ -147,6 +148,27 @@ impl VTextTokenizer {
                 }
             }
             res.push(tok);
+
+            if res.len() >= 3 {
+                // Merge some sequences
+                let tok0 = res[res.len() - 3];
+                let tok1 = res[res.len() - 2];
+                let tok2 = res[res.len() - 1];
+                // merge on dashes, /, or @
+                if ((tok1 == "-") | (tok1 == "@") | (tok1 == "/"))
+                    & (tok0 != " ")
+                    & (tok2 != " ")
+                    & (tok0.len() > 0)
+                    & (tok2.len() > 0)
+                {
+                    if tok0.chars().last().unwrap().is_alphanumeric()
+                        & tok2.chars().next().unwrap().is_alphanumeric()
+                    {
+                        res.truncate(res.len() - 3);
+                        res.push(&text[str_idx - tok0.len() - tok1.len() - tok2.len()..str_idx]);
+                    }
+                }
+            }
         }
 
         if punct_start_seq >= 0 {
@@ -257,14 +279,16 @@ mod tests {
         // dash separated words
         let s = "porte-manteau";
         let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
-        // TODO
-        //assert_eq!(tokens, &["porte-manteau"]);
+        assert_eq!(tokens, &["porte-manteau"]);
 
         let s = "name@domain.com";
         let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
-        // TODO
-        // assert_eq!(tokens, &["name@domain.com"]);
-        //
+        assert_eq!(tokens, &["name@domain.com"]);
+
+        let s = "1/2";
+        let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
+        assert_eq!(tokens, &["1/2"]);
+
         let s = "Hello :)";
         let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
         // TODO
