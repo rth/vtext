@@ -123,6 +123,7 @@ impl VTextTokenizer {
                     }
                     res.push(&tok[..apostroph_idx]);
                     res.push(&tok[apostroph_idx..]);
+                    continue;
                 } else if let Some(apostroph_idx) = tok.find(&"’") {
                     let mut apostroph_idx = apostroph_idx;
                     if tok.ends_with(&"n’t") {
@@ -131,12 +132,21 @@ impl VTextTokenizer {
                     }
                     res.push(&tok[..apostroph_idx]);
                     res.push(&tok[apostroph_idx..]);
-                } else {
-                    res.push(tok);
+                    continue;
                 }
-            } else {
-                res.push(tok);
+            } else if &self.lang == "fr" {
+                // Handle English contractions
+                if let Some(apostroph_idx) = tok.find(&"'") {
+                    let apostroph_idx = apostroph_idx;
+                    if apostroph_idx == 1 {
+                        let apostroph_idx = apostroph_idx + "'".len();
+                        res.push(&tok[..apostroph_idx]);
+                        res.push(&tok[apostroph_idx..]);
+                        continue;
+                    }
+                }
             }
+            res.push(tok);
         }
 
         if punct_start_seq >= 0 {
@@ -203,6 +213,15 @@ mod tests {
         let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
         // TODO
         // assert_eq!(tokens, &["N.Y."]);
+    }
+
+    #[test]
+    fn test_vtext_tokenizer_fr() {
+        let tokenizer = VTextTokenizer::new("fr");
+
+        let s = "l'image";
+        let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
+        assert_eq!(tokens, &["l'", "image"]);
     }
 
     #[test]
