@@ -214,83 +214,60 @@ mod tests {
     }
 
     #[test]
+    fn test_vtext_tokenizer_all_lang() {
+        let tokenizer = VTextTokenizer::new("en");
+
+        for (s, tokens_ref) in [
+            // float numbers
+            ("23.2 meters", vec!["23.2", "meters"]),
+            ("11,2 m", vec!["11,2", "m"]),
+            // repeated punctuation
+            ("1 ..", vec!["1", ".."]),
+            ("I ...", vec!["I", "..."]),
+            (", o ! o", vec![",", "o", "!", "o"]),
+            ("... ok.", vec!["...", "ok", "."]),
+            // dash separated words
+            ("porte-manteau", vec!["porte-manteau"]),
+            // emails
+            ("name@domain.com", vec!["name@domain.com"]),
+            ("1/2", vec!["1/2"]),
+            //("and/or", vec!["and", "/", "or"]),
+            // TODO
+            // ("Hello :)", vec!["Hello", ":)"])
+        ]
+        .iter()
+        {
+            let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
+            assert_eq!(&tokens, tokens_ref);
+        }
+    }
+
+    #[test]
     fn test_vtext_tokenizer_en() {
         let tokenizer = VTextTokenizer::new("en");
 
-        let s = "We can't";
-        let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
-        assert_eq!(tokens, &["We", "ca", "n't"]);
-
-        let s = "it's";
-        let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
-        assert_eq!(tokens, &["it", "'s"]);
-
-        let s = "it’s";
-        let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
-        assert_eq!(tokens, &["it", "’s"]);
-
-        let s = "N.Y.";
-        let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
-        // TODO
-        // assert_eq!(tokens, &["N.Y."]);
+        for (s, tokens_ref) in [
+            ("We can't", vec!["We", "ca", "n't"]),
+            ("it's", vec!["it", "'s"]),
+            ("it’s", vec!["it", "’s"]),
+            // TODO
+            //("N.Y.", vec!["N.Y."])
+        ]
+        .iter()
+        {
+            let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
+            assert_eq!(&tokens, tokens_ref);
+        }
     }
 
     #[test]
     fn test_vtext_tokenizer_fr() {
         let tokenizer = VTextTokenizer::new("fr");
 
-        let s = "l'image";
-        let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
-        assert_eq!(tokens, &["l'", "image"]);
-    }
-
-    #[test]
-    fn test_vtext_tokenizer_all_lang() {
-        let tokenizer = VTextTokenizer::new("en");
-
-        // float numbers
-        let s = "23.2 meters";
-        let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
-        assert_eq!(tokens, &["23.2", "meters"]);
-
-        let s = "11,2 meters";
-        let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
-        assert_eq!(tokens, &["11,2", "meters"]);
-
-        // repeated punctuation
-        let s = "1 ..";
-        let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
-        assert_eq!(tokens, &["1", ".."]);
-
-        let s = "I ...";
-        let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
-        assert_eq!(tokens, &["I", "..."]);
-
-        let s = ", o ! o";
-        let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
-        assert_eq!(tokens, &[",", "o", "!", "o"]);
-
-        let s = "... ok.";
-        let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
-        assert_eq!(tokens, &["...", "ok", "."]);
-
-        // dash separated words
-        let s = "porte-manteau";
-        let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
-        assert_eq!(tokens, &["porte-manteau"]);
-
-        let s = "name@domain.com";
-        let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
-        assert_eq!(tokens, &["name@domain.com"]);
-
-        let s = "1/2";
-        let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
-        assert_eq!(tokens, &["1/2"]);
-
-        let s = "Hello :)";
-        let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
-        // TODO
-        //assert_eq!(tokens, &["Hello", ":)"]);
+        for (s, tokens_ref) in [("l'image", vec!["l'", "image"])].iter() {
+            let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
+            assert_eq!(&tokens, tokens_ref);
+        }
     }
 
 }
