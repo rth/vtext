@@ -5,7 +5,7 @@ extern crate vtext;
 use std::fs;
 use std::io::prelude::*;
 use std::time::SystemTime;
-use vtext::{CountVectorizer, HashingVectorizer};
+use vtext::vectorize::{CountVectorizer, HashingVectorizer};
 
 fn main() {
     let _dirs_list = fs::read_dir("./data/").unwrap();
