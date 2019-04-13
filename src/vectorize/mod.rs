@@ -1,3 +1,9 @@
+/*!
+# Vectorization module
+
+This module allows computing a sparse document term matrix from a text corpus.
+*/
+
 use crate::math::CSRArray;
 use crate::tokenize;
 use hashbrown::HashMap;

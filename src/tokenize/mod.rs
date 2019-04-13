@@ -1,3 +1,46 @@
+/*!
+# Tokenization module
+
+This module includes several tokenizers
+
+For instance let's tokenize the following sentence,
+```rust
+use vtext::tokenize::*;
+
+let s = "The “brown” fox can't jump 32.3 feet, right?";
+```
+
+Using a regular expression tokenizer we would get,
+```rust
+# let s = "The “brown” fox can't jump 32.3 feet, right?";
+# use vtext::tokenize::RegexpTokenizer;
+let tokenizer = RegexpTokenizer::new(r"\b\w\w+\b".to_string());
+let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
+assert_eq!(tokens, &["The", "brown", "fox", "can", "jump", "32", "feet", "right"]);
+```
+
+which would remove all punctuation. A more general approach is to apply unicode segmentation,
+```rust
+# let s = "The “brown” fox can't jump 32.3 feet, right?";
+# use vtext::tokenize::UnicodeSegmentTokenizer;
+let tokenizer = UnicodeSegmentTokenizer::new(true);
+let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
+assert_eq!(tokens, &["The", "“", "brown", "”", "fox", "can't", "jump", "32.3", "feet", ",", "right", "?"]);
+```
+Here `UnicodeSegmentTokenizer` object is a thin wrapper around the
+[unicode-segmentation](https://github.com/unicode-rs/unicode-segmentation) crate.
+
+This approach produces better results, however for instance the word "can't" should be tokenized
+as "ca", "n't" in English. To address such issues, we apply several additional rules on the previous results,
+
+```rust
+# let s = "The “brown” fox can't jump 32.3 feet, right?";
+# use vtext::tokenize::VTextTokenizer;
+let tokenizer = VTextTokenizer::new("en");
+let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
+assert_eq!(tokens, &["The", "“", "brown", "”", "fox", "ca", "n't", "jump", "32.3", "feet", ",", "right", "?"]);
+
+*/
 extern crate regex;
 extern crate unicode_segmentation;
 

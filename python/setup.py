@@ -6,7 +6,7 @@ with open("./requirements.txt", "rt") as fh:
     install_requires = fh.read().splitlines()
 
 setup(
-    version="0.1.a1",
+    version="0.1.0a1",
     rust_extensions=[
         RustExtension(
             "vtext._lib",

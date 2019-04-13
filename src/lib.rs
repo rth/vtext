@@ -1,8 +1,6 @@
 /*!
 # vtext
 
-[![CircleCI](https://circleci.com/gh/rth/vtext/tree/master.svg?style=svg)](https://circleci.com/gh/rth/vtext/tree/master)
-
 NLP in Rust with Python bindings
 
 This package aims to provide a high performance toolkit for ingesting textual data for
@@ -19,24 +17,6 @@ The API is currently unstable.
    `HashingVectorizer` in scikit-learn.
  - Feature weighting (*planned*): feature weighting based on document
    frequency (TF-IDF), feature normalization.
-
-## Installation
-
-Add the following to `Cargo.toml`,
-```toml
-[dependencies]
-text-vectorize = {"git" = "https://github.com/rth/vtext"}
-```
-
-## Example
-
-```rust
-
-let documents = vec![
-    String::from("the moon in the sky"),
-    String::from("The sky sky sky is blue"),
-];
-```
 
 */
 
