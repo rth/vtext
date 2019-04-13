@@ -18,7 +18,7 @@ use pyo3::prelude::{pymodinit, ObjectProtocol, Py, PyModule, PyObject, PyResult,
 use pyo3::types::{PyIterator, PyString};
 
 use vtext::tokenize;
-use vtext::{CountVectorizer, HashingVectorizer};
+use vtext::vectorize;
 
 type PyCsrArray = (Py<PyArray1<i32>>, Py<PyArray1<i32>>, Py<PyArray1<i32>>);
 
@@ -53,14 +53,14 @@ fn result_to_csr(py: Python, x: CsMat<i32>) -> PyResult<PyCsrArray> {
 
 #[pyclass]
 pub struct _HashingVectorizerWrapper {
-    inner: HashingVectorizer,
+    inner: vtext::vectorize::HashingVectorizer,
 }
 
 #[pymethods]
 impl _HashingVectorizerWrapper {
     #[new]
     fn __new__(obj: &PyRawObject) -> PyResult<()> {
-        let estimator = HashingVectorizer::new();
+        let estimator = vtext::vectorize::HashingVectorizer::new();
         obj.init(|_token| _HashingVectorizerWrapper { inner: estimator })
     }
 
@@ -77,14 +77,14 @@ impl _HashingVectorizerWrapper {
 
 #[pyclass]
 pub struct _CountVectorizerWrapper {
-    inner: CountVectorizer,
+    inner: vtext::vectorize::CountVectorizer,
 }
 
 #[pymethods]
 impl _CountVectorizerWrapper {
     #[new]
     fn __new__(obj: &PyRawObject) -> PyResult<()> {
-        let estimator = CountVectorizer::new();
+        let estimator = vtext::vectorize::CountVectorizer::new();
         obj.init(|_token| _CountVectorizerWrapper { inner: estimator })
     }
 
