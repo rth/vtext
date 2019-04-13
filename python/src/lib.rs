@@ -167,7 +167,13 @@ impl UnicodeSegmentTokenizer {
 
 /// VText tokenizer
 ///
-/// A tokenization that extends `unicode-segmentation` crate
+/// This tokenizer a few additional rules on top of word boundaries computed
+/// by unicode segmentation.
+///
+/// Additional language specific rules are implemented for English (en),
+/// and French (en). Providing `lang` parameter with any other value, will siletly
+/// fallback to `lang="any"`.
+///
 ///
 /// ## References
 ///

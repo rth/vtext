@@ -63,7 +63,13 @@ impl UnicodeSegmentTokenizer {
 
 /// vtext tokenizer
 ///
-/// This tokenizer builds upon the `unicode-segmentation` crate
+/// This tokenizer a few additional rules on top of word boundaries computed
+/// by unicode segmentation.
+///
+/// Additional language specific rules are implemented for English (en),
+/// and French (en). Providing `lang` parameter with any other value, will siletly
+/// fallback to `lang="any"`.
+///
 ///
 /// ## References
 ///
@@ -76,8 +82,8 @@ pub struct VTextTokenizer {
 impl VTextTokenizer {
     /// Create a new instance
     pub fn new(lang: &str) -> VTextTokenizer {
-        match lang {
-            "en" | "fr" => {}
+        let lang_valid = match lang {
+            "en" | "fr" => lang,
             _ => {
                 // TODO: add some warning message here
                 //println!(
@@ -86,10 +92,11 @@ impl VTextTokenizer {
                 //     language independent tokenizer!",
                 //    lang
                 //);
+                "any"
             }
         };
         VTextTokenizer {
-            lang: lang.to_string(),
+            lang: lang_valid.to_string(),
         }
     }
     /// Tokenize a string
@@ -170,7 +177,6 @@ impl VTextTokenizer {
                 let tok0 = res[res.len() - 3];
                 let tok1 = res[res.len() - 2];
                 let tok2 = res[res.len() - 1];
-                // merge on dashes, /, or @
                 if (tok0 != " ") & (tok2 != " ") & (tok0.len() > 0) & (tok2.len() > 0) {
                     let char0_last = tok0.chars().last().unwrap();
                     let char2_first = tok0.chars().next().unwrap();
@@ -292,6 +298,12 @@ mod tests {
             let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
             assert_eq!(&tokens, tokens_ref);
         }
+    }
+
+    #[test]
+    fn test_vtext_tokenizer_invalid_lang() {
+        let tokenizer = VTextTokenizer::new("unknown");
+        assert_eq!(tokenizer.lang, "any");
     }
 
 }
