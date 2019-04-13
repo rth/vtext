@@ -47,7 +47,7 @@ tb_list = [
     ("en", "EWT"),
     ("fr", "Sequoia"),
     ("de", "GSD"),
-    #("ru", "GSD"),
+    # ("ru", "GSD"),
 ]
 
 
@@ -56,7 +56,7 @@ def whitespace_split(x):
 
 
 tok_db = [
-    #("whitespace", lambda lang: whitespace_split),
+    # ("whitespace", lambda lang: whitespace_split),
     ("regexp", lambda lang: re.compile(r"\b\w\w+\b").findall),
     (
         "unicode-segmentation",

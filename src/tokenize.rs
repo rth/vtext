@@ -76,18 +76,16 @@ pub struct VTextTokenizer {
 impl VTextTokenizer {
     /// Create a new instance
     pub fn new(lang: &str) -> VTextTokenizer {
-
-
         match lang {
-            "en" | "fr" => {},
+            "en" | "fr" => {}
             _ => {
-                    // TODO: add some warning message here
-                    //println!(
-                    //    "Warning: Lokenizer for {} \
-                    //     is not implemented! Falling back to the \
-                    //     language independent tokenizer!",
-                    //    lang
-                    //);
+                // TODO: add some warning message here
+                //println!(
+                //    "Warning: Lokenizer for {} \
+                //     is not implemented! Falling back to the \
+                //     language independent tokenizer!",
+                //    lang
+                //);
             }
         };
         VTextTokenizer {
@@ -163,8 +161,7 @@ impl VTextTokenizer {
                         }
                     }
                 }
-                _ => {
-                }
+                _ => {}
             };
             res.push(tok);
 
