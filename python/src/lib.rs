@@ -171,8 +171,8 @@ impl UnicodeSegmentTokenizer {
 /// by unicode segmentation.
 ///
 /// Additional language specific rules are implemented for English (en),
-/// and French (en). Providing `lang` parameter with any other value, will siletly
-/// fallback to `lang="any"`.
+/// and French (en). Providing `lang` parameter with any other value, will silently
+/// fall back to `lang='any'`.
 ///
 ///
 /// ## References
