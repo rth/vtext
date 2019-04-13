@@ -1,3 +1,4 @@
+import re
 from glob import glob
 from time import time
 from pathlib import Path
@@ -33,9 +34,9 @@ def evaluate_tokenizer(treebank, tokenizer):
         tokens = [str(el) for el in tokenizer(txt)]
         tokens_ref = [el["form"] for el in sentence]
         similarity = tokens_similarity(tokens_ref, tokens)
-        #if similarity != 1:
-        #  print(f"Expected: {tokens_ref}")
-        #  print(f"Got:      {tokens}")
+        # if similarity != 1:
+        #    print(f"Expected: {tokens_ref}")
+        #    print(f"Got:      {tokens}")
         scores.append(similarity)
     scores = np.mean(scores)
     return scores
@@ -46,23 +47,28 @@ tb_list = [
     ("en", "EWT"),
     ("fr", "Sequoia"),
     ("de", "GSD"),
-    ("ru", "GSD"),
+    #("ru", "GSD"),
 ]
 
 
-tok_db = [  # ('whitespace', lambda x: x.split(' ')),
-    # ("regexp", lambda lang: re.compile(r"\b\w\w+\b").findall),
-    # (
-    #    "unicode-segmentation",
-    #    lambda lang: UnicodeSegmentTokenizer(word_bounds=True).tokenize,
-    # ),
-    ("vtext", lambda lang: VTextTokenizer(lang).tokenize)
+def whitespace_split(x):
+    return x.split(" ")
+
+
+tok_db = [
+    #("whitespace", lambda lang: whitespace_split),
+    ("regexp", lambda lang: re.compile(r"\b\w\w+\b").findall),
+    (
+        "unicode-segmentation",
+        lambda lang: UnicodeSegmentTokenizer(word_bounds=True).tokenize,
+    ),
+    ("vtext", lambda lang: VTextTokenizer(lang).tokenize),
 ]
 
 if sacremoses is not None:
     tok_db.append(("MosesTokenizer", lambda lang: sacremoses.MosesTokenizer().tokenize))
 
-if spacy is not None and False:
+if spacy is not None:
     tok_db.append(
         ("spacy", lambda lang: spacy.load(lang, parser=False, entity=False).tokenizer)
     )
@@ -86,5 +92,10 @@ for lang, tb_name in tb_list:
         print(f"{tb_name} done with {name} in {time() - t0:.2f}s")
         out.append({"treebank": tb_name, "lang": lang, "tokenizer": name, "score": res})
 
-out = pd.DataFrame(out).set_index(["lang", "treebank", "tokenizer"]).score.unstack(-1).round(3)
+out = (
+    pd.DataFrame(out)
+    .set_index(["lang", "treebank", "tokenizer"])
+    .score.unstack(-1)
+    .round(3)
+)
 print(out)

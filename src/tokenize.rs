@@ -260,6 +260,8 @@ mod tests {
             ("8:30", vec!["8:30"]),
             ("B&B", vec!["B&B"]),
             // TODO ("Hello :)", vec!["Hello", ":)"])
+            // TODO ("http://www.youtube.com/watch?v=q2lDF0XU3NI",
+            // vec!["http://www.youtube.com/watch?v=q2lDF0XU3NI"])
         ]
         .iter()
         {
