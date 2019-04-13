@@ -1,6 +1,8 @@
 # vtext
 
+![Crates.io](https://img.shields.io/crates/v/vtext.svg)
 [![CircleCI](https://circleci.com/gh/rth/vtext/tree/master.svg?style=svg)](https://circleci.com/gh/rth/vtext/tree/master)
+
 
 NLP in Rust with Python bindings
 
