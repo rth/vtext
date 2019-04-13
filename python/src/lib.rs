@@ -134,6 +134,7 @@ impl _CountVectorizerWrapper {
 #[pyclass]
 pub struct UnicodeSegmentTokenizer {
     pub word_bounds: bool,
+    inner: vtext::tokenize::UnicodeSegmentTokenizer,
 }
 
 #[pymethods]
@@ -141,8 +142,11 @@ impl UnicodeSegmentTokenizer {
     #[new]
     #[args(word_bounds = true)]
     fn __new__(obj: &PyRawObject, word_bounds: bool) -> PyResult<()> {
+        let tokenizer = vtext::tokenize::UnicodeSegmentTokenizer::new(word_bounds);
+
         obj.init(|_token| UnicodeSegmentTokenizer {
             word_bounds: word_bounds,
+            inner: tokenizer,
         })
     }
 
@@ -155,11 +159,9 @@ impl UnicodeSegmentTokenizer {
     /// ## Returns
     ///  - tokens : List<str>
     fn tokenize(&self, py: Python, x: String) -> PyResult<(Vec<String>)> {
-        let tokenizer = vtext::tokenize::UnicodeSegmentTokenizer::new(self.word_bounds);
-
         let x = x.to_string();
 
-        let res = tokenizer.tokenize(&x);
+        let res = self.inner.tokenize(&x);
         let res = res.map(|s| s.to_string()).collect();
         Ok((res))
     }
@@ -181,13 +183,18 @@ impl UnicodeSegmentTokenizer {
 #[pyclass]
 pub struct VTextTokenizer {
     pub lang: String,
+    inner: vtext::tokenize::VTextTokenizer,
 }
 
 #[pymethods]
 impl VTextTokenizer {
     #[new]
     fn __new__(obj: &PyRawObject, lang: String) -> PyResult<()> {
-        obj.init(|_token| VTextTokenizer { lang: lang })
+        let tokenizer = vtext::tokenize::VTextTokenizer::new(&lang);
+        obj.init(|_token| VTextTokenizer {
+            lang: lang,
+            inner: tokenizer,
+        })
     }
 
     /// Tokenize a string
@@ -199,11 +206,9 @@ impl VTextTokenizer {
     /// ## Returns
     ///  - tokens : List<str>
     fn tokenize(&self, py: Python, x: String) -> PyResult<(Vec<String>)> {
-        let tokenizer = vtext::tokenize::VTextTokenizer::new(&self.lang);
-
         let x = x.to_string();
 
-        let res = tokenizer.tokenize(&x);
+        let res = self.inner.tokenize(&x);
         let res = res.map(|s| s.to_string()).collect();
         Ok((res))
     }
