@@ -57,11 +57,9 @@ if __name__ == "__main__":
     if sacremoses is not None:
         db.append(("MosesTokenizer()", sacremoses.MosesTokenizer().tokenize))
     if spacy is not None:
-        nlp = spacy.load("en_core_web_sm", parser=False, entity=False)
-        from spacy.tokenizer import Tokenizer
+        from spacy.lang.en import English
 
-        tokenizer = Tokenizer(nlp.vocab)
-        db.append(("Spacy en", tokenizer))
+        db.append(("Spacy en", English().tokenizer))
 
     for label, func in db:
         t0 = time()

@@ -2,10 +2,10 @@
 
 [![CircleCI](https://circleci.com/gh/rth/vtext/tree/master.svg?style=svg)](https://circleci.com/gh/rth/vtext/tree/master)
 
-Fast NLP in Rust with Python bindings
+NLP in Rust with Python bindings
 
-This package aims to provide a convenient and high performance toolkit for ingesting textual data for
-machine learning applications. Making existing NLP Rust crates accesible in Python with a common API is another goal of this project.
+This package aims to provide a high performance toolkit for ingesting textual data for
+machine learning applications.
 
 The API is currently unstable.
 
@@ -18,8 +18,7 @@ The API is currently unstable.
    in machine learning libraries. Similar to `CountVectorizer` and
    `HashingVectorizer` in scikit-learn.
  - Feature weighting (*planned*): feature weighting based on document
-   frequency (TF-IDF), supervised term weighting (e.g. TF-IGM),
-   feature normalization
+   frequency (TF-IDF), feature normalization.
 
 ## Usage
 
@@ -58,22 +57,35 @@ though only a subset of features will be implemented.
 
 ## Benchmarks
 
+#### Tokenization
+
+Following benchmarks illustrate the tokenization accuracy (F1 score) on [UD treebanks](https://universaldependencies.org/)
+and the English tokenization speed in million words per second (MWPS),
+
+|       |           |regexp    | spacy 2.1 | vtext    |
+|  lang | dataset   |          |           |          |
+|-------|-----------|----------|-----------|----------|
+|  en   | EWT       | 0.812    | 0.972     | 0.966    |
+|  en   | GUM       | 0.881    | 0.989     | 0.996    |
+|  de   | GSD       | 0.896    | 0.944     | 0.964    |
+|  fr   | Sequoia   | 0.844    | 0.968     | 0.971    |
+|-------|-----------|----------|-----------|----------|
+| Speed | 20 news.  | 3.1 MWPS | 0.14 MWPS | 2.1 MWPS |
+
+
 #### Vectorization
 
-Below are some very preliminary benchmarks on the 20 newsgroups dataset of 19924 documents (~91 MB in total),
+Below are preliminary vectorization benchmarks on the 20 newsgroups dataset,
 
-|                   | CountVectorizer      | HashingVectorizer|
-|-------------------|----------------------|------------------|
-| CountVectorizer   | scikit-learn 0.20.1  | 14 MB/s          |
-| CountVectorizer   | vtext 0.1.0-a1       | 33 MB/s          |
-| HashingVectorizer | scikit-learn 0.20.1  | 18 MB/s          |
-| HashingVectorizer | vtext 0.1.0-a1       | 68 MB/s          |
+|                     | scikit-learn 0.20.1  | vtext 0.1.0a1    |
+|---------------------|----------------------|------------------|
+| CountVectorizer     |  14 MB/s             | 35 MB/s          |
+| HashingVectorizer   |  19 MB/s             | 68 MB/s          |
+
 
 see [benchmarks/README.md](./benchmarks/README.md) for more details.
-Note that these are not strictly equivalent, and are meant as a
-rough estimate for the possible performance improvements.
 
 
 ## License
 
-text-vectorize is released under the BSD 3-clause license.
+vtext is released under the BSD 3-clause license.

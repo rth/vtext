@@ -24,7 +24,12 @@ base_dir = base_dir / "ud-treebanks-v2.3/"
 
 
 def tokens_similarity(tokens_ref, tokens):
-    return len([tok for tok in tokens if tok in tokens_ref]) / len(tokens_ref)
+    recall = len([tok for tok in tokens if tok in tokens_ref]) / len(tokens_ref)
+    precision = len([tok for tok in tokens_ref if tok in tokens]) / max(len(tokens), 1)
+    if precision + recall == 0:
+        return 0.0
+    else:
+        return 2 * (precision * recall) / (precision + recall)
 
 
 def evaluate_tokenizer(treebank, tokenizer):
@@ -69,9 +74,19 @@ if sacremoses is not None:
     tok_db.append(("MosesTokenizer", lambda lang: sacremoses.MosesTokenizer().tokenize))
 
 if spacy is not None:
-    tok_db.append(
-        ("spacy", lambda lang: spacy.load(lang, parser=False, entity=False).tokenizer)
-    )
+
+    def spacy_tokenizer(lang):
+        if lang == "en":
+            from spacy.lang.en import English as Nlp
+        elif lang == "de":
+            from spacy.lang.de import German as Nlp
+        elif lang == "fr":
+            from spacy.lang.fr import French as Nlp
+        else:
+            raise ValueError
+        return Nlp().tokenizer
+
+    tok_db.append(("spacy", spacy_tokenizer))
 
 out = []
 for lang, tb_name in tb_list:
