@@ -1,8 +1,23 @@
 [package]
 name = "vtext"
 version = "0.1.0-alpha.1"
+description = "NLP in Rust"
+license = "BSD-3-Clause"
+license_file = "LICENSE"
+documentation = "https://docs.rs/vtext/"
+repository = "https://github.com/rth/vtext"
 authors = ["Roman Yurchak <rth.yurchak@pm.me>"]
 edition = "2018"
+exclude = [
+    "python/*",
+    "benchmarks/*",
+    "evaluation/*",
+    "ud-treebanks-*",
+    "data/*",
+    "*.tgz",
+    "*.zip",
+    "sandbox/*"
+]
 
 [profile.release]
 opt-level = 3
