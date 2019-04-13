@@ -76,6 +76,20 @@ pub struct VTextTokenizer {
 impl VTextTokenizer {
     /// Create a new instance
     pub fn new(lang: &str) -> VTextTokenizer {
+
+
+        match lang {
+            "en" | "fr" => {},
+            _ => {
+                    // TODO: add some warning message here
+                    //println!(
+                    //    "Warning: Lokenizer for {} \
+                    //     is not implemented! Falling back to the \
+                    //     language independent tokenizer!",
+                    //    lang
+                    //);
+            }
+        };
         VTextTokenizer {
             lang: lang.to_string(),
         }
@@ -113,40 +127,45 @@ impl VTextTokenizer {
                 punct_last = 'X';
             }
 
-            if &self.lang == "en" {
-                // Handle English contractions
-                if let Some(apostroph_idx) = tok.find(&"'") {
-                    let mut apostroph_idx = apostroph_idx;
-                    if tok.ends_with(&"n't") {
-                        // also include the "n" from "n't"
-                        apostroph_idx = apostroph_idx - 1;
-                    }
-                    res.push(&tok[..apostroph_idx]);
-                    res.push(&tok[apostroph_idx..]);
-                    continue;
-                } else if let Some(apostroph_idx) = tok.find(&"’") {
-                    // TODO: refactor to avoid repetitions
-                    let mut apostroph_idx = apostroph_idx;
-                    if tok.ends_with(&"n’t") {
-                        // also include the "n" from "n't"
-                        apostroph_idx = apostroph_idx - 1;
-                    }
-                    res.push(&tok[..apostroph_idx]);
-                    res.push(&tok[apostroph_idx..]);
-                    continue;
-                }
-            } else if &self.lang == "fr" {
-                // Handle English contractions
-                if let Some(apostroph_idx) = tok.find(&"'") {
-                    let apostroph_idx = apostroph_idx;
-                    if apostroph_idx == 1 {
-                        let apostroph_idx = apostroph_idx + "'".len();
+            match self.lang.as_ref() {
+                "en" => {
+                    // Handle contractions
+                    if let Some(apostroph_idx) = tok.find(&"'") {
+                        let mut apostroph_idx = apostroph_idx;
+                        if tok.ends_with(&"n't") {
+                            // also include the "n" from "n't"
+                            apostroph_idx = apostroph_idx - 1;
+                        }
+                        res.push(&tok[..apostroph_idx]);
+                        res.push(&tok[apostroph_idx..]);
+                        continue;
+                    } else if let Some(apostroph_idx) = tok.find(&"’") {
+                        // TODO: refactor to avoid repetitions
+                        let mut apostroph_idx = apostroph_idx;
+                        if tok.ends_with(&"n’t") {
+                            // also include the "n" from "n't"
+                            apostroph_idx = apostroph_idx - 1;
+                        }
                         res.push(&tok[..apostroph_idx]);
                         res.push(&tok[apostroph_idx..]);
                         continue;
                     }
                 }
-            }
+                "fr" => {
+                    // Handle English contractions
+                    if let Some(apostroph_idx) = tok.find(&"'") {
+                        let apostroph_idx = apostroph_idx;
+                        if apostroph_idx == 1 {
+                            let apostroph_idx = apostroph_idx + "'".len();
+                            res.push(&tok[..apostroph_idx]);
+                            res.push(&tok[apostroph_idx..]);
+                            continue;
+                        }
+                    }
+                }
+                _ => {
+                }
+            };
             res.push(tok);
 
             if res.len() >= 3 {
@@ -158,10 +177,14 @@ impl VTextTokenizer {
                 if (tok0 != " ") & (tok2 != " ") & (tok0.len() > 0) & (tok2.len() > 0) {
                     let char0_last = tok0.chars().last().unwrap();
                     let char2_first = tok0.chars().next().unwrap();
-                    if ((tok1 == "-") | (tok1 == "@") | (tok1 == "/"))
+                    let f1 = ((tok1 == "-") | (tok1 == "@") | (tok1 == "&"))
                         & char0_last.is_alphanumeric()
-                        & char2_first.is_alphanumeric()
-                    {
+                        & char2_first.is_alphanumeric();
+                    let f2 = ((tok1 == "/") | (tok1 == ":"))
+                        & char0_last.is_numeric()
+                        & char2_first.is_numeric();
+
+                    if f1 | f2 {
                         res.truncate(res.len() - 3);
                         res.push(&text[str_idx - tok0.len() - tok1.len() - tok2.len()..str_idx]);
                     }
@@ -230,10 +253,13 @@ mod tests {
             ("porte-manteau", vec!["porte-manteau"]),
             // emails
             ("name@domain.com", vec!["name@domain.com"]),
+            // fractions
             ("1/2", vec!["1/2"]),
-            //("and/or", vec!["and", "/", "or"]),
-            // TODO
-            // ("Hello :)", vec!["Hello", ":)"])
+            ("and/or", vec!["and", "/", "or"]),
+            // time
+            ("8:30", vec!["8:30"]),
+            ("B&B", vec!["B&B"]),
+            // TODO ("Hello :)", vec!["Hello", ":)"])
         ]
         .iter()
         {
@@ -250,8 +276,7 @@ mod tests {
             ("We can't", vec!["We", "ca", "n't"]),
             ("it's", vec!["it", "'s"]),
             ("it’s", vec!["it", "’s"]),
-            // TODO
-            //("N.Y.", vec!["N.Y."])
+            // TODO ("N.Y.", vec!["N.Y."])
         ]
         .iter()
         {

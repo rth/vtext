@@ -1,8 +1,8 @@
-import re
-import conllu
+from glob import glob
 from time import time
 from pathlib import Path
 
+import conllu
 import pandas as pd
 import numpy as np
 
@@ -33,20 +33,20 @@ def evaluate_tokenizer(treebank, tokenizer):
         tokens = [str(el) for el in tokenizer(txt)]
         tokens_ref = [el["form"] for el in sentence]
         similarity = tokens_similarity(tokens_ref, tokens)
-        if similarity != 1:
-          print(f"Expected: {tokens_ref}")
-          print(f"Got:      {tokens}")
+        #if similarity != 1:
+        #  print(f"Expected: {tokens_ref}")
+        #  print(f"Got:      {tokens}")
         scores.append(similarity)
     scores = np.mean(scores)
     return scores
 
 
 tb_list = [
-    #("English-GUM", "UD_English-GUM/en_gum-ud-train.conllu", "en"),
-    ("English-EWT", "UD_English-EWT/en_ewt-ud-train.conllu", "en"),
-    #("UD_French-Sequoia", "UD_French-Sequoia/fr_sequoia-ud-train.conllu", "fr"),
-    # ("UD_Russian-GSD", "UD_Russian-GSD/ru_gsd-ud-train.conllu", "ru")
-    # ('Japanese-PUD', 'UD_Japanese-PUD/ja_pud-ud-test.conllu', "jp")
+    ("en", "GUM"),
+    ("en", "EWT"),
+    ("fr", "Sequoia"),
+    ("de", "GSD"),
+    ("ru", "GSD"),
 ]
 
 
@@ -68,7 +68,12 @@ if spacy is not None and False:
     )
 
 out = []
-for tb_name, tb_path, lang in tb_list:
+for lang, tb_name in tb_list:
+    tb_pattern = base_dir / "*" / f"{lang}_{tb_name.lower()}-ud-test.conllu"
+    tb_path = list(glob(str(tb_pattern)))
+    if len(tb_path) != 1:
+        raise ValueError(tb_path)
+    tb_path = tb_path[0]
 
     with (base_dir / tb_path).open("rt") as fh:
         t0 = time()
@@ -79,7 +84,7 @@ for tb_name, tb_path, lang in tb_list:
         t0 = time()
         res = evaluate_tokenizer(tb, tokenizer)
         print(f"{tb_name} done with {name} in {time() - t0:.2f}s")
-        out.append({"treebank": tb_name, "tokenizer": name, "score": res})
+        out.append({"treebank": tb_name, "lang": lang, "tokenizer": name, "score": res})
 
-out = pd.DataFrame(out).set_index(["tokenizer", "treebank"]).score.unstack().T.round(3)
+out = pd.DataFrame(out).set_index(["lang", "treebank", "tokenizer"]).score.unstack(-1).round(3)
 print(out)
