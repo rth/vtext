@@ -29,24 +29,20 @@ The API is currently unstable.
 Add the following to `Cargo.toml`,
 ```toml
 [dependencies]
-text-vectorize = {"git" = "https://github.com/rth/vtext"}
+text-vectorize = "0.1.0-alpha.1"
 ``` 
-A simple example can be found below,
+A simple tokenization example can be found below,
 ```rust
 extern crate vtext;
 
-use vtext::CountVectorizer;
+use vtext::tokenize.VTextTokenizer;
 
-let documents = vec![
-    String::from("Some text input"),
-    String::from("Another line"),
-];
-
-let mut vect = CountVectorizer::new();
-let X = vect.fit_transform(&documents);
+let tok = VTextTokenizer("en");
+let tokens = tok.tokenize("Flights after 2:00 pm can't depart today, and tomorrow.");
+// returns &["Flights", "after", "2:00", "pm", "ca", "n't",
+//           "depart", "today", ",", "and", "tomorrow", "."]
 ```
-where `X` is a `CSRArray` struct with the following attributes
-`X.indptr`, `X.indices`, `X.values`.
+For more details see rust documentation: [docs.rs/vtext](https://docs.rs/vtext)
 
 ### Usage in Python
 
