@@ -35,12 +35,12 @@ A simple tokenization example can be found below,
 ```rust
 extern crate vtext;
 
-use vtext::tokenize.VTextTokenizer;
+use vtext::tokenize::VTextTokenizer;
 
 let tok = VTextTokenizer("en");
-let tokens = tok.tokenize("Flights after 2:00 pm can't depart today, and tomorrow.");
+let tokens = tok.tokenize("Flights after 2:00 pm can't depart (today and tomorrow).");
 // returns &["Flights", "after", "2:00", "pm", "ca", "n't",
-//           "depart", "today", ",", "and", "tomorrow", "."]
+//           "depart", "(", "today", "and", "tomorrow", ")", "."]
 ```
 For more details see rust documentation: [docs.rs/vtext](https://docs.rs/vtext)
 
