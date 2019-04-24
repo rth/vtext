@@ -57,7 +57,7 @@ jobs:
           command: |
             cd python
             python3.7 -m pip install awscli
-            aws s3 cp dist/*manylinux*.whl s3://vtext/dist/
+            aws s3 sync --exclude="*" --include="*manylinux*" dist/ s3://vtext/dist/
       - store_artifacts:
           path: /root/repo/python/dist/
 
