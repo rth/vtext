@@ -19,6 +19,11 @@ try:
 except ImportError:
     spacy = None
 
+try:
+    import blingfire
+except ImportError:
+    blingfire = None
+
 base_dir = Path(__file__).parent.parent
 base_dir = base_dir / "ud-treebanks-v2.3/"
 
@@ -88,15 +93,22 @@ if spacy is not None:
 
     tok_db.append(("spacy", spacy_tokenizer))
 
+if blingfire is not None:
+
+    def bling_tokenkizer(lang):
+        return lambda x: blingfire.text_to_words(x).split(' ')
+
+    tok_db.append(('blingfire', bling_tokenkizer))
+
 out = []
 for lang, tb_name in tb_list:
     tb_pattern = base_dir / "*" / f"{lang}_{tb_name.lower()}-ud-test.conllu"
     tb_path = list(glob(str(tb_pattern)))
     if len(tb_path) != 1:
         raise ValueError(tb_path)
-    tb_path = tb_path[0]
+    tb_path = Path(tb_path[0])
 
-    with (base_dir / tb_path).open("rt") as fh:
+    with tb_path.open("rt") as fh:
         t0 = time()
         tb = conllu.parse(fh.read())
         print(f"Loaded {tb_name} in {time() - t0:.2f}s")

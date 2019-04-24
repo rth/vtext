@@ -17,6 +17,11 @@ try:
 except ImportError:
     spacy = None
 
+try:
+    import blingfire
+except ImportError:
+    blingfire = None
+
 
 base_dir = Path(__file__).parent.parent.resolve()
 
@@ -60,6 +65,9 @@ if __name__ == "__main__":
         from spacy.lang.en import English
 
         db.append(("Spacy en", English().tokenizer))
+
+    if blingfire is not None:
+        db.append(('BlingFire en', lambda x: blingfire.text_to_words(x).split(' ')))
 
     for label, func in db:
         t0 = time()
