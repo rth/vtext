@@ -106,7 +106,7 @@ workflows:
       - rust-stable
       - python
       - lint
-      - upload-wheels
+      - upload-wheels:
           requires:
             - python
             - lint
