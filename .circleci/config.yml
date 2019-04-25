@@ -47,19 +47,34 @@ jobs:
             for PYBIN in python3.{5,6,7}; do
                 "$PYBIN" -m pip install -r requirements.txt
                 "$PYBIN" -m pip install wheel==0.31.1 auditwheel==2.0.0
+                "$PYBIN" setup.py clean
                 "$PYBIN" setup.py bdist_wheel
             done
             for whl in dist/*.whl; do
                 auditwheel repair "$whl" -w dist/
             done
+            rm dist/*-linux-*
+      - persist_to_workspace:
+          root: .
+          paths:
+            - ./python/dist/
+      - store_artifacts:
+          path: /root/repo/python/dist/
+
+
+  upload-wheels:
+    working_directory: ~/repo
+    docker:
+      - image: konstin2/pyo3-pack:0.5.0
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
       - run:
           name: upload-wheels
           command: |
-            cd python
             python3.7 -m pip install awscli
-            aws s3 sync --exclude="*" --include="*manylinux*" dist/ s3://vtext/dist/
-      - store_artifacts:
-          path: /root/repo/python/dist/
+            aws s3 sync --exclude="*" --include="*manylinux*" python/dist/ s3://vtext/dist/
 
   lint:
     working_directory: ~/repo
