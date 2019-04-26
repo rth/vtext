@@ -27,6 +27,9 @@ jobs:
     - script: |
         ci/azure/test_python.sh
       displayName: 'Test python'
+    - script: |
+        ci/azure/upload_wheels.sh
+      displayName: 'Upload wheels'
     - task: PublishTestResults@2
       inputs:
         testResultsFiles: '$(TEST_DIR)/$(JUNITXML)'
