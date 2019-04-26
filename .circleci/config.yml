@@ -43,6 +43,7 @@ jobs:
                 "$PYBIN" setup.py install
                 cd /tmp/
                 "$PYBIN" -m pytest --pyargs vtext
+                cd -
             done
       - run:
           name: build-wheels
