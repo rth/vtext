@@ -39,7 +39,7 @@ jobs:
           command: |
             cd python
             for PYBIN in python3.{5,6,7}; do
-                "$PYBIN" -m pip install -r requirements.txt
+                "$PYBIN" -m pip install -r requirements.txt pytest
                 "$PYBIN" setup.py install
                 cd /tmp/
                 "$PYBIN" -m pytest --pyargs vtext
