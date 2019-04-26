@@ -116,3 +116,6 @@ workflows:
             - python
             - lint
             - rust-stable
+          filters:
+            branches:
+              only: master

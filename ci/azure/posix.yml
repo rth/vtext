@@ -11,6 +11,7 @@ jobs:
     TEST_DIR: '$(Agent.WorkFolder)/tmp_folder'
     VIRTUALENV: 'testvenv'
     JUNITXML: 'test-data.xml'
+    - group: AWS_CREDENTIALS
   strategy:
     matrix:
       ${{ insert }}: ${{ parameters.matrix }}
