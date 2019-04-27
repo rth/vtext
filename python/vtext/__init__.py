@@ -1,10 +1,8 @@
 from . import _lib  # noqa
-from .base import HashingVectorizer
-from .base import CountVectorizer
-from . import tokenize  # noqa
-from . import stem  # noqa
+from . import stem
+from . import tokenize
+from . import vectorize
 
 __version__ = "0.1.0a1"
 
-
-__all__ = ["CountVectorizer", "HashingVectorizer"]
+__all__ = ["stem", "tokenize", "vectorize"]

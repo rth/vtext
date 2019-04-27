@@ -126,11 +126,12 @@ impl _CountVectorizerWrapper {
 /// Unicode Segmentation tokenizer
 ///
 /// This implementation is a thin wrapper around the
-/// `unicode-segmentation` crate
+/// `unicode-segmentation <https://github.com/unicode-rs/unicode-segmentation>`_
+/// crate.
 ///
-/// ## References
-///
-/// * [Unicode® Standard Annex #29](http://www.unicode.org/reports/tr29/)
+/// References
+/// ----------
+/// - `Unicode® Standard Annex #29 <http://www.unicode.org/reports/tr29/>`_
 #[pyclass]
 pub struct UnicodeSegmentTokenizer {
     pub word_bounds: bool,
@@ -152,12 +153,15 @@ impl UnicodeSegmentTokenizer {
 
     /// Tokenize a string
     ///
-    /// ## Parameters
-    ///  - x : bool
-    ///    the string to tokenize
+    /// Parameters
+    /// ----------
+    /// x : bool
+    ///   the string to tokenize
     ///
-    /// ## Returns
-    ///  - tokens : List<str>
+    /// Returns
+    /// -------
+    /// tokens : List[str]
+    ///    computed tokens
     fn tokenize(&self, py: Python, x: String) -> PyResult<(Vec<String>)> {
         let x = x.to_string();
 
@@ -174,12 +178,13 @@ impl UnicodeSegmentTokenizer {
 ///
 /// Additional language specific rules are implemented for English (en),
 /// and French (en). Providing `lang` parameter with any other value, will silently
-/// fall back to `lang='any'`.
+/// fall back to ``lang='any'``.
 ///
 ///
-/// ## References
+/// References
+/// ----------
 ///
-/// * [Unicode® Standard Annex #29](http://www.unicode.org/reports/tr29/)
+/// - `Unicode® Standard Annex #29 <http://www.unicode.org/reports/tr29/>`_
 #[pyclass]
 pub struct VTextTokenizer {
     pub lang: String,
@@ -199,12 +204,15 @@ impl VTextTokenizer {
 
     /// Tokenize a string
     ///
-    /// ## Parameters
-    ///  - x : bool
+    /// Parameters
+    /// ----------
+    /// x : bool
     ///    the string to tokenize
     ///
-    /// ## Returns
-    ///  - tokens : List<str>
+    /// Returns
+    /// -------
+    /// tokens : List[str]
+    ///    computed tokens
     fn tokenize(&self, py: Python, x: String) -> PyResult<(Vec<String>)> {
         let x = x.to_string();
 
@@ -236,12 +244,15 @@ impl RegexpTokenizer {
 
     /// Tokenize a string
     ///
-    /// ## Parameters
-    ///  - x : bool
+    /// Parameters
+    /// ----------
+    /// x : bool
     ///    the string to tokenize
     ///
-    /// ## Returns
-    ///  - tokens : List<str>
+    /// Returns
+    /// -------
+    /// tokens : List[str]
+    ///    computed tokens
     fn tokenize(&self, py: Python, x: String) -> PyResult<(Vec<String>)> {
         // TODO: reduce the number of copies here
         let res = self.inner.tokenize(&x);
@@ -253,7 +264,7 @@ impl RegexpTokenizer {
 /// Snowball stemmer
 ///
 /// Wraps the rust-stemmers crate that uses an implementation generated
-/// by the [Snowball compiler](https://github.com/snowballstem/snowball)
+/// by the `Snowball compiler <https://github.com/snowballstem/snowball>`_
 /// for Rust.
 #[pyclass]
 pub struct SnowballStemmer {
@@ -299,13 +310,13 @@ impl SnowballStemmer {
 
     /// Stem a string
     ///
-    /// ## Parameters
-    ///
+    /// Parameters
+    /// ----------
     /// word : str
     ///    the string to tokenize
     ///
-    /// ## Returns
-    ///
+    /// Returns
+    /// -------
     /// word_stemmed : str
     ///      stemmed word
     fn stem(&self, py: Python, word: &str) -> PyResult<(String)> {
