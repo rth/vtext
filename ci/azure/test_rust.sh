@@ -2,4 +2,4 @@
 
 source $HOME/.cargo/env
 
-cargo test
+cargo test --release

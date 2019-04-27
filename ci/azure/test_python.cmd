@@ -1,9 +1,6 @@
 @echo on
 
-@rem Only 64 bit uses conda
-IF "%PYTHON_ARCH%"=="64" (
-    call activate %VIRTUALENV%
-)
+call activate %VIRTUALENV%
 
 mkdir %TMP_FOLDER%
 cd %TMP_FOLDER%

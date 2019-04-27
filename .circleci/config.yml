@@ -6,13 +6,12 @@ jobs:
     docker:
       - image: rust:1.31.0-slim-stretch
     steps:
-      - checkout
       - run:
           name: dependencies
           command: |
             apt-get update
-            apt-get install -y build-essential
-
+            apt-get install -y build-essential git
+      - checkout
       - run:
           name: build
           command: |
@@ -36,24 +35,50 @@ jobs:
             rustup default nightly-2019-02-28
             rustup target add x86_64-unknown-linux-musl
       - run:
-          name: test
-          command: |
-            cd python
-            tox
-      - run:
           name: build-wheels
           command: |
             cd python
             for PYBIN in python3.{5,6,7}; do
                 "$PYBIN" -m pip install -r requirements.txt
-                "$PYBIN" -m pip install wheel==0.31.1 auditwheel==2.0.0
+                "$PYBIN" -m pip install wheel==0.31.1 auditwheel==2.0.0 pytest
                 "$PYBIN" setup.py bdist_wheel
             done
             for whl in dist/*.whl; do
                 auditwheel repair "$whl" -w dist/
             done
+            rm dist/*-linux_*
+      - run:
+          name: test
+          command: |
+            cd python
+            for PYBIN in python3.{5,6,7}; do
+                "$PYBIN" -m pip uninstall -y vtextpy
+                cd /tmp/
+                "$PYBIN" -m pip install --pre --no-index --find-links /root/repo/python/dist/ vtextpy
+                "$PYBIN" -m pytest --pyargs vtext
+                cd -
+            done
+      - persist_to_workspace:
+          root: .
+          paths:
+            - ./python/dist/
       - store_artifacts:
           path: /root/repo/python/dist/
+
+
+  upload-wheels:
+    working_directory: ~/repo
+    docker:
+      - image: konstin2/pyo3-pack:0.5.0
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          name: upload-wheels
+          command: |
+            python3.7 -m pip install awscli
+            aws s3 sync --exclude="*" --include="*manylinux*" python/dist/ s3://vtext/dist/
 
   lint:
     working_directory: ~/repo
@@ -85,3 +110,11 @@ workflows:
       - rust-stable
       - python
       - lint
+      - upload-wheels:
+          requires:
+            - python
+            - lint
+            - rust-stable
+          filters:
+            branches:
+              only: master
