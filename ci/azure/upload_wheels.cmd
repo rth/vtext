@@ -1,6 +1,6 @@
 @echo on
 
-call activate $VIRTUALENV
+call activate %VIRTUALENV%
 
 pip install awscli
 
