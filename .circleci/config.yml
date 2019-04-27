@@ -144,3 +144,6 @@ workflows:
           filters:
             branches:
               only: master
+      - docs:
+          requires:
+            - python
