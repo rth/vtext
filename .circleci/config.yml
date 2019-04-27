@@ -91,7 +91,9 @@ jobs:
       - run:
           name: dependencies
           command: |
-            pip install -r python/requirements.txt -r doc/requirements-doc.txt awscli
+            pip install -r python/requirements.txt
+            pip install -r doc/requirements-doc.txt
+            pip install awscli
             pip install --pre --no-index --find-links python/dist/ vtextpy
       - run:
           name: html docs
