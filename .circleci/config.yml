@@ -41,7 +41,6 @@ jobs:
             for PYBIN in python3.{5,6,7}; do
                 "$PYBIN" -m pip install -r requirements.txt
                 "$PYBIN" -m pip install wheel==0.31.1 auditwheel==2.0.0 pytest
-                "$PYBIN" setup.py clean
                 "$PYBIN" setup.py bdist_wheel
             done
             for whl in dist/*.whl; do
@@ -53,6 +52,7 @@ jobs:
           command: |
             cd python
             for PYBIN in python3.{5,6,7}; do
+                "$PYBIN" -m pip uninstall -y vtext
                 "$PYBIN" -m pip install --pre --no-index --find-links dist/ vtextpy
                 cd /tmp/
                 "$PYBIN" -m pytest --pyargs vtext
