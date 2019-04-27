@@ -52,9 +52,9 @@ jobs:
           command: |
             cd python
             for PYBIN in python3.{5,6,7}; do
-                "$PYBIN" -m pip uninstall -y vtext
-                "$PYBIN" -m pip install --pre --no-index --find-links dist/ vtextpy
+                "$PYBIN" -m pip uninstall -y vtextpy
                 cd /tmp/
+                "$PYBIN" -m pip install --pre --no-index --find-links /root/repo/python/dist/ vtextpy
                 "$PYBIN" -m pytest --pyargs vtext
                 cd -
             done
