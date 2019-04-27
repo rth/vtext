@@ -34,6 +34,9 @@ jobs:
     - script: |
         ci/azure/upload_wheels.sh
       displayName: 'Upload wheels'
+      env:
+         AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+         AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
     - task: PublishTestResults@2
       inputs:
         testResultsFiles: '$(TEST_DIR)/$(JUNITXML)'
