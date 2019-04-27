@@ -91,6 +91,8 @@ jobs:
       - run:
           name: dependencies
           command: |
+            python -m venv venv
+            source venv/bin/activate
             pip install -r python/requirements.txt
             pip install -r doc/requirements-doc.txt
             pip install awscli
@@ -98,11 +100,13 @@ jobs:
       - run:
           name: html docs
           command: |
+            source venv/bin/activate
             cd doc/
             make html
       - run:
           name: upload docs
           command: |
+            source venv/bin/activate
             aws s3 sync --delete doc/_build/html/ s3://vtext/doc/latest/
       - store_artifacts:
           path: /root/repo/doc/_build/html/
