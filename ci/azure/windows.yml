@@ -23,7 +23,6 @@ jobs:
   steps:
     - powershell: Write-Host "##vso[task.prependpath]$env:CONDA\Scripts"
       displayName: Add conda to PATH for 64 bit Python
-      condition: eq(variables['PYTHON_ARCH'], '64')
     - script: |
         ci\\azure\\install.cmd
       displayName: 'Install'
