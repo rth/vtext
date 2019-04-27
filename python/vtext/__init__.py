@@ -5,4 +5,4 @@ from . import vectorize
 
 __version__ = "0.1.0a1"
 
-__all__ = ['stem', 'tokenize', 'vectorize']
+__all__ = ["stem", "tokenize", "vectorize"]
