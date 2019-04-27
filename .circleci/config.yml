@@ -106,8 +106,11 @@ jobs:
       - run:
           name: upload docs
           command: |
-            source venv/bin/activate
-            aws s3 sync --delete doc/_build/html/ s3://vtext/doc/latest/
+            if [ "$CIRCLE_BRANCH" = "master" ]
+            then
+                source venv/bin/activate
+                aws s3 sync --delete doc/_build/html/ s3://vtext/doc/latest/
+            fi
       - store_artifacts:
           path: /root/repo/doc/_build/html/
 

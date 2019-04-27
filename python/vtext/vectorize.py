@@ -58,22 +58,6 @@ class HashingVectorizer(BaseEstimator):
 
     Parameters
     ----------
-
-    input : string {'filename', 'file', 'content'}
-        If 'filename', the sequence passed as an argument to fit is
-        expected to be a list of filenames that need reading to fetch
-        the raw content to analyze.
-
-        If 'file', the sequence items must have a 'read' method (file-like
-        object) that is called to fetch the bytes in memory.
-
-        Otherwise the input is expected to be the sequence strings or
-        bytes items are expected to be analyzed directly.
-
-    encoding : string, default='utf-8'
-        If bytes or files are given to analyze, this encoding is used to
-        decode.
-
     decode_error : {'strict', 'ignore', 'replace'}
         Instruction on what to do if a byte sequence is given to analyze that
         contains characters not of the given `encoding`. By default, it is
@@ -141,9 +125,6 @@ class HashingVectorizer(BaseEstimator):
         probabilistic models that model binary events rather than integer
         counts.
 
-    norm : 'l1', 'l2' or None, optional
-        Norm used to normalize term vectors. None for no normalization.
-
     alternate_sign : boolean, optional, default True
         When True, an alternating sign is added to the features as to
         approximately conserve the inner product in the hashed space even for
@@ -156,7 +137,7 @@ class HashingVectorizer(BaseEstimator):
 
     Examples
     --------
-    >>> from vtext import HashingVectorizer
+    >>> from vtext.vectorize import HashingVectorizer
     >>> corpus = [
     ...     'This is the first document.',
     ...     'This document is the second document.',
@@ -172,10 +153,6 @@ class HashingVectorizer(BaseEstimator):
 
     def __init__(
         self,
-        input="content",
-        encoding="utf-8",
-        decode_error="strict",
-        strip_accents=None,
         lowercase=True,
         preprocessor=None,
         tokenizer=None,
@@ -189,10 +166,6 @@ class HashingVectorizer(BaseEstimator):
         alternate_sign=False,
         dtype=np.float64,
     ):
-        self.input = input
-        self.encoding = encoding
-        self.decode_error = decode_error
-        self.strip_accents = strip_accents
         self.preprocessor = preprocessor
         self.tokenizer = tokenizer
         self.analyzer = analyzer
@@ -202,7 +175,6 @@ class HashingVectorizer(BaseEstimator):
         self.n_features = n_features
         self.ngram_range = ngram_range
         self.binary = binary
-        self.norm = norm
         self.alternate_sign = alternate_sign
         self.dtype = dtype
 
@@ -220,19 +192,11 @@ class HashingVectorizer(BaseEstimator):
         return self
 
     def _validate_params(self):
-        if self.norm is not None:
-            raise NotImplementedError
 
         if self.analyzer != "word":
             raise NotImplementedError
 
         if self.stop_words is not None:
-            raise NotImplementedError
-
-        if self.input != "content":
-            raise NotImplementedError
-
-        if self.encoding != "utf-8":
             raise NotImplementedError
 
     def fit(self, X, y=None):
@@ -314,38 +278,6 @@ class CountVectorizer(BaseEstimator):
 
     Parameters
     ----------
-    input : string {'filename', 'file', 'content'}
-        If 'filename', the sequence passed as an argument to fit is
-        expected to be a list of filenames that need reading to fetch
-        the raw content to analyze.
-
-        If 'file', the sequence items must have a 'read' method (file-like
-        object) that is called to fetch the bytes in memory.
-
-        Otherwise the input is expected to be the sequence strings or
-        bytes items are expected to be analyzed directly.
-
-    encoding : string, 'utf-8' by default.
-        If bytes or files are given to analyze, this encoding is used to
-        decode.
-
-    decode_error : {'strict', 'ignore', 'replace'}
-        Instruction on what to do if a byte sequence is given to analyze that
-        contains characters not of the given `encoding`. By default, it is
-        'strict', meaning that a UnicodeDecodeError will be raised. Other
-        values are 'ignore' and 'replace'.
-
-    strip_accents : {'ascii', 'unicode', None}
-        Remove accents and perform other character normalization
-        during the preprocessing step.
-        'ascii' is a fast method that only works on characters that have
-        an direct ASCII mapping.
-        'unicode' is a slightly slower method that works on any characters.
-        None (default) does nothing.
-
-        Both 'ascii' and 'unicode' use NFKD normalization from
-        :func:`unicodedata.normalize`.
-
     lowercase : boolean, True by default
         Convert all characters to lowercase before tokenizing.
 
@@ -443,7 +375,7 @@ class CountVectorizer(BaseEstimator):
 
     Examples
     --------
-    >>> from vtext import CountVectorizer
+    >>> from vtext.tokenize import CountVectorizer
     >>> corpus = [
     ...     'This is the first document.',
     ...     'This document is the second document.',
@@ -473,10 +405,6 @@ class CountVectorizer(BaseEstimator):
 
     def __init__(
         self,
-        input="content",
-        encoding="utf-8",
-        decode_error="strict",
-        strip_accents=None,
         lowercase=True,
         preprocessor=None,
         tokenizer=None,
@@ -491,10 +419,6 @@ class CountVectorizer(BaseEstimator):
         binary=False,
         dtype=np.int64,
     ):
-        self.input = input
-        self.encoding = encoding
-        self.decode_error = decode_error
-        self.strip_accents = strip_accents
         self.preprocessor = preprocessor
         self.tokenizer = tokenizer
         self.analyzer = analyzer
@@ -529,12 +453,6 @@ class CountVectorizer(BaseEstimator):
             raise NotImplementedError
 
         if self.stop_words is not None:
-            raise NotImplementedError
-
-        if self.input != "content":
-            raise NotImplementedError
-
-        if self.encoding != "utf-8":
             raise NotImplementedError
 
     def fit(self, raw_documents, y=None):

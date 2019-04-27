@@ -2,13 +2,36 @@ Python API
 ==========
 
 
-.. currentmodule:: vtext.tokenize
+vtext.stem
+----------
+
+.. currentmodule:: vtext
 
 .. autosummary::
-   RegexpTokenizer
-   VTextTokenizer
+   :toctree: generated/
+
+   stem.SnowballStemmer
+
+vtext.tokenize
+--------------
+
+.. currentmodule:: vtext
+
+.. autosummary::
+   :toctree: generated/
+
+   tokenize.RegexpTokenizer
+   tokenize.UnicodeSegmentTokenizer
+   tokenize.VTextTokenizer
 
 
+vtext.vectorize
+--------------
 
-.. automodule:: vtext.tokenize
-   :members:
+.. currentmodule:: vtext
+
+.. autosummary::
+   :toctree: generated/
+
+   vectorize.CountVectorizer
+   vectorize.HashingVectorizer
