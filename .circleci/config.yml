@@ -77,6 +77,8 @@ jobs:
       - run:
           name: upload-wheels
           command: |
+            python -m venv venv
+            source venv/bin/activate
             pip install awscli
             aws s3 sync --exclude="*" --include="*manylinux*" python/dist/ s3://vtext/dist/
 
