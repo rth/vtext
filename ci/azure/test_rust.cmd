@@ -1,3 +1,3 @@
-cargo test --release
+cargo test
 
 if %errorlevel% neq 0 exit /b %errorlevel%
