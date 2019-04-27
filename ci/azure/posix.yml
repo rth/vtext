@@ -35,6 +35,7 @@ jobs:
       env:
          AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
          AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+      condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
     - task: PublishTestResults@2
       inputs:
         testResultsFiles: '$(TEST_DIR)/$(JUNITXML)'

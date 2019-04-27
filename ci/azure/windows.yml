@@ -38,6 +38,7 @@ jobs:
       env:
          AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
          AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+      condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
     - task: PublishPipelineArtifact@0
       inputs:
         artifactName: "${{ parameters.name }}-$(PYTHON_VERSION)-wheels"
