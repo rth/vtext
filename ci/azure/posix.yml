@@ -13,8 +13,6 @@ jobs:
       value: '$(Agent.WorkFolder)/tmp_folder'
     - name: VIRTUALENV
       value: 'testvenv'
-    - name: JUNITXML
-      value: 'test-data.xml'
   strategy:
     matrix:
       ${{ insert }}: ${{ parameters.matrix }}

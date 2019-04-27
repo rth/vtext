@@ -9,10 +9,13 @@ jobs:
   pool:
     vmImage: ${{ parameters.vmImage }}
   variables:
-    VIRTUALENV: 'testvenv'
-    JUNITXML: 'test-data.xml'
-    SKLEARN_SKIP_NETWORK_TESTS: '1'
-    TMP_FOLDER: '$(Agent.WorkFolder)\tmp_folder'
+    - group: AWS_CREDENTIALS
+    - name: VIRTUALENV
+      value: 'testvenv'
+    - name: JUNITXML
+      value: 'test-data.xml'
+    - name: TMP_FOLDER
+      value: '$(Agent.WorkFolder)\tmp_folder'
   strategy:
     matrix:
       ${{ insert }}: ${{ parameters.matrix }}
@@ -30,6 +33,12 @@ jobs:
     - script: |
         ci\\azure\\test_python.cmd
       displayName: 'Test python'
+    - script: |
+        ci\\azure\\upload_wheels.cmd
+      displayName: 'Upload wheels'
+      env:
+         AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+         AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
     - task: PublishPipelineArtifact@0
       inputs:
         artifactName: "${{ parameters.name }}-$(PYTHON_VERSION)-wheels"
