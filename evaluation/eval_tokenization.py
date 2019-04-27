@@ -96,9 +96,9 @@ if spacy is not None:
 if blingfire is not None:
 
     def bling_tokenkizer(lang):
-        return lambda x: blingfire.text_to_words(x).split(' ')
+        return lambda x: blingfire.text_to_words(x).split(" ")
 
-    tok_db.append(('blingfire', bling_tokenkizer))
+    tok_db.append(("blingfire", bling_tokenkizer))
 
 out = []
 for lang, tb_name in tb_list:

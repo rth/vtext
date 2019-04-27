@@ -67,7 +67,7 @@ if __name__ == "__main__":
         db.append(("Spacy en", English().tokenizer))
 
     if blingfire is not None:
-        db.append(('BlingFire en', lambda x: blingfire.text_to_words(x).split(' ')))
+        db.append(("BlingFire en", lambda x: blingfire.text_to_words(x).split(" ")))
 
     for label, func in db:
         t0 = time()
