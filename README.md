@@ -48,7 +48,7 @@ For more details see rust documentation: [docs.rs/vtext](https://docs.rs/vtext)
 
 The python package can be installed for Python 3.7 on Linux with,
 ```
-pip install https://535-156188651-gh.circle-artifacts.com/0/root/repo/python/dist/vtextpy-0.1.0a1-cp37-cp37m-manylinux1_x86_64.whl
+pip install vtext
 ```
 (adjust the URL if you need another python 3 version). Wheels for Windows and Mac OS will be uploaded to PyPi in the near future.
 

@@ -1,4 +1,4 @@
-# vtextpy
+# vtext
 
 This is a Python wrapper for the Rust vtext crate.
 
@@ -43,7 +43,7 @@ python3 setup.py develop --user
 The easiest might be to use docker to setup a build environment,
 
 ```
-docker build -t vtextpy-env .
+docker build -t vtext-py-env .
 ./run_docker_env.sh
 rustup toolchain add nightly-2019-02-04
 rustup default nightly-2019-02-04-x86_64-unknown-linux-gnu
