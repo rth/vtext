@@ -17,6 +17,13 @@ use std::iter::FromIterator;
 ///  // returns 0.333
 ///  ```
 pub fn dice_similarity(x: &str, y: &str) -> f64 {
+
+    if (x.len() == 0) | (y.len() == 0) {
+        return 0.0
+    } else if (x == y) {
+        return 1.0
+    }
+
     let mut x_tokens = Vec::new();
 
     for ngram in x.chars().collect::<Vec<char>>().windows(2) {
@@ -41,6 +48,7 @@ pub fn dice_similarity(x: &str, y: &str) -> f64 {
 mod tests {
     use crate::metrics::string::dice_similarity;
 
+    #[test]
     fn test_dice_similarity() {
         let res = dice_similarity("yesterday", "today");
         assert_eq!((res * 100.).round() / 100., 0.33);
@@ -48,7 +56,7 @@ mod tests {
         assert_eq!(dice_similarity("healed", "sealed"), 0.8);
 
         assert_eq!(dice_similarity("", ""), 0.0);
-        // Can't make even 1 2-char ngram.
+        // 1 char, doesn't allow to make a single 2-char ngram
         assert_eq!(dice_similarity("1", "test"), 0.0);
 
         assert_eq!(dice_similarity("test", "test"), 1.0);
