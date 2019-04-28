@@ -1,6 +1,7 @@
 # vtext
 
 ![Crates.io](https://img.shields.io/crates/v/vtext.svg)
+![PyPI](https://img.shields.io/pypi/v/vtext.svg)
 [![CircleCI](https://circleci.com/gh/rth/vtext/tree/master.svg?style=svg)](https://circleci.com/gh/rth/vtext/tree/master)
 [![Build Status](https://dev.azure.com/ryurchak/vtext/_apis/build/status/rth.vtext?branchName=master)](https://dev.azure.com/ryurchak/vtext/_build/latest?definitionId=1&branchName=master)
 
