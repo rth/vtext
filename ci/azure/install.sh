@@ -25,4 +25,4 @@ cd python/
 pip install -r requirements.txt
 python setup.py bdist_wheel
 
-pip install --pre --no-index --find-links dist/ vtextpy
+pip install --pre --no-index --find-links dist/ vtext
