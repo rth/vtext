@@ -26,7 +26,7 @@ The API is currently unstable.
 
 ### Usage in Python
 
-The vtext requires Python 3.5+ and can be installed with,
+vtext requires Python 3.5+ and can be installed with,
 ```
 pip install vtext
 ```

@@ -15,6 +15,7 @@ setup(
             features=["numpy/python3"],
         )
     ],
+    long_description_content_type="text/markdown",
     install_requires=install_requires,
     packages=find_packages(),
 )
