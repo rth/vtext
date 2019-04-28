@@ -8,7 +8,7 @@ The lastest vtext release for Python can be installed with,
 
 .. code::
 
-    pip install vtext
+    pip install --pre vtext
 
 this will also install the following dependencies if they are missing,
  

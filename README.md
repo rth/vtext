@@ -28,7 +28,7 @@ The API is currently unstable.
 
 vtext requires Python 3.5+ and can be installed with,
 ```
-pip install vtext
+pip install --pre vtext
 ```
 
 Below is a simple tokenization example,
