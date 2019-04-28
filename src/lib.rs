@@ -26,10 +26,10 @@ extern crate vtext;
 
 use vtext::tokenize::VTextTokenizer;
 
-let tok = VTextTokenizer("en");
-let tokens = tok.tokenize("Flights after 2:00 pm can't depart (today and tomorrow).");
-// returns &["Flights", "after", "2:00", "pm", "ca", "n't",
-//           "depart", "(", "today", "and", "tomorrow", ")", "."]
+let tok = VTextTokenizer::new("en");
+let tokens = tok.tokenize("Flights can't depart after 2:00 pm.");
+
+// returns &["Flights", "ca", "n't", "depart", "after", "2:00", "pm", "."]
 ```
 
 */
