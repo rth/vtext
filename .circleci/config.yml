@@ -52,9 +52,9 @@ jobs:
           command: |
             cd python
             for PYBIN in python3.{5,6,7}; do
-                "$PYBIN" -m pip uninstall -y vtextpy
+                "$PYBIN" -m pip uninstall -y vtext
                 cd /tmp/
-                "$PYBIN" -m pip install --pre --no-index --find-links /root/repo/python/dist/ vtextpy
+                "$PYBIN" -m pip install --pre --no-index --find-links /root/repo/python/dist/ vtext
                 "$PYBIN" -m pytest --pyargs vtext
                 cd -
             done
@@ -98,7 +98,7 @@ jobs:
             pip install -r python/requirements.txt
             pip install -r doc/requirements-doc.txt
             pip install awscli
-            pip install --pre --no-index --find-links python/dist/ vtextpy
+            pip install --pre --no-index --find-links python/dist/ vtext
       - run:
           name: html docs
           command: |
