@@ -26,7 +26,7 @@ vtext.tokenize
 
 
 vtext.vectorize
---------------
+---------------
 
 .. currentmodule:: vtext
 

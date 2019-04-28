@@ -18,6 +18,20 @@ The API is currently unstable.
  - Feature weighting (*planned*): feature weighting based on document
    frequency (TF-IDF), feature normalization.
 
+# Example
+
+A simple tokenization example can be found below,
+```rust
+extern crate vtext;
+
+use vtext::tokenize::VTextTokenizer;
+
+let tok = VTextTokenizer("en");
+let tokens = tok.tokenize("Flights after 2:00 pm can't depart (today and tomorrow).");
+// returns &["Flights", "after", "2:00", "pm", "ca", "n't",
+//           "depart", "(", "today", "and", "tomorrow", ")", "."]
+```
+
 */
 
 #![allow(non_snake_case)]

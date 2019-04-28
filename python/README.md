@@ -21,33 +21,17 @@ The API is currently unstable.
 
 ### Installation
 
+vtext requires Python 3.5+ and can be installed with,
+
 ```
 pip install vtext
 ```
 
+### Documentation
 
-### Building from sources
+Project documentation: [vtext.io/doc/latest/index.html](https://vtext.io/doc/latest/index.html)
 
-Building requires Python 3.5+ as well as Rust nightly >=1.30.0
-(due to [rust-numpy](https://github.com/rust-numpy/rust-numpy) and
-[pyo3](https://github.com/PyO3/pyo3) requirements),
+## License
 
-To build the Python package, run,
-```
-pip install -r requirements.txt
-python3 setup.py develop --user
-```
+vtext is released under the BSD 3-clause license.
 
-### Docker environment
-
-The easiest might be to use docker to setup a build environment,
-
-```
-docker build -t vtext-py-env .
-./run_docker_env.sh
-rustup toolchain add nightly-2019-02-04
-rustup default nightly-2019-02-04-x86_64-unknown-linux-gnu
-python3.7 -m pip install -r /src/python/requirements.txt
-cd /src/python && python3.7 setup.py install
-python3.7 -m pip install pandas conllu
-```

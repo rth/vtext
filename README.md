@@ -24,39 +24,32 @@ The API is currently unstable.
 
 ## Usage
 
+### Usage in Python
+
+The vtext requires Python 3.5+ and can be installed with,
+```
+pip install vtext
+```
+
+Below is a simple tokenization example,
+
+```python
+>>> from vtext.tokenize import VTextTokenizer
+>>> VTextTokenizer("en").tokenize("Flights can't depart after 2:00 pm.")
+["Flights", "ca", "n't", "depart" "after", "2:00", "pm", "."]
+```
+
+For more details see the project documentation: [vtext.io/doc/latest/index.html](https://vtext.io/doc/latest/index.html)
+
 ### Usage in Rust
 
 Add the following to `Cargo.toml`,
 ```toml
 [dependencies]
-text-vectorize = "0.1.0-alpha.1"
-``` 
-A simple tokenization example can be found below,
-```rust
-extern crate vtext;
-
-use vtext::tokenize::VTextTokenizer;
-
-let tok = VTextTokenizer("en");
-let tokens = tok.tokenize("Flights after 2:00 pm can't depart (today and tomorrow).");
-// returns &["Flights", "after", "2:00", "pm", "ca", "n't",
-//           "depart", "(", "today", "and", "tomorrow", ")", "."]
+vtext = "0.1.0-alpha.1"
 ```
+
 For more details see rust documentation: [docs.rs/vtext](https://docs.rs/vtext)
-
-### Usage in Python
-
-The python package can be installed for Python 3.7 on Linux with,
-```
-pip install vtext
-```
-(adjust the URL if you need another python 3 version). Wheels for Windows and Mac OS will be uploaded to PyPi in the near future.
-
-The API aims to be compatible with scikit-learn's
-[CountVectorizer](https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.CountVectorizer.html)
-and [HashingVectorizer](https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.HashingVectorizer.html) 
-though only a subset of features will be implemented.
-
 
 ## Benchmarks
 
