@@ -108,7 +108,7 @@ jobs:
       - run:
           name: upload docs
           command: |
-            if [ "$CIRCLE_BRANCH" = "master" ]
+            if [ "$CIRCLE_BRANCH" == "master" ]
             then
                 source venv/bin/activate
                 aws s3 sync --delete doc/_build/html/ s3://vtext/doc/latest/

@@ -16,6 +16,7 @@ setup(
         )
     ],
     long_description_content_type="text/markdown",
+    url="https://github.com/rth/vtext",
     install_requires=install_requires,
     packages=find_packages(),
 )
