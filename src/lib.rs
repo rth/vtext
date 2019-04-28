@@ -46,5 +46,6 @@ extern crate hashbrown;
 extern crate sprs;
 
 mod math;
+pub mod metrics;
 pub mod tokenize;
 pub mod vectorize;
