@@ -110,7 +110,55 @@ pub fn jaro_similarity(x: &str, y: &str) -> f64 {
     (matches as f64 / x_len as f64
         + matches as f64 / y_len as f64
         + (matches as f64 - (transpositions / 2) as f64) / matches as f64)
-        / 3 as f64
+        / 3.0
+}
+
+///  Jaro similarity
+///
+///  The [Jaro-Winkler
+///  similarity](https://en.wikipedia.org/wiki/Jaro%E2%80%93Winkler_distance)
+///  accounts for the minimal number of character transpositions needed
+///  to change one word in another, and the length of the longest common prefix
+///
+///  The default values for parameters are p=0.1, max_l=4
+///
+///  # References
+///
+///  William E. Winkler. 1990. String Comparator Metrics and Enhanced
+///  Decision Rules in the Fellegi-Sunter Model of Record Linkage.
+///  Proceedings of the Section on Survey Research Methods.
+///  American Statistical Association: 354-359.
+///
+///
+///  # Example
+///  ```rust
+///  use vtext::metrics::string::jaro_winkler_similarity;
+///
+///  let res = jaro_winkler_similarity("yesterday", "today", 0.1, 4);
+///  // returns 0.581
+///  ```
+pub fn jaro_winkler_similarity(x: &str, y: &str, p: f64, max_l: usize) -> f64 {
+    // implementation adapted from NLTK
+    //
+    if (p * max_l as f64 <= 0.0) | (p * max_l as f64 >= 1.0) {
+        panic!("{} not in (0, 1)!", p * max_l as f64)
+    }
+
+    let jaro_sim = jaro_similarity(x, y);
+
+    // Compute the length of the common prefix
+    let mut l = 0;
+    for (s1_i, s2_i) in x.chars().zip(y.chars()) {
+        if s1_i == s2_i {
+            l += 1;
+            if l == max_l {
+                break;
+            }
+        } else {
+            break;
+        }
+    }
+    jaro_sim + (l as f64 * p * (1.0 - jaro_sim))
 }
 
 #[cfg(test)]
@@ -136,9 +184,29 @@ mod tests {
         let res = jaro_similarity("AABABCAAAC", "ABAACBAAAC");
         assert_eq!((res * 1000.).round() / 1000., 0.933);
 
+        let res = jaro_similarity("SHACKLEFORD", "SHACKELFORD");
+        assert_eq!((res * 1000.).round() / 1000., 0.970);
+
         assert_eq!(jaro_similarity("", ""), 0.0);
         assert_eq!(jaro_similarity("1", "2"), 0.0);
         assert_eq!(jaro_similarity("test", "test"), 1.0);
+    }
+
+    #[test]
+    fn test_jaro_winkler_similarity() {
+        let res = jaro_winkler_similarity("SHACKLEFORD", "SHACKELFORD", 0.1, 4);
+        assert_eq!((res * 1000.).round() / 1000., 0.982);
+
+        assert_eq!(jaro_winkler_similarity("", "", 0.1, 4), 0.0);
+        assert_eq!(jaro_winkler_similarity("1", "2", 0.1, 4), 0.0);
+        assert_eq!(jaro_winkler_similarity("test", "test", 0.1, 4), 1.0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_jaro_winkler_similarity_invalid() {
+        // Should panic: 0.5*4 > 1
+        jaro_winkler_similarity("AABABCAAAC", "ABAACBAAAC", 0.5, 4);
     }
 
 }
