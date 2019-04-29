@@ -32,6 +32,7 @@ if __name__ == "__main__":
     tokens = tokens[:20000]
     db = [
         ("vtext dice_similarity", vtext.metrics.string.dice_similarity),
+        ("vtext jaro_similarity", vtext.metrics.string.jaro_similarity),
         ("NLTK edit_distance", nltk.edit_distance),
     ]
     if Levenshtein is not None:

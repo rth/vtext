@@ -46,3 +46,4 @@ vtext.metrics
    :toctree: generated/
 
    metrics.string.dice_similarity
+   metrics.string.jaro_similarity
