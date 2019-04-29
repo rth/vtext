@@ -113,7 +113,7 @@ pub fn jaro_similarity(x: &str, y: &str) -> f64 {
         / 3.0
 }
 
-///  Jaro similarity
+///  Jaro Winkler similarity
 ///
 ///  The [Jaro-Winkler
 ///  similarity](https://en.wikipedia.org/wiki/Jaro%E2%80%93Winkler_distance)

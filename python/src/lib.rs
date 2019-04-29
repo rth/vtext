@@ -389,6 +389,48 @@ fn jaro_similarity(x: &str, y: &str) -> PyResult<f64> {
     Ok(metrics::string::jaro_similarity(x, y))
 }
 
+/// Jaro Winkler similarity
+///
+///  The `Jaro-Winkler
+///  similarity <https://en.wikipedia.org/wiki/Jaro%E2%80%93Winkler_distance>`_
+///  accounts for the minimal number of character transpositions needed
+///  to change one word in another, and the length of the longest common prefix
+///
+///  The default values for parameters are ``p=0.1``, ``max_l=4``
+///
+///  References
+///  ----------
+///
+///  William E. Winkler. 1990. String Comparator Metrics and Enhanced
+///  Decision Rules in the Fellegi-Sunter Model of Record Linkage.
+///  Proceedings of the Section on Survey Research Methods.
+///  American Statistical Association: 354-359.
+///
+///  Parameters
+///  ----------
+///  x : str
+///     string to compare
+///  y : str
+///     string to compare
+///  p : float, default=0.1
+///     the constant scaling factor to overweigh common prefixes
+///  max_l : int, default=4
+///     the length of common prefix at the start of the string
+///
+///  Result
+///  ------
+///  similarity : float
+///     computed similarity
+///
+///  Example
+///  -------
+///  >>> jaro_winkler_similarity('yesterday', 'today')
+///  0.581..
+#[pyfunction]
+fn jaro_winkler_similarity(x: &str, y: &str, p: f64, max_l: usize) -> PyResult<f64> {
+    Ok(metrics::string::jaro_winkler_similarity(x, y, p, max_l))
+}
+
 #[pymodinit]
 fn _lib(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<_HashingVectorizerWrapper>()?;
@@ -399,5 +441,6 @@ fn _lib(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<SnowballStemmer>()?;
     m.add_function(wrap_function!(dice_similarity))?;
     m.add_function(wrap_function!(jaro_similarity))?;
+    m.add_function(wrap_function!(jaro_winkler_similarity))?;
     Ok(())
 }

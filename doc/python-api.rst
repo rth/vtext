@@ -47,3 +47,4 @@ vtext.metrics
 
    metrics.string.dice_similarity
    metrics.string.jaro_similarity
+   metrics.string.jaro_winkler_similarity
