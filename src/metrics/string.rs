@@ -23,18 +23,18 @@ use itertools::Itertools;
 ///  // returns 0.333
 ///  ```
 pub fn dice_similarity(x: &str, y: &str) -> f64 {
-    if (x.len() == 0) | (y.len() == 0) {
+    if (x.len() < 2) | (y.len() < 2) {
         0.0
     } else if (x == y) {
         1.0
     } else {
-        let mut x_set: HashSet<(char, char)> = HashSet::new();
+        let mut x_set: HashSet<(char, char)> = HashSet::with_capacity(5);
 
         for (char_1, char_2) in x.chars().tuple_windows() {
             x_set.insert((char_1, char_2));
         }
 
-        let mut y_set: HashSet<(char, char)> = HashSet::new();
+        let mut y_set: HashSet<(char, char)> = HashSet::with_capacity(x_set.len());
 
         for (char_1, char_2) in y.chars().tuple_windows() {
             y_set.insert((char_1, char_2));

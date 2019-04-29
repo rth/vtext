@@ -15,7 +15,6 @@ use sprs::CsMat;
 use pyo3::exceptions;
 use pyo3::prelude::*;
 use pyo3::prelude::{pymodinit, ObjectProtocol, Py, PyModule, PyObject, PyResult, Python};
-//use pyo3::wrap_pyfunction;
 use pyo3::types::{PyIterator, PyString};
 
 use vtext::metrics;
