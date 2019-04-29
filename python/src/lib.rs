@@ -124,6 +124,8 @@ impl _CountVectorizerWrapper {
     }
 }
 
+/// __init__(self, word_bounds=True)
+///
 /// Unicode Segmentation tokenizer
 ///
 /// This implementation is a thin wrapper around the
@@ -152,6 +154,8 @@ impl UnicodeSegmentTokenizer {
         })
     }
 
+    /// tokenize(self, x)
+    ///
     /// Tokenize a string
     ///
     /// Parameters
@@ -172,6 +176,8 @@ impl UnicodeSegmentTokenizer {
     }
 }
 
+/// __init__(self, lang)
+///
 /// VText tokenizer
 ///
 /// This tokenizer a few additional rules on top of word boundaries computed
@@ -203,6 +209,8 @@ impl VTextTokenizer {
         })
     }
 
+    /// tokenize(self, x)
+    ///
     /// Tokenize a string
     ///
     /// Parameters
@@ -223,6 +231,8 @@ impl VTextTokenizer {
     }
 }
 
+/// __init__(self, pattern=r'\\b\\w\\w+\\b')
+///
 /// Tokenize a document using regular expressions
 #[pyclass]
 pub struct RegexpTokenizer {
@@ -243,6 +253,8 @@ impl RegexpTokenizer {
         })
     }
 
+    /// tokenize(self, x)
+    ///
     /// Tokenize a string
     ///
     /// Parameters
@@ -262,6 +274,8 @@ impl RegexpTokenizer {
     }
 }
 
+/// __init__(self, lang='english')
+///
 /// Snowball stemmer
 ///
 /// Wraps the rust-stemmers crate that uses an implementation generated
@@ -309,6 +323,8 @@ impl SnowballStemmer {
         })
     }
 
+    /// stem(self, word)
+    ///
     /// Stem a string
     ///
     /// Parameters
@@ -326,6 +342,8 @@ impl SnowballStemmer {
     }
 }
 
+///  dice_similarity(x, y)
+///
 ///  Sørensen–Dice similarity coefficient
 ///
 ///  This similarity tokenizes the input string x, y as 2-char n-grams,
@@ -356,18 +374,22 @@ fn dice_similarity(x: &str, y: &str) -> PyResult<f64> {
     Ok(metrics::string::dice_similarity(x, y))
 }
 
-/// Jaro similarity
+///  jaro_similarity(x, y)
+///
+///  Jaro similarity
 ///
 ///  The `Jaro
 ///  similarity <https://en.wikipedia.org/wiki/Jaro%E2%80%93Winkler_distance#Jaro_Similarity>`_
 ///  accounts for the minimal number of character transpositions needed
 ///  to change one word in another.
 ///
-///  # References
+///  References
+///  ----------
 ///
 ///  Matthew A. Jaro (1989). Advances in record linkage methodology
 ///  as applied to the 1985 census of Tampa Florida. Journal of the
 ///  American Statistical Association. 84 (406): 414-20.
+///
 ///  Parameters
 ///  ----------
 ///  x : str
@@ -389,7 +411,9 @@ fn jaro_similarity(x: &str, y: &str) -> PyResult<f64> {
     Ok(metrics::string::jaro_similarity(x, y))
 }
 
-/// Jaro Winkler similarity
+///  jaro_winkler_similarity(x, y, p, max_l)
+///
+///  Jaro Winkler similarity
 ///
 ///  The `Jaro-Winkler
 ///  similarity <https://en.wikipedia.org/wiki/Jaro%E2%80%93Winkler_distance>`_
