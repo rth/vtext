@@ -24,7 +24,7 @@ Features
    `HashingVectorizer` in scikit-learn.
  - Feature weighting (*planned*): feature weighting based on document
    frequency (TF-IDF), feature normalization.
- - String similarity: Sørensen-Dice, Jaro, Jaro Winkler
+ - Levenshtein edit distance; Sørensen-Dice, Jaro, Jaro Winkler string similarities
 
 .. toctree::
    :maxdepth: 2
