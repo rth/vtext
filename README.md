@@ -91,4 +91,4 @@ see [benchmarks/README.md](./benchmarks/README.md) for more details.
 
 ## License
 
-vtext is released under the BSD 3-clause license.
+vtext is released under the [Apache License, Version 2.0](./LICENSE).
