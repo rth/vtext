@@ -78,26 +78,27 @@ pub fn jaro_similarity(x: &str, y: &str) -> f64 {
     // The upper bound of the distance for being a matched character.
     let match_bound = max(x_len, y_len);
     // no.of matched characters in s1 and s2
-    let mut matches = 0;
     // no. of transpositions between s1 and s2
     let mut transpositions = 0;
     // positions in s1 which are matches to some character in s2
-    let mut flagged_1: Vec<usize> = Vec::new();
+    let mut flagged_1: Vec<usize> = Vec::with_capacity(5);
     // positions in s2 which are matches to some character in s1
-    let mut flagged_2: Vec<usize> = Vec::new();
+    let mut flagged_2: Vec<usize> = Vec::with_capacity(5);
     for (x_idx, x_char) in x_chars.iter().enumerate() {
         let upperbound = min(x_idx + match_bound, y_len - 1);
         let lowerbound = max(0, x_idx as i32 - match_bound as i32) as usize;
         for j in (lowerbound..upperbound + 1) {
             if (x_char == &y_chars[j]) & !flagged_2.contains(&j) {
-                matches += 1;
                 flagged_1.push(x_idx);
                 flagged_2.push(j);
                 break;
             }
         }
-        flagged_2.sort_unstable();
     }
+    flagged_2.sort_unstable();
+
+    let matches = flagged_1.len();
+
     if matches == 0 {
         return 0.0;
     }
