@@ -356,6 +356,14 @@ fn dice_similarity(x: &str, y: &str) -> PyResult<f64> {
     Ok(metrics::string::dice_similarity(x, y))
 }
 
+
+/// Jaro similarity
+#[pyfunction]
+fn jaro_similarity(x: &str, y: &str) -> PyResult<f64> {
+    Ok(metrics::string::jaro_similarity(x, y))
+}
+
+
 #[pymodinit]
 fn _lib(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<_HashingVectorizerWrapper>()?;
@@ -365,5 +373,6 @@ fn _lib(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<VTextTokenizer>()?;
     m.add_class::<SnowballStemmer>()?;
     m.add_function(wrap_function!(dice_similarity))?;
+    m.add_function(wrap_function!(jaro_similarity))?;
     Ok(())
 }
