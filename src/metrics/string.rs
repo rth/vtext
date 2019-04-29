@@ -4,56 +4,61 @@ String metrics
 */
 use hashbrown::HashSet;
 use itertools::Itertools;
+use ndarray::{Array, ShapeBuilder};
 use std::cmp::{max, min};
 use std::iter::FromIterator;
-use ndarray::{Array, ShapeBuilder};
 
 ///  Levenshtein edit distance
 ///
+///  # Example
+///  ```rust
+///  use vtext::metrics::string::edit_distance;
+///
+///  let res = edit_distance("yesterday", "today", 1, false);
+///  // returns 5.0
+///  ```
 pub fn edit_distance(x: &str, y: &str, substitution_cost: usize, transpositions: bool) -> f64 {
     // implementation adapted from NLTK
-    let x_chars: Vec<char> = x.chars().collect::<Vec<char>>();
-    let y_chars: Vec<char> = y.chars().collect::<Vec<char>>();
-    let x_len = x_chars.len();
-    let y_len = y_chars.len();
-    
+
+    let x_len = x.chars().count();
+    let y_len = y.chars().count();
+
     // initialize the 2D array
+    // TODO: there is likely a way to avoid allocating this array
     let mut lev = Array::<i32, _>::zeros((x_len + 1, y_len + 1).f());
-    for idx in 1..x_len+1 {
+    for idx in 1..x_len + 1 {
         lev[[idx, 0]] = idx as i32
     }
-    for idx in 1..y_len+1 {
+    for idx in 1..y_len + 1 {
         lev[[0, idx]] = idx as i32
     }
 
-    for x_idx in 0..x_len {
-        for y_idx in 0..y_len {
-            let c1 = x_chars[x_idx];
-            let c2 = y_chars[y_idx];
-
+    for (x_idx, c1) in x.chars().enumerate() {
+        for (y_idx, c2) in y.chars().enumerate() {
             // skipping a character in x
-            let a = lev[[x_idx, y_idx +1]] + 1;
+            let a = lev[[x_idx, y_idx + 1]] + 1;
             // skipping a character in y
-            let b = lev[[x_idx+1, y_idx]] + 1;
+            let b = lev[[x_idx + 1, y_idx]] + 1;
 
             // substitution
             let mut c = lev[[x_idx, y_idx]];
-            if c1 == c2 {
+            if c1 != c2 {
                 c += substitution_cost as i32;
             }
 
             let mut d = c + 1; // never picked by default
             if transpositions & (x_idx > 1) & (y_idx > 1) {
-                if (x_chars[x_idx - 1] == c2) & (y_chars[y_idx - 1] == c1) {
+                if (x.chars().nth(x_idx - 1).unwrap() == c2)
+                    & (y.chars().nth(y_idx - 1).unwrap() == c1)
+                {
                     d = lev[[x_idx - 1, y_idx - 1]] + 1;
                 }
             }
             // pick the cheapest
-            lev[[x_idx+1, y_idx+1]] = min(min(min(a, b), c), d)
+            lev[[x_idx + 1, y_idx + 1]] = min(min(min(a, b), c), d)
         }
     }
     lev[[x_len, y_len]] as f64
-
 }
 
 ///  Sørensen–Dice similarity coefficient
