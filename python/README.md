@@ -32,7 +32,7 @@ pip install --pre vtext
 
 Project documentation: [vtext.io/doc/latest/index.html](https://vtext.io/doc/latest/index.html)
 
+
 ## License
 
-vtext is released under the BSD 3-clause license.
-
+vtext is released under the [Apache License, Version 2.0](./LICENSE).

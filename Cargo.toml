@@ -1,8 +1,8 @@
 [package]
 name = "vtext"
 version = "0.1.0-alpha.1"
-description = "NLP in Rust"
-license = "BSD-3-Clause"
+description = "NLP with Rust"
+license = "Apache-2.0"
 license_file = "LICENSE"
 documentation = "https://docs.rs/vtext/"
 repository = "https://github.com/rth/vtext"
