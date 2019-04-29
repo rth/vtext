@@ -6,8 +6,13 @@
 
 from vtext.metrics.string import dice_similarity, jaro_similarity
 from vtext.metrics.string import jaro_winkler_similarity
+from vtext.metrics.string import edit_distance
 
 import pytest
+
+
+def test_edit_distance():
+    assert edit_distance("healed", "sealed", 1, False) == 1.0
 
 
 def test_dice_similarity():

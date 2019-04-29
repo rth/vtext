@@ -37,6 +37,10 @@ if __name__ == "__main__":
             "vtext jaro_winkler_similarity",
             lambda x, y: vtext.metrics.string.jaro_winkler_similarity(x, y, 0.1, 4),
         ),
+        (
+            "vtext edit_distance",
+            lambda x, y: vtext.metrics.string.edit_distance(x, y, 1, False),
+        ),
         ("NLTK edit_distance", nltk.edit_distance),
     ]
     if Levenshtein is not None:

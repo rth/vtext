@@ -10,8 +10,69 @@ String metrics
 */
 use hashbrown::HashSet;
 use itertools::Itertools;
+use ndarray::{Array, ShapeBuilder};
 use std::cmp::{max, min};
 use std::iter::FromIterator;
+
+///  Levenshtein edit distance
+///
+///  It corresponds to the minimum number of single-character edits
+///  (insertions, deletions, substitutions, and optionally transpositions)
+///  required to change one word into the other.
+///
+///  # Example
+///  ```rust
+///  use vtext::metrics::string::edit_distance;
+///
+///  let res = edit_distance("yesterday", "today", 1, false);
+///  // returns 5.0
+///  ```
+pub fn edit_distance(x: &str, y: &str, substitution_cost: usize, transpositions: bool) -> f64 {
+    // implementation adapted from NLTK
+
+    let x_len = x.chars().count();
+    let y_len = y.chars().count();
+
+    // initialize the 2D array
+    // TODO: there is likely a way to avoid allocating this array
+    let mut lev = Array::<i32, _>::zeros((x_len + 1, y_len + 1).f());
+    for idx in 1..x_len + 1 {
+        lev[[idx, 0]] = idx as i32
+    }
+    for idx in 1..y_len + 1 {
+        lev[[0, idx]] = idx as i32
+    }
+
+    for (x_idx, c1) in x.chars().enumerate() {
+        for (y_idx, c2) in y.chars().enumerate() {
+            // skipping a character in x
+            let a = lev[[x_idx, y_idx + 1]] + 1;
+            // skipping a character in y
+            let b = lev[[x_idx + 1, y_idx]] + 1;
+
+            // substitution
+            let mut c = lev[[x_idx, y_idx]];
+            if c1 != c2 {
+                c += substitution_cost as i32;
+            }
+
+            // pick the cheapest
+            c = min(min(a, b), c);
+
+            if transpositions {
+                if (x_idx > 1) & (y_idx > 1) {
+                    if (x.chars().nth(x_idx - 1).unwrap() == c2)
+                        & (y.chars().nth(y_idx - 1).unwrap() == c1)
+                    {
+                        c = min(c, lev[[x_idx - 1, y_idx - 1]] + 1);
+                    }
+                }
+            }
+            lev[[x_idx + 1, y_idx + 1]] = c;
+        }
+    }
+    lev[[x_len, y_len]] as f64
+}
 
 ///  Sørensen–Dice similarity coefficient
 ///
@@ -32,7 +93,7 @@ use std::iter::FromIterator;
 pub fn dice_similarity(x: &str, y: &str) -> f64 {
     if (x.len() < 2) | (y.len() < 2) {
         0.0
-    } else if (x == y) {
+    } else if x == y {
         1.0
     } else {
         let mut x_set: HashSet<(char, char)> = HashSet::with_capacity(5);
@@ -93,7 +154,7 @@ pub fn jaro_similarity(x: &str, y: &str) -> f64 {
     for (x_idx, x_char) in x_chars.iter().enumerate() {
         let upperbound = min(x_idx + match_bound, y_len - 1);
         let lowerbound = max(0, x_idx as i32 - match_bound as i32) as usize;
-        for j in (lowerbound..upperbound + 1) {
+        for j in lowerbound..upperbound + 1 {
             if (x_char == &y_chars[j]) & !flagged_2.contains(&j) {
                 flagged_1.push(x_idx);
                 flagged_2.push(j);
@@ -213,6 +274,12 @@ mod tests {
     fn test_jaro_winkler_similarity_invalid() {
         // Should panic: 0.5*4 > 1
         jaro_winkler_similarity("AABABCAAAC", "ABAACBAAAC", 0.5, 4);
+    }
+
+    #[test]
+    fn test_edit_distance() {
+        let res = edit_distance("yesterday", "today", 1, false);
+        assert_eq!(res, 5.0);
     }
 
 }
