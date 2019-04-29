@@ -48,6 +48,26 @@ pub fn dice_similarity(x: &str, y: &str) -> f64 {
 }
 
 ///  Jaro similarity
+///
+///  The [Jaro
+///  similarity](https://en.wikipedia.org/wiki/Jaro%E2%80%93Winkler_distance#Jaro_Similarity)
+///  accounts for the minimal number of character transpositions needed
+///  to change one word in another.
+///
+///  # References
+///
+///  Matthew A. Jaro (1989). Advances in record linkage methodology
+///  as applied to the 1985 census of Tampa Florida. Journal of the
+///  American Statistical Association. 84 (406): 414-20.
+///
+///
+///  # Example
+///  ```rust
+///  use vtext::metrics::string::jaro_similarity;
+///
+///  let res = dice_similarity("yesterday", "today");
+///  // returns 0.581
+///  ```
 pub fn jaro_similarity(x: &str, y: &str) -> f64 {
     // implementation adapted from NLTK
     let x_chars: Vec<char> = x.chars().collect::<Vec<char>>();
@@ -117,6 +137,7 @@ mod tests {
 
         assert_eq!(jaro_similarity("", ""), 0.0);
         assert_eq!(jaro_similarity("1", "2"), 0.0);
+        assert_eq!(jaro_similarity("test", "test"), 1.0);
     }
 
 }

@@ -357,6 +357,33 @@ fn dice_similarity(x: &str, y: &str) -> PyResult<f64> {
 }
 
 /// Jaro similarity
+///
+///  The `Jaro
+///  similarity <https://en.wikipedia.org/wiki/Jaro%E2%80%93Winkler_distance#Jaro_Similarity>`_
+///  accounts for the minimal number of character transpositions needed
+///  to change one word in another.
+///
+///  # References
+///
+///  Matthew A. Jaro (1989). Advances in record linkage methodology
+///  as applied to the 1985 census of Tampa Florida. Journal of the
+///  American Statistical Association. 84 (406): 414-20.
+///  Parameters
+///  ----------
+///  x : str
+///     string to compare
+///  y : str
+///     string to compare
+///
+///  Result
+///  ------
+///  similarity : float
+///     computed similarity
+///
+///  Example
+///  -------
+///  >>> jaro_similarity('yesterday', 'today')
+///  0.581..
 #[pyfunction]
 fn jaro_similarity(x: &str, y: &str) -> PyResult<f64> {
     Ok(metrics::string::jaro_similarity(x, y))
