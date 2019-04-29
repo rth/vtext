@@ -151,16 +151,16 @@ impl CountVectorizer {
         )
     }
 
+    /// Fit and transform
+    ///
     pub fn fit_transform(&mut self, X: &[String]) -> CsMat<i32> {
-        /// Fit and transform
-        ///
         self._fit_transform(X, true)
     }
 }
 
 impl HashingVectorizer {
+    /// Create a new HashingVectorizer estimator
     pub fn new() -> Self {
-        /// Create a new HashingVectorizer estimator
         HashingVectorizer {
             lowercase: true,
             token_pattern: String::from(TOKEN_PATTERN_DEFAULT),
@@ -168,15 +168,15 @@ impl HashingVectorizer {
         }
     }
 
+    /// Fit method
+    ///
+    /// The vectorizer is stateless, this has no effect
     pub fn fit(self, _X: &[String]) -> Self {
-        /// Fit method
-        ///
-        /// The vectorizer is stateless, this has no effect
         self
     }
 
+    /// Transform method
     pub fn transform(&self, X: &[String]) -> CsMat<i32> {
-        /// Transform method
         let mut tf = crate::math::CSRArray {
             indices: Vec::new(),
             indptr: Vec::new(),
@@ -221,9 +221,9 @@ impl HashingVectorizer {
         )
     }
 
+    /// Fit and transform
+    ///
     pub fn fit_transform(&self, X: &[String]) -> CsMat<i32> {
-        /// Fit and transform
-        ///
         self.transform(X)
     }
 }

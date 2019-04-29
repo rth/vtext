@@ -17,6 +17,7 @@ use pyo3::prelude::*;
 use pyo3::prelude::{pymodinit, ObjectProtocol, Py, PyModule, PyObject, PyResult, Python};
 use pyo3::types::{PyIterator, PyString};
 
+use vtext::metrics;
 use vtext::tokenize;
 use vtext::vectorize;
 
@@ -325,6 +326,36 @@ impl SnowballStemmer {
     }
 }
 
+///  Sørensen–Dice similarity coefficient
+///
+///  This similarity tokenizes the input string x, y as 2-char n-grams,
+///  into two sets of tokens X, Y then computes,
+///
+///  similarity(x, y) = 2 * |X ∩ Y| / (|X| + |Y|)
+///
+///  where |X| is the cardinality of set X.
+///
+///  Parameters
+///  ----------
+///  x : str
+///     string to compare
+///  y : str
+///     string to compare
+///
+///  Result
+///  ------
+///  similarity : float
+///     computed similarity
+///
+///  Example
+///  -------
+///  >>> dice_similarity('yesterday', 'today')
+///  0.333..
+#[pyfunction]
+fn dice_similarity(x: &str, y: &str) -> PyResult<f64> {
+    Ok(metrics::string::dice_similarity(x, y))
+}
+
 #[pymodinit]
 fn _lib(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<_HashingVectorizerWrapper>()?;
@@ -333,5 +364,6 @@ fn _lib(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<RegexpTokenizer>()?;
     m.add_class::<VTextTokenizer>()?;
     m.add_class::<SnowballStemmer>()?;
+    m.add_function(wrap_function!(dice_similarity))?;
     Ok(())
 }

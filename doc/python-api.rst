@@ -35,3 +35,14 @@ vtext.vectorize
 
    vectorize.CountVectorizer
    vectorize.HashingVectorizer
+
+
+vtext.metrics
+-------------
+
+.. currentmodule:: vtext
+
+.. autosummary::
+   :toctree: generated/
+
+   metrics.string.dice_similarity

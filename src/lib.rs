@@ -17,6 +17,7 @@ The API is currently unstable.
    `HashingVectorizer` in scikit-learn.
  - Feature weighting (*planned*): feature weighting based on document
    frequency (TF-IDF), feature normalization.
+ - String similarities: Sørensen-Dice
 
 # Example
 
@@ -44,7 +45,10 @@ extern crate seahash;
 extern crate ndarray;
 extern crate hashbrown;
 extern crate sprs;
+#[macro_use]
+extern crate itertools;
 
 mod math;
+pub mod metrics;
 pub mod tokenize;
 pub mod vectorize;
