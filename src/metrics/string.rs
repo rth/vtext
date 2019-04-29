@@ -110,8 +110,11 @@ mod tests {
 
     #[test]
     fn test_jaro_similarity() {
-        let res = jaro_similarity("yesterday", "today");
-        assert_eq!((res * 100.).round() / 100., 0.437);
+        let res = jaro_similarity("AABABCAAAC", "ABAACBAAAC");
+        assert_eq!((res * 1000.).round() / 1000., 0.933);
+
+        assert_eq!(jaro_similarity("", ""), 0.0);
+        assert_eq!(jaro_similarity("1", "2"), 0.0);
     }
 
 }
