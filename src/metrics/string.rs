@@ -46,16 +46,19 @@ pub fn edit_distance(x: &str, y: &str, substitution_cost: usize, transpositions:
                 c += substitution_cost as i32;
             }
 
-            let mut d = c + 1; // never picked by default
-            if transpositions & (x_idx > 1) & (y_idx > 1) {
-                if (x.chars().nth(x_idx - 1).unwrap() == c2)
-                    & (y.chars().nth(y_idx - 1).unwrap() == c1)
-                {
-                    d = lev[[x_idx - 1, y_idx - 1]] + 1;
+            // pick the cheapest
+            c = min(min(a, b), c);
+
+            if transpositions {
+                if (x_idx > 1) & (y_idx > 1) {
+                    if (x.chars().nth(x_idx - 1).unwrap() == c2)
+                        & (y.chars().nth(y_idx - 1).unwrap() == c1)
+                    {
+                        c = min(c, lev[[x_idx - 1, y_idx - 1]] + 1);
+                    }
                 }
             }
-            // pick the cheapest
-            lev[[x_idx + 1, y_idx + 1]] = min(min(min(a, b), c), d)
+            lev[[x_idx + 1, y_idx + 1]] = c;
         }
     }
     lev[[x_len, y_len]] as f64

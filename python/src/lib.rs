@@ -480,10 +480,19 @@ fn jaro_winkler_similarity(x: &str, y: &str, p: f64, max_l: usize) -> PyResult<f
 ///  >>> edit_distance('yesterday', 'today')
 ///  4.0
 #[pyfunction]
-fn edit_distance(x: &str, y: &str, substitution_cost: usize, transpositions: bool) -> PyResult<f64> {
-    Ok(metrics::string::edit_distance(x, y, substitution_cost, transpositions))
+fn edit_distance(
+    x: &str,
+    y: &str,
+    substitution_cost: usize,
+    transpositions: bool,
+) -> PyResult<f64> {
+    Ok(metrics::string::edit_distance(
+        x,
+        y,
+        substitution_cost,
+        transpositions,
+    ))
 }
-
 
 #[pymodinit]
 fn _lib(_py: Python, m: &PyModule) -> PyResult<()> {
