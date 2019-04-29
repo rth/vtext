@@ -2,8 +2,9 @@
 String metrics
 
 */
-use std::collections::HashSet;
+use hashbrown::HashSet;
 use std::iter::FromIterator;
+use itertools::Itertools;
 
 ///  Sørensen–Dice similarity coefficient
 ///
@@ -24,14 +25,14 @@ pub fn dice_similarity(x: &str, y: &str) -> f64 {
     } else {
         let mut x_set: HashSet<(char, char)> = HashSet::new();
 
-        for ngram in x.chars().collect::<Vec<char>>().windows(2) {
-            x_set.insert((ngram[0], ngram[1]));
+        for (char_1, char_2) in x.chars().tuple_windows() {
+            x_set.insert((char_1, char_2));
         }
 
         let mut y_set: HashSet<(char, char)> = HashSet::new();
 
-        for ngram in y.chars().collect::<Vec<char>>().windows(2) {
-            y_set.insert((ngram[0], ngram[1]));
+        for (char_1, char_2) in y.chars().tuple_windows() {
+            y_set.insert((char_1, char_2));
         }
 
         let intersection_len = x_set.intersection(&y_set).count();

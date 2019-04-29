@@ -44,6 +44,7 @@ extern crate seahash;
 extern crate ndarray;
 extern crate hashbrown;
 extern crate sprs;
+#[macro_use] extern crate itertools;
 
 mod math;
 pub mod metrics;
