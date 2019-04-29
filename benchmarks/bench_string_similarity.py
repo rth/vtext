@@ -9,6 +9,11 @@ import vtext
 
 base_dir = Path(__file__).parent.parent.resolve()
 
+try:
+    import Levenshtein
+except ImportError:
+    Levenshtein = None
+
 if __name__ == "__main__":
     input_files = list(glob(str(base_dir / "data" / "comp.graphics" / "*")))
     data = []
@@ -24,12 +29,21 @@ if __name__ == "__main__":
 
     print("# vectorizing {} documents:".format(len(data)))
 
-    tokens = tokens[:10000]
-
-    for label, func in [
+    tokens = tokens[:20000]
+    db = [
         ("vtext dice_similarity", vtext.metrics.string.dice_similarity),
         ("NLTK edit_distance", nltk.edit_distance),
-    ]:
+    ]
+    if Levenshtein is not None:
+        db.extend(
+            [
+                ("python-Levenshtein Levenshtein", Levenshtein.distance),
+                ("python-Levenshtein jaro", Levenshtein.jaro),
+                ("python-Levenshtein jaro_winkler", Levenshtein.jaro_winkler),
+            ]
+        )
+
+    for label, func in db:
 
         t0 = time()
 

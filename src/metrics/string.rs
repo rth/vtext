@@ -17,31 +17,27 @@ use std::iter::FromIterator;
 ///  // returns 0.333
 ///  ```
 pub fn dice_similarity(x: &str, y: &str) -> f64 {
-
     if (x.len() == 0) | (y.len() == 0) {
-        return 0.0
+        0.0
     } else if (x == y) {
-        return 1.0
+        1.0
+    } else {
+        let mut x_set: HashSet<(char, char)> = HashSet::new();
+
+        for ngram in x.chars().collect::<Vec<char>>().windows(2) {
+            x_set.insert((ngram[0], ngram[1]));
+        }
+
+        let mut y_set: HashSet<(char, char)> = HashSet::new();
+
+        for ngram in y.chars().collect::<Vec<char>>().windows(2) {
+            y_set.insert((ngram[0], ngram[1]));
+        }
+
+        let intersection_len = x_set.intersection(&y_set).count();
+
+        (2 * intersection_len) as f64 / (x_set.len() + y_set.len()) as f64
     }
-
-    let mut x_tokens = Vec::new();
-
-    for ngram in x.chars().collect::<Vec<char>>().windows(2) {
-        x_tokens.push(ngram.to_owned());
-    }
-
-    let mut y_tokens = Vec::new();
-
-    for ngram in y.chars().collect::<Vec<char>>().windows(2) {
-        y_tokens.push(ngram.to_owned());
-    }
-
-    let x_set: HashSet<&Vec<char>> = HashSet::from_iter(x_tokens.iter());
-    let y_set: HashSet<&Vec<char>> = HashSet::from_iter(y_tokens.iter());
-
-    let intersection_len = x_set.intersection(&y_set).count();
-
-    (2 * intersection_len) as f64 / (x_set.len() + y_set.len()) as f64
 }
 
 #[cfg(test)]
