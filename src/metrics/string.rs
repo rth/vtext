@@ -50,8 +50,10 @@ pub fn dice_similarity(x: &str, y: &str) -> f64 {
 ///  Jaro similarity
 pub fn jaro_similarity(x: &str, y: &str) -> f64 {
     // implementation adapted from NLTK
-    let x_len = x.chars().count();
-    let y_len = y.chars().count();
+    let x_chars: Vec<char> = x.chars().collect::<Vec<char>>();
+    let y_chars: Vec<char> = y.chars().collect::<Vec<char>>();
+    let x_len = x_chars.len();
+    let y_len = y_chars.len();
 
     // The upper bound of the distance for being a matched character.
     let match_bound = max(x_len, y_len);
@@ -63,11 +65,11 @@ pub fn jaro_similarity(x: &str, y: &str) -> f64 {
     let mut flagged_1: Vec<usize> = Vec::new();
     // positions in s2 which are matches to some character in s1
     let mut flagged_2: Vec<usize> = Vec::new();
-    for (x_idx, x_char) in x.chars().enumerate() {
+    for (x_idx, x_char) in x_chars.iter().enumerate() {
         let upperbound = min(x_idx + match_bound, y_len - 1);
         let lowerbound = max(0, x_idx as i32 - match_bound as i32) as usize;
         for j in (lowerbound..upperbound + 1) {
-            if (x_char == y.chars().nth(j).unwrap()) & !flagged_2.contains(&j) {
+            if (x_char == &y_chars[j]) & !flagged_2.contains(&j) {
                 matches += 1;
                 flagged_1.push(x_idx);
                 flagged_2.push(j);
@@ -80,7 +82,7 @@ pub fn jaro_similarity(x: &str, y: &str) -> f64 {
         return 0.0;
     }
     for (i, j) in flagged_1.iter().zip(flagged_2.iter()) {
-        if x.chars().nth(*i).unwrap() != y.chars().nth(*j).unwrap() {
+        if x_chars[*i] != y_chars[*j] {
             transpositions += 1
         }
     }
