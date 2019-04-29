@@ -455,6 +455,36 @@ fn jaro_winkler_similarity(x: &str, y: &str, p: f64, max_l: usize) -> PyResult<f
     Ok(metrics::string::jaro_winkler_similarity(x, y, p, max_l))
 }
 
+///  edit_distance(x, y, p, max_l)
+///
+///  Levenshtein edit distance
+///
+///  Parameters
+///  ----------
+///  x : str
+///     string to compare
+///  y : str
+///     string to compare
+///  p : float, default=0.1
+///     the constant scaling factor to overweigh common prefixes
+///  max_l : int, default=4
+///     the length of common prefix at the start of the string
+///
+///  Result
+///  ------
+///  distancec : float
+///     computed distance
+///
+///  Example
+///  -------
+///  >>> edit_distance('yesterday', 'today')
+///  4.0
+#[pyfunction]
+fn edit_distance(x: &str, y: &str, substitution_cost: usize, transpositions: bool) -> PyResult<f64> {
+    Ok(metrics::string::edit_distance(x, y, substitution_cost, transpositions))
+}
+
+
 #[pymodinit]
 fn _lib(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<_HashingVectorizerWrapper>()?;
@@ -466,5 +496,6 @@ fn _lib(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_function!(dice_similarity))?;
     m.add_function(wrap_function!(jaro_similarity))?;
     m.add_function(wrap_function!(jaro_winkler_similarity))?;
+    m.add_function(wrap_function!(edit_distance))?;
     Ok(())
 }

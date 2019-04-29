@@ -52,8 +52,6 @@ pub fn edit_distance(x: &str, y: &str, substitution_cost: usize, transpositions:
             lev[[x_idx+1, y_idx+1]] = min(min(min(a, b), c), d)
         }
     }
-    println!("{}", lev);
-
     lev[[x_len, y_len]] as f64
 
 }
