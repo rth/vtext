@@ -8,7 +8,12 @@ use itertools::Itertools;
 
 ///  Sørensen–Dice similarity coefficient
 ///
-///  Uses 2-char n-grams by default.
+///  This similarity tokenizes the input string x, y as 2-char n-grams,
+///  into two sets of tokens X, Y then computes,
+///
+///  similarity(x, y) = 2 * |X ∩ Y| / (|X| + |Y|)
+///
+///  where |X| is the cardinality of set X.
 ///
 ///  # Example
 ///  ```rust

@@ -18,9 +18,9 @@ use pyo3::prelude::{pymodinit, ObjectProtocol, Py, PyModule, PyObject, PyResult,
 //use pyo3::wrap_pyfunction;
 use pyo3::types::{PyIterator, PyString};
 
+use vtext::metrics;
 use vtext::tokenize;
 use vtext::vectorize;
-use vtext::metrics;
 
 type PyCsrArray = (Py<PyArray1<i32>>, Py<PyArray1<i32>>, Py<PyArray1<i32>>);
 
@@ -329,7 +329,12 @@ impl SnowballStemmer {
 
 ///  Sørensen–Dice similarity coefficient
 ///
-///  Uses 2-char n-grams by default.
+///  This similarity tokenizes the input string x, y as 2-char n-grams,
+///  into two sets of tokens X, Y then computes,
+///
+///  similarity(x, y) = 2 * |X ∩ Y| / (|X| + |Y|)
+///
+///  where |X| is the cardinality of set X.
 ///
 ///  Parameters
 ///  ----------
@@ -351,7 +356,6 @@ impl SnowballStemmer {
 fn dice_similarity(x: &str, y: &str) -> PyResult<f64> {
     Ok(metrics::string::dice_similarity(x, y))
 }
-
 
 #[pymodinit]
 fn _lib(_py: Python, m: &PyModule) -> PyResult<()> {
