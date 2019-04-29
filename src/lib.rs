@@ -17,7 +17,7 @@ The API is currently unstable.
    `HashingVectorizer` in scikit-learn.
  - Feature weighting (*planned*): feature weighting based on document
    frequency (TF-IDF), feature normalization.
- - String similarity: Sørensen-Dice, Jaro
+ - String similarity: Sørensen-Dice, Jaro, Jaro Winkler
 
 # Example
 

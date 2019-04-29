@@ -33,6 +33,10 @@ if __name__ == "__main__":
     db = [
         ("vtext dice_similarity", vtext.metrics.string.dice_similarity),
         ("vtext jaro_similarity", vtext.metrics.string.jaro_similarity),
+        (
+            "vtext jaro_winkler_similarity",
+            lambda x, y: vtext.metrics.string.jaro_winkler_similarity(x, y, 0.1, 4),
+        ),
         ("NLTK edit_distance", nltk.edit_distance),
     ]
     if Levenshtein is not None:
