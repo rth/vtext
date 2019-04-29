@@ -6,6 +6,57 @@ use hashbrown::HashSet;
 use itertools::Itertools;
 use std::cmp::{max, min};
 use std::iter::FromIterator;
+use ndarray::{Array, ShapeBuilder};
+
+///  Levenshtein edit distance
+///
+pub fn edit_distance(x: &str, y: &str, substitution_cost: usize, transpositions: bool) -> f64 {
+    // implementation adapted from NLTK
+    let x_chars: Vec<char> = x.chars().collect::<Vec<char>>();
+    let y_chars: Vec<char> = y.chars().collect::<Vec<char>>();
+    let x_len = x_chars.len();
+    let y_len = y_chars.len();
+    
+    // initialize the 2D array
+    let mut lev = Array::<i32, _>::zeros((x_len + 1, y_len + 1).f());
+    for idx in 1..x_len+1 {
+        lev[[idx, 0]] = idx as i32
+    }
+    for idx in 1..y_len+1 {
+        lev[[0, idx]] = idx as i32
+    }
+
+    for x_idx in 0..x_len {
+        for y_idx in 0..y_len {
+            let c1 = x_chars[x_idx];
+            let c2 = y_chars[y_idx];
+
+            // skipping a character in x
+            let a = lev[[x_idx, y_idx +1]] + 1;
+            // skipping a character in y
+            let b = lev[[x_idx+1, y_idx]] + 1;
+
+            // substitution
+            let mut c = lev[[x_idx, y_idx]];
+            if c1 == c2 {
+                c += substitution_cost as i32;
+            }
+
+            let mut d = c + 1; // never picked by default
+            if transpositions & (x_idx > 1) & (y_idx > 1) {
+                if (x_chars[x_idx - 1] == c2) & (y_chars[y_idx - 1] == c1) {
+                    d = lev[[x_idx - 1, y_idx - 1]] + 1;
+                }
+            }
+            // pick the cheapest
+            lev[[x_idx+1, y_idx+1]] = min(min(min(a, b), c), d)
+        }
+    }
+    println!("{}", lev);
+
+    lev[[x_len, y_len]] as f64
+
+}
 
 ///  Sørensen–Dice similarity coefficient
 ///
@@ -26,7 +77,7 @@ use std::iter::FromIterator;
 pub fn dice_similarity(x: &str, y: &str) -> f64 {
     if (x.len() < 2) | (y.len() < 2) {
         0.0
-    } else if (x == y) {
+    } else if x == y {
         1.0
     } else {
         let mut x_set: HashSet<(char, char)> = HashSet::with_capacity(5);
@@ -87,7 +138,7 @@ pub fn jaro_similarity(x: &str, y: &str) -> f64 {
     for (x_idx, x_char) in x_chars.iter().enumerate() {
         let upperbound = min(x_idx + match_bound, y_len - 1);
         let lowerbound = max(0, x_idx as i32 - match_bound as i32) as usize;
-        for j in (lowerbound..upperbound + 1) {
+        for j in lowerbound..upperbound + 1 {
             if (x_char == &y_chars[j]) & !flagged_2.contains(&j) {
                 flagged_1.push(x_idx);
                 flagged_2.push(j);
@@ -207,6 +258,12 @@ mod tests {
     fn test_jaro_winkler_similarity_invalid() {
         // Should panic: 0.5*4 > 1
         jaro_winkler_similarity("AABABCAAAC", "ABAACBAAAC", 0.5, 4);
+    }
+
+    #[test]
+    fn test_edit_distance() {
+        let res = edit_distance("yesterday", "today", 1, false);
+        assert_eq!(res, 5.0);
     }
 
 }
