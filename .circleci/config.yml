@@ -80,7 +80,7 @@ jobs:
             python -m venv venv
             source venv/bin/activate
             pip install awscli
-            aws s3 sync --exclude="*" --include="*manylinux*" python/dist/ s3://vtext/dist/
+            aws s3 sync --exclude="*" --include="*manylinux*" --cache-control max-age=60 python/dist/ s3://vtext/dist/ 
 
   docs:
     working_directory: ~/repo
@@ -111,7 +111,7 @@ jobs:
             if [ "$CIRCLE_BRANCH" == "master" ]
             then
                 source venv/bin/activate
-                aws s3 sync --delete doc/_build/html/ s3://vtext/doc/latest/
+                aws s3 sync --delete doc/_build/html/ s3://vtext/doc/latest/ --recursive --cache-control max-age=60
             fi
       - store_artifacts:
           path: /root/repo/doc/_build/html/
