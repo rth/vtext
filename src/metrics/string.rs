@@ -65,7 +65,7 @@ pub fn dice_similarity(x: &str, y: &str) -> f64 {
 ///  ```rust
 ///  use vtext::metrics::string::jaro_similarity;
 ///
-///  let res = dice_similarity("yesterday", "today");
+///  let res = jaro_similarity("yesterday", "today");
 ///  // returns 0.581
 ///  ```
 pub fn jaro_similarity(x: &str, y: &str) -> f64 {
