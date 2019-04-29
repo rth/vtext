@@ -111,7 +111,7 @@ jobs:
             if [ "$CIRCLE_BRANCH" == "master" ]
             then
                 source venv/bin/activate
-                aws s3 sync --delete doc/_build/html/ s3://vtext/doc/latest/ --recursive --cache-control max-age=60
+                aws s3 sync --delete doc/_build/html/ s3://vtext/doc/latest/ --cache-control max-age=60
             fi
       - store_artifacts:
           path: /root/repo/doc/_build/html/
