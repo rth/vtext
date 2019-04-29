@@ -6,7 +6,7 @@ import pytest
 
 
 def test_edit_distance():
-    assert edit_distance("healed", "sealed") == 4.0
+    assert edit_distance("healed", "sealed", 1, False) == 1.0
 
 
 def test_dice_similarity():
