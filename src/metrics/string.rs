@@ -3,8 +3,8 @@ String metrics
 
 */
 use hashbrown::HashSet;
-use std::iter::FromIterator;
 use itertools::Itertools;
+use std::iter::FromIterator;
 
 ///  Sørensen–Dice similarity coefficient
 ///
