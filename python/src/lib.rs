@@ -461,9 +461,13 @@ fn jaro_winkler_similarity(x: &str, y: &str, p: f64, max_l: usize) -> PyResult<f
     Ok(metrics::string::jaro_winkler_similarity(x, y, p, max_l))
 }
 
-///  edit_distance(x, y, p, max_l)
+///  edit_distance(x, y, substitution_cost, transpositions)
 ///
 ///  Levenshtein edit distance
+///
+///  It corresponds to the minimum number of single-character edits
+///  (insertions, deletions, substitutions, and optionally transpositions)
+///  required to change one word into the other.
 ///
 ///  Parameters
 ///  ----------
@@ -471,14 +475,14 @@ fn jaro_winkler_similarity(x: &str, y: &str, p: f64, max_l: usize) -> PyResult<f
 ///     string to compare
 ///  y : str
 ///     string to compare
-///  p : float, default=0.1
-///     the constant scaling factor to overweigh common prefixes
-///  max_l : int, default=4
-///     the length of common prefix at the start of the string
+///  substitution_cost : int
+///     the cost associated with one character substitutions
+///  transpositions : bool
+///     if True, transpositions are also taken into account
 ///
 ///  Result
 ///  ------
-///  distancec : float
+///  distance : float
 ///     computed distance
 ///
 ///  Example

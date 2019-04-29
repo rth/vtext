@@ -16,6 +16,10 @@ use std::iter::FromIterator;
 
 ///  Levenshtein edit distance
 ///
+///  It corresponds to the minimum number of single-character edits
+///  (insertions, deletions, substitutions, and optionally transpositions)
+///  required to change one word into the other.
+///
 ///  # Example
 ///  ```rust
 ///  use vtext::metrics::string::edit_distance;
