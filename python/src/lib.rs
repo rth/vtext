@@ -20,8 +20,8 @@ use sprs::CsMat;
 
 use pyo3::exceptions;
 use pyo3::prelude::*;
-use pyo3::wrap_pyfunction;
 use pyo3::types::{PyIterator, PyString};
+use pyo3::wrap_pyfunction;
 
 use vtext::metrics;
 use vtext::tokenize;
@@ -68,7 +68,7 @@ impl _HashingVectorizerWrapper {
     #[new]
     fn new(obj: &PyRawObject) {
         let estimator = vtext::vectorize::HashingVectorizer::new();
-        obj.new(_HashingVectorizerWrapper { inner: estimator });
+        obj.init(_HashingVectorizerWrapper { inner: estimator });
     }
 
     fn transform(&mut self, py: Python, x: PyObject) -> PyResult<PyCsrArray> {
@@ -92,7 +92,7 @@ impl _CountVectorizerWrapper {
     #[new]
     fn new(obj: &PyRawObject) {
         let estimator = vtext::vectorize::CountVectorizer::new();
-        obj.new(_CountVectorizerWrapper { inner: estimator });
+        obj.init(_CountVectorizerWrapper { inner: estimator });
     }
 
     fn fit(&mut self, py: Python, x: PyObject) -> PyResult<()> {
@@ -154,7 +154,7 @@ impl UnicodeSegmentTokenizer {
     fn new(obj: &PyRawObject, word_bounds: bool) {
         let tokenizer = vtext::tokenize::UnicodeSegmentTokenizer::new(word_bounds);
 
-        obj.new(UnicodeSegmentTokenizer {
+        obj.init(UnicodeSegmentTokenizer {
             word_bounds: word_bounds,
             inner: tokenizer,
         });
@@ -207,7 +207,7 @@ impl VTextTokenizer {
     #[new]
     fn new(obj: &PyRawObject, lang: String) {
         let tokenizer = vtext::tokenize::VTextTokenizer::new(&lang);
-        obj.new(VTextTokenizer {
+        obj.init(VTextTokenizer {
             lang: lang,
             inner: tokenizer,
         });
@@ -249,7 +249,7 @@ impl RegexpTokenizer {
     fn new(obj: &PyRawObject, pattern: &str) {
         let inner = vtext::tokenize::RegexpTokenizer::new(pattern.to_owned());
 
-        obj.new(RegexpTokenizer {
+        obj.init(RegexpTokenizer {
             pattern: pattern.to_string(),
             inner: inner,
         });
@@ -305,7 +305,7 @@ impl CharacterTokenizer {
     fn new(obj: &PyRawObject, window_size: usize) {
         let inner = vtext::tokenize::CharacterTokenizer::new(window_size);
 
-        obj.new(CharacterTokenizer {
+        obj.init(CharacterTokenizer {
             window_size: window_size,
             inner: inner,
         });
@@ -349,7 +349,7 @@ pub struct SnowballStemmer {
 impl SnowballStemmer {
     #[new]
     #[args(lang = "\"english\"")]
-    fn new(obj: &PyRawObject, lang: &str) {
+    fn new(obj: &PyRawObject, lang: &str) -> PyResult<()> {
         let algorithm = match lang {
             "arabic" => Ok(rust_stemmers::Algorithm::Arabic),
             "danish" => Ok(rust_stemmers::Algorithm::Danish),
@@ -375,10 +375,11 @@ impl SnowballStemmer {
 
         let stemmer = rust_stemmers::Stemmer::create(algorithm);
 
-        obj.new(SnowballStemmer {
+        obj.init(SnowballStemmer {
             lang: lang.to_string(),
             inner: stemmer,
         });
+        Ok(())
     }
 
     /// stem(self, word)
@@ -558,16 +559,16 @@ fn edit_distance(
 
 #[pymodule]
 fn _lib(_py: Python, m: &PyModule) -> PyResult<()> {
-//    m.add_class::<_HashingVectorizerWrapper>()?;
-//    m.add_class::<_CountVectorizerWrapper>()?;
-//    m.add_class::<UnicodeSegmentTokenizer>()?;
-//    m.add_class::<RegexpTokenizer>()?;
-//    m.add_class::<VTextTokenizer>()?;
-//    m.add_class::<CharacterTokenizer>()?;
-//    m.add_class::<SnowballStemmer>()?;
-//    m.add_wrapped(wrap_pyfunction!(dice_similarity))?;
-//    m.add_wrapped(wrap_pyfunction!(jaro_similarity))?;
-//    m.add_wrapped(wrap_pyfunction!(jaro_winkler_similarity))?;
-//    m.add_wrapped(wrap_pyfunction!(edit_distance))?;
+    m.add_class::<_HashingVectorizerWrapper>()?;
+    m.add_class::<_CountVectorizerWrapper>()?;
+    m.add_class::<UnicodeSegmentTokenizer>()?;
+    m.add_class::<RegexpTokenizer>()?;
+    m.add_class::<VTextTokenizer>()?;
+    m.add_class::<CharacterTokenizer>()?;
+    m.add_class::<SnowballStemmer>()?;
+    m.add_wrapped(wrap_pyfunction!(dice_similarity))?;
+    m.add_wrapped(wrap_pyfunction!(jaro_similarity))?;
+    m.add_wrapped(wrap_pyfunction!(jaro_winkler_similarity))?;
+    m.add_wrapped(wrap_pyfunction!(edit_distance))?;
     Ok(())
 }
