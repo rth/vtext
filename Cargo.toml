@@ -3,9 +3,9 @@ name = "vtext"
 version = "0.1.0-alpha.1"
 description = "NLP with Rust"
 license = "Apache-2.0"
-license_file = "LICENSE"
 documentation = "https://docs.rs/vtext/"
 repository = "https://github.com/rth/vtext"
+readme = "README.md"
 authors = ["Roman Yurchak <rth.yurchak@pm.me>"]
 keywords = [
     "nlp",
