@@ -276,9 +276,22 @@ impl RegexpTokenizer {
     }
 }
 
-/// __init__(self, pattern=r'\\b\\w\\w+\\b')
+/// __init__(self, window_size=4)
 ///
 /// Character tokenizer
+///
+/// Parameters
+/// ----------
+/// window_size : str, default=4
+///   number of consecutive characters included in a token
+///
+/// Example
+/// -------
+/// >>> from vtext.tokenize import CharacterTokenizer
+/// >>> tokenizer = CharacterTokenizer(window_size=4)
+/// >>> tokenizer.tokenize("fox can't")
+/// ["fox ", "ox c", "x ca", " can", "can'", "an't"]
+///
 #[pyclass]
 pub struct CharacterTokenizer {
     pub window_size: usize,
