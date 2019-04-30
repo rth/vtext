@@ -7,6 +7,12 @@
 from ._lib import UnicodeSegmentTokenizer
 from ._lib import RegexpTokenizer
 from ._lib import VTextTokenizer
+from ._lib import CharacterTokenizer
 
 
-__all__ = ["UnicodeSegmentTokenizer", "RegexpTokenizer", "VTextTokenizer"]
+__all__ = [
+    "UnicodeSegmentTokenizer",
+    "RegexpTokenizer",
+    "VTextTokenizer",
+    "CharacterTokenizer",
+]

@@ -6,6 +6,7 @@ import re
 from vtext.tokenize import RegexpTokenizer
 from vtext.tokenize import UnicodeSegmentTokenizer
 from vtext.tokenize import VTextTokenizer
+from vtext.tokenize import CharacterTokenizer
 
 try:
     import sacremoses
@@ -57,6 +58,7 @@ if __name__ == "__main__":
             UnicodeSegmentTokenizer(word_bounds=True).tokenize,
         ),
         ("VTextTokenizer('en')", VTextTokenizer("en").tokenize),
+        ("CharacterTokenizer(4)", CharacterTokenizer(4).tokenize)
     ]
 
     if sacremoses is not None:
