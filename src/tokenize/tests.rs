@@ -4,7 +4,7 @@
 // <http://apache.org/licenses/LICENSE-2.0>. This file may not be copied,
 // modified, or distributed except according to those terms.
 
-use crate::tokenize::{RegexpTokenizer, UnicodeSegmentTokenizer, VTextTokenizer};
+use crate::tokenize::*;
 
 #[test]
 fn test_regexp_tokenizer() {
@@ -101,4 +101,14 @@ fn test_vtext_tokenizer_fr() {
 fn test_vtext_tokenizer_invalid_lang() {
     let tokenizer = VTextTokenizer::new("unknown");
     assert_eq!(tokenizer.lang, "any");
+}
+
+#[test]
+fn test_character_tokenizer() {
+    let s = "fox can't";
+
+    let tokenizer = CharacterTokenizer::new(4);
+    let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
+    let b: &[_] = &["fox ", "ox c", "x ca", " can", "can'", "an't"];
+    assert_eq!(tokens, b);
 }

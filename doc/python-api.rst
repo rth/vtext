@@ -23,6 +23,7 @@ vtext.tokenize
    tokenize.RegexpTokenizer
    tokenize.UnicodeSegmentTokenizer
    tokenize.VTextTokenizer
+   tokenize.CharacterTokenizer
 
 
 vtext.vectorize

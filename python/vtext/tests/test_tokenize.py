@@ -8,6 +8,7 @@ import pytest
 
 from vtext.tokenize import UnicodeSegmentTokenizer
 from vtext.tokenize import RegexpTokenizer
+from vtext.tokenize import CharacterTokenizer
 
 
 def test_unicode_segment_tokenize():
@@ -33,3 +34,15 @@ def test_regexp_tokenize():
     # check default pattern
     tokenizer = RegexpTokenizer()
     assert tokenizer.tokenize("Today, tomorrow") == ["Today", "tomorrow"]
+
+
+def test_character_tokenizer():
+    tokenizer = CharacterTokenizer()
+    assert tokenizer.tokenize("fox can't") == [
+        "fox ",
+        "ox c",
+        "x ca",
+        " can",
+        "can'",
+        "an't",
+    ]

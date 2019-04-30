@@ -50,6 +50,7 @@ assert_eq!(tokens, &["The", "“", "brown", "”", "fox", "ca", "n't", "jump", "
 extern crate regex;
 extern crate unicode_segmentation;
 
+use itertools::Itertools;
 use std::cmp;
 
 use regex::Regex;
@@ -254,5 +255,33 @@ impl VTextTokenizer {
         // remove whitespace tokens
         let res = res.into_iter().filter(|x| x != &" ");
         return Box::new(res);
+    }
+}
+
+/// Character tokenizer
+#[derive(Debug)]
+pub struct CharacterTokenizer {
+    pub window_size: usize,
+}
+
+impl CharacterTokenizer {
+    /// Create a new instance
+    pub fn new(window_size: usize) -> CharacterTokenizer {
+        CharacterTokenizer {
+            window_size: window_size,
+        }
+    }
+
+    /// Tokenize a string
+    pub fn tokenize<'a>(&self, text: &'a str) -> Box<Iterator<Item = &'a str> + 'a> {
+        let res = text
+            .char_indices()
+            .zip(
+                text.char_indices()
+                    .skip(self.window_size)
+                    .chain(Some((text.len(), ' '))),
+            )
+            .map(move |((i, _), (j, _))| &text[i..j]);
+        Box::new(res)
     }
 }

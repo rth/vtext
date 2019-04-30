@@ -173,10 +173,8 @@ impl UnicodeSegmentTokenizer {
     /// -------
     /// tokens : List[str]
     ///    computed tokens
-    fn tokenize(&self, py: Python, x: String) -> PyResult<(Vec<String>)> {
-        let x = x.to_string();
-
-        let res = self.inner.tokenize(&x);
+    fn tokenize(&self, py: Python, x: &str) -> PyResult<(Vec<String>)> {
+        let res = self.inner.tokenize(x);
         let res = res.map(|s| s.to_string()).collect();
         Ok((res))
     }
@@ -228,10 +226,8 @@ impl VTextTokenizer {
     /// -------
     /// tokens : List[str]
     ///    computed tokens
-    fn tokenize(&self, py: Python, x: String) -> PyResult<(Vec<String>)> {
-        let x = x.to_string();
-
-        let res = self.inner.tokenize(&x);
+    fn tokenize(&self, py: Python, x: &str) -> PyResult<(Vec<String>)> {
+        let res = self.inner.tokenize(x);
         let res = res.map(|s| s.to_string()).collect();
         Ok((res))
     }
@@ -272,9 +268,65 @@ impl RegexpTokenizer {
     /// -------
     /// tokens : List[str]
     ///    computed tokens
-    fn tokenize(&self, py: Python, x: String) -> PyResult<(Vec<String>)> {
+    fn tokenize(&self, py: Python, x: &str) -> PyResult<(Vec<String>)> {
         // TODO: reduce the number of copies here
-        let res = self.inner.tokenize(&x);
+        let res = self.inner.tokenize(x);
+        let res: Vec<String> = res.map(|s| s.to_string()).collect();
+        Ok((res))
+    }
+}
+
+/// __init__(self, window_size=4)
+///
+/// Character tokenizer
+///
+/// Parameters
+/// ----------
+/// window_size : str, default=4
+///   number of consecutive characters included in a token
+///
+/// Example
+/// -------
+/// >>> from vtext.tokenize import CharacterTokenizer
+/// >>> tokenizer = CharacterTokenizer(window_size=4)
+/// >>> tokenizer.tokenize('fox can\'t')
+/// ['fox ', 'ox c', 'x ca', ' can', 'can\'', 'an\'t']
+///
+#[pyclass]
+pub struct CharacterTokenizer {
+    pub window_size: usize,
+    inner: vtext::tokenize::CharacterTokenizer,
+}
+
+#[pymethods]
+impl CharacterTokenizer {
+    #[new]
+    #[args(window_size = 4)]
+    fn __new__(obj: &PyRawObject, window_size: usize) -> PyResult<()> {
+        let inner = vtext::tokenize::CharacterTokenizer::new(window_size);
+
+        obj.init(|_token| CharacterTokenizer {
+            window_size: window_size,
+            inner: inner,
+        })
+    }
+
+    /// tokenize(self, x)
+    ///
+    /// Tokenize a string
+    ///
+    /// Parameters
+    /// ----------
+    /// x : bool
+    ///    the string to tokenize
+    ///
+    /// Returns
+    /// -------
+    /// tokens : List[str]
+    ///    computed tokens
+    fn tokenize(&self, py: Python, x: &str) -> PyResult<(Vec<String>)> {
+        // TODO: reduce the number of copies here
+        let res = self.inner.tokenize(x);
         let res: Vec<String> = res.map(|s| s.to_string()).collect();
         Ok((res))
     }
@@ -511,6 +563,7 @@ fn _lib(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<UnicodeSegmentTokenizer>()?;
     m.add_class::<RegexpTokenizer>()?;
     m.add_class::<VTextTokenizer>()?;
+    m.add_class::<CharacterTokenizer>()?;
     m.add_class::<SnowballStemmer>()?;
     m.add_function(wrap_function!(dice_similarity))?;
     m.add_function(wrap_function!(jaro_similarity))?;
