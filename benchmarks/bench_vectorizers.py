@@ -27,8 +27,10 @@ if __name__ == "__main__":
         ),
         ("CountVectorizer (vtext)", vtext.vectorize.CountVectorizer(lowercase=False)),
         ("CountVectorizer (scikit-learn)", skt.CountVectorizer(lowercase=False)),
-        ("CountVectorizer, 4-char ngram (scikit-learn)",
-            skt.CountVectorizer(lowercase=False, analyzer="char", ngram_range=(4, 4))),
+        (
+            "CountVectorizer, 4-char ngram (scikit-learn)",
+            skt.CountVectorizer(lowercase=False, analyzer="char", ngram_range=(4, 4)),
+        ),
     ]:
 
         t0 = time()
