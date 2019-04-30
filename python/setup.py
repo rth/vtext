@@ -19,6 +19,7 @@ setup(
             "./Cargo.toml",
             rustc_flags=["--cfg=Py_3"],
             features=["numpy/python3"],
+            args=["--no-default-features"],
         )
     ],
     long_description_content_type="text/markdown",

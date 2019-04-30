@@ -20,8 +20,8 @@ use sprs::CsMat;
 
 use pyo3::exceptions;
 use pyo3::prelude::*;
-use pyo3::prelude::{pymodinit, ObjectProtocol, Py, PyModule, PyObject, PyResult, Python};
 use pyo3::types::{PyIterator, PyString};
+use pyo3::wrap_pyfunction;
 
 use vtext::metrics;
 use vtext::tokenize;
@@ -66,9 +66,9 @@ pub struct _HashingVectorizerWrapper {
 #[pymethods]
 impl _HashingVectorizerWrapper {
     #[new]
-    fn __new__(obj: &PyRawObject) -> PyResult<()> {
+    fn new(obj: &PyRawObject) {
         let estimator = vtext::vectorize::HashingVectorizer::new();
-        obj.init(|_token| _HashingVectorizerWrapper { inner: estimator })
+        obj.init(_HashingVectorizerWrapper { inner: estimator });
     }
 
     fn transform(&mut self, py: Python, x: PyObject) -> PyResult<PyCsrArray> {
@@ -90,9 +90,9 @@ pub struct _CountVectorizerWrapper {
 #[pymethods]
 impl _CountVectorizerWrapper {
     #[new]
-    fn __new__(obj: &PyRawObject) -> PyResult<()> {
+    fn new(obj: &PyRawObject) {
         let estimator = vtext::vectorize::CountVectorizer::new();
-        obj.init(|_token| _CountVectorizerWrapper { inner: estimator })
+        obj.init(_CountVectorizerWrapper { inner: estimator });
     }
 
     fn fit(&mut self, py: Python, x: PyObject) -> PyResult<()> {
@@ -151,13 +151,13 @@ pub struct UnicodeSegmentTokenizer {
 impl UnicodeSegmentTokenizer {
     #[new]
     #[args(word_bounds = true)]
-    fn __new__(obj: &PyRawObject, word_bounds: bool) -> PyResult<()> {
+    fn new(obj: &PyRawObject, word_bounds: bool) {
         let tokenizer = vtext::tokenize::UnicodeSegmentTokenizer::new(word_bounds);
 
-        obj.init(|_token| UnicodeSegmentTokenizer {
+        obj.init(UnicodeSegmentTokenizer {
             word_bounds: word_bounds,
             inner: tokenizer,
-        })
+        });
     }
 
     /// tokenize(self, x)
@@ -205,12 +205,12 @@ pub struct VTextTokenizer {
 #[pymethods]
 impl VTextTokenizer {
     #[new]
-    fn __new__(obj: &PyRawObject, lang: String) -> PyResult<()> {
+    fn new(obj: &PyRawObject, lang: String) {
         let tokenizer = vtext::tokenize::VTextTokenizer::new(&lang);
-        obj.init(|_token| VTextTokenizer {
+        obj.init(VTextTokenizer {
             lang: lang,
             inner: tokenizer,
-        })
+        });
     }
 
     /// tokenize(self, x)
@@ -246,13 +246,13 @@ pub struct RegexpTokenizer {
 impl RegexpTokenizer {
     #[new]
     #[args(pattern = "\"\\\\b\\\\w\\\\w+\\\\b\"")]
-    fn __new__(obj: &PyRawObject, pattern: &str) -> PyResult<()> {
+    fn new(obj: &PyRawObject, pattern: &str) {
         let inner = vtext::tokenize::RegexpTokenizer::new(pattern.to_owned());
 
-        obj.init(|_token| RegexpTokenizer {
+        obj.init(RegexpTokenizer {
             pattern: pattern.to_string(),
             inner: inner,
-        })
+        });
     }
 
     /// tokenize(self, x)
@@ -302,13 +302,13 @@ pub struct CharacterTokenizer {
 impl CharacterTokenizer {
     #[new]
     #[args(window_size = 4)]
-    fn __new__(obj: &PyRawObject, window_size: usize) -> PyResult<()> {
+    fn new(obj: &PyRawObject, window_size: usize) {
         let inner = vtext::tokenize::CharacterTokenizer::new(window_size);
 
-        obj.init(|_token| CharacterTokenizer {
+        obj.init(CharacterTokenizer {
             window_size: window_size,
             inner: inner,
-        })
+        });
     }
 
     /// tokenize(self, x)
@@ -349,7 +349,7 @@ pub struct SnowballStemmer {
 impl SnowballStemmer {
     #[new]
     #[args(lang = "\"english\"")]
-    fn __new__(obj: &PyRawObject, lang: &str) -> PyResult<()> {
+    fn new(obj: &PyRawObject, lang: &str) -> PyResult<()> {
         let algorithm = match lang {
             "arabic" => Ok(rust_stemmers::Algorithm::Arabic),
             "danish" => Ok(rust_stemmers::Algorithm::Danish),
@@ -375,10 +375,11 @@ impl SnowballStemmer {
 
         let stemmer = rust_stemmers::Stemmer::create(algorithm);
 
-        obj.init(|_token| SnowballStemmer {
+        obj.init(SnowballStemmer {
             lang: lang.to_string(),
             inner: stemmer,
-        })
+        });
+        Ok(())
     }
 
     /// stem(self, word)
@@ -556,7 +557,7 @@ fn edit_distance(
     ))
 }
 
-#[pymodinit]
+#[pymodule]
 fn _lib(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<_HashingVectorizerWrapper>()?;
     m.add_class::<_CountVectorizerWrapper>()?;
@@ -565,9 +566,9 @@ fn _lib(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<VTextTokenizer>()?;
     m.add_class::<CharacterTokenizer>()?;
     m.add_class::<SnowballStemmer>()?;
-    m.add_function(wrap_function!(dice_similarity))?;
-    m.add_function(wrap_function!(jaro_similarity))?;
-    m.add_function(wrap_function!(jaro_winkler_similarity))?;
-    m.add_function(wrap_function!(edit_distance))?;
+    m.add_wrapped(wrap_pyfunction!(dice_similarity))?;
+    m.add_wrapped(wrap_pyfunction!(jaro_similarity))?;
+    m.add_wrapped(wrap_pyfunction!(jaro_winkler_similarity))?;
+    m.add_wrapped(wrap_pyfunction!(edit_distance))?;
     Ok(())
 }
