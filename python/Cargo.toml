@@ -18,5 +18,8 @@ version = "0.4.1"
 features = ["python3"]
 
 [dependencies.pyo3]
-version = "0.5.3"
-features = ["extension-module"]
+version = "0.7.0-alpha.1"
+
+[features]
+extension-module = ["pyo3/extension-module"]
+default = ["extension-module"]

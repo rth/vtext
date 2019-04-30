@@ -24,8 +24,7 @@ The easiest might be to use docker to setup a build environment,
 
     docker build -t vtext-py-env .
     ./run_docker_env.sh
-    rustup toolchain add nightly-2019-02-04
-    rustup default nightly-2019-02-04-x86_64-unknown-linux-gnu
+    rustup default nightly-2019-02-28-x86_64-unknown-linux-gnu
     python3.7 -m pip install -r /src/python/requirements.txt
     cd /src/python && python3.7 setup.py install
     python3.7 -m pip install pandas conllu
