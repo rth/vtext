@@ -173,10 +173,8 @@ impl UnicodeSegmentTokenizer {
     /// -------
     /// tokens : List[str]
     ///    computed tokens
-    fn tokenize(&self, py: Python, x: String) -> PyResult<(Vec<String>)> {
-        let x = x.to_string();
-
-        let res = self.inner.tokenize(&x);
+    fn tokenize(&self, py: Python, x: &str) -> PyResult<(Vec<String>)> {
+        let res = self.inner.tokenize(x);
         let res = res.map(|s| s.to_string()).collect();
         Ok((res))
     }
@@ -228,10 +226,8 @@ impl VTextTokenizer {
     /// -------
     /// tokens : List[str]
     ///    computed tokens
-    fn tokenize(&self, py: Python, x: String) -> PyResult<(Vec<String>)> {
-        let x = x.to_string();
-
-        let res = self.inner.tokenize(&x);
+    fn tokenize(&self, py: Python, x: &str) -> PyResult<(Vec<String>)> {
+        let res = self.inner.tokenize(x);
         let res = res.map(|s| s.to_string()).collect();
         Ok((res))
     }
@@ -272,9 +268,9 @@ impl RegexpTokenizer {
     /// -------
     /// tokens : List[str]
     ///    computed tokens
-    fn tokenize(&self, py: Python, x: String) -> PyResult<(Vec<String>)> {
+    fn tokenize(&self, py: Python, x: &str) -> PyResult<(Vec<String>)> {
         // TODO: reduce the number of copies here
-        let res = self.inner.tokenize(&x);
+        let res = self.inner.tokenize(x);
         let res: Vec<String> = res.map(|s| s.to_string()).collect();
         Ok((res))
     }
@@ -315,9 +311,9 @@ impl CharacterTokenizer {
     /// -------
     /// tokens : List[str]
     ///    computed tokens
-    fn tokenize(&self, py: Python, x: String) -> PyResult<(Vec<String>)> {
+    fn tokenize(&self, py: Python, x: &str) -> PyResult<(Vec<String>)> {
         // TODO: reduce the number of copies here
-        let res = self.inner.tokenize(&x);
+        let res = self.inner.tokenize(x);
         let res: Vec<String> = res.map(|s| s.to_string()).collect();
         Ok((res))
     }
