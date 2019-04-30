@@ -7,6 +7,15 @@ license_file = "LICENSE"
 documentation = "https://docs.rs/vtext/"
 repository = "https://github.com/rth/vtext"
 authors = ["Roman Yurchak <rth.yurchak@pm.me>"]
+keywords = [
+    "nlp",
+    "information retrieval",
+    "tokenization",
+    "bag-of-words"
+    "tf-idf",
+    "levenshtein",
+    "matching"
+]
 edition = "2018"
 exclude = [
     "python/*",
