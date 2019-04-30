@@ -11,7 +11,7 @@ keywords = [
     "nlp",
     "information retrieval",
     "tokenization",
-    "bag-of-words"
+    "bag-of-words",
     "tf-idf",
     "levenshtein",
     "matching"
