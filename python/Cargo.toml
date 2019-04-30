@@ -14,11 +14,14 @@ vtext = {"path" = "../"}
 rust-stemmers = "1.1.0"
 
 [dependencies.numpy]
-version = "0.5.0"
+git ="https://github.com/rth/rust-numpy"
+branch="pyo3-0.7.0"
 features = ["python3"]
 
 [dependencies.pyo3]
-version = "0.6.0"
+git = "https://github.com/PyO3/pyo3"
+branch = "master"
+
 
 [features]
 extension-module = ["pyo3/extension-module"]
