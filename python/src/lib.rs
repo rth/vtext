@@ -289,8 +289,8 @@ impl RegexpTokenizer {
 /// -------
 /// >>> from vtext.tokenize import CharacterTokenizer
 /// >>> tokenizer = CharacterTokenizer(window_size=4)
-/// >>> tokenizer.tokenize("fox can't")
-/// ["fox ", "ox c", "x ca", " can", "can'", "an't"]
+/// >>> tokenizer.tokenize('fox can\'t')
+/// ['fox ', 'ox c', 'x ca', ' can', 'can\'', 'an\'t']
 ///
 #[pyclass]
 pub struct CharacterTokenizer {
