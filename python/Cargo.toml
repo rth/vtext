@@ -19,8 +19,7 @@ branch="pyo3-0.7.0"
 features = ["python3"]
 
 [dependencies.pyo3]
-git = "https://github.com/PyO3/pyo3"
-branch = "master"
+version = "0.7.0-alpha.1"
 
 
 [features]
