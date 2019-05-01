@@ -12,6 +12,7 @@ This module allows computing a sparse document term matrix from a text corpus.
 
 use crate::math::CSRArray;
 use crate::tokenize;
+use crate::tokenize::Tokenizer;
 use hashbrown::HashMap;
 use ndarray::Array;
 use sprs::CsMat;

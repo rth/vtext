@@ -19,7 +19,7 @@ let s = "The “brown” fox can't jump 32.3 feet, right?";
 Using a regular expression tokenizer we would get,
 ```rust
 # let s = "The “brown” fox can't jump 32.3 feet, right?";
-# use vtext::tokenize::RegexpTokenizer;
+# use vtext::tokenize::*;
 let tokenizer = RegexpTokenizer::new(r"\b\w\w+\b".to_string());
 let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
 assert_eq!(tokens, &["The", "brown", "fox", "can", "jump", "32", "feet", "right"]);
@@ -59,6 +59,11 @@ use unicode_segmentation::UnicodeSegmentation;
 #[cfg(test)]
 mod tests;
 
+pub trait Tokenizer {
+    fn tokenize<'a>(&'a self, text: &'a str) -> Box<Iterator<Item = &'a str> + 'a>;
+}
+
+
 /// Regular expression tokenizer
 ///
 #[derive(Debug)]
@@ -77,9 +82,12 @@ impl RegexpTokenizer {
             regexp: regexp,
         }
     }
+}
+
+impl Tokenizer for RegexpTokenizer {
     /// Tokenize a string
-    pub fn tokenize<'a>(&'a self, text: &'a str) -> impl Iterator<Item = &'a str> {
-        self.regexp.find_iter(text).map(|m| m.as_str())
+    fn tokenize<'a>(&'a self, text: &'a str) -> Box<Iterator<Item = &'a str> + 'a> {
+        Box::new(self.regexp.find_iter(text).map(|m| m.as_str()))
     }
 }
 
