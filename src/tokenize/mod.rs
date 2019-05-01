@@ -28,7 +28,7 @@ assert_eq!(tokens, &["The", "brown", "fox", "can", "jump", "32", "feet", "right"
 which would remove all punctuation. A more general approach is to apply unicode segmentation,
 ```rust
 # let s = "The “brown” fox can't jump 32.3 feet, right?";
-# use vtext::tokenize::UnicodeSegmentTokenizer;
+# use vtext::tokenize::*;
 let tokenizer = UnicodeSegmentTokenizer::new(true);
 let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
 assert_eq!(tokens, &["The", "“", "brown", "”", "fox", "can't", "jump", "32.3", "feet", ",", "right", "?"]);
@@ -41,7 +41,7 @@ as "ca", "n't" in English. To address such issues, we apply several additional r
 
 ```rust
 # let s = "The “brown” fox can't jump 32.3 feet, right?";
-# use vtext::tokenize::VTextTokenizer;
+# use vtext::tokenize::*;
 let tokenizer = VTextTokenizer::new("en");
 let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
 assert_eq!(tokens, &["The", "“", "brown", "”", "fox", "ca", "n't", "jump", "32.3", "feet", ",", "right", "?"]);
@@ -111,8 +111,11 @@ impl UnicodeSegmentTokenizer {
             word_bounds: word_bounds,
         }
     }
+}
+
+impl Tokenizer for UnicodeSegmentTokenizer {
     /// Tokenize a string
-    pub fn tokenize<'a>(&self, text: &'a str) -> Box<Iterator<Item = &'a str> + 'a> {
+    fn tokenize<'a>(&self, text: &'a str) -> Box<Iterator<Item = &'a str> + 'a> {
         if self.word_bounds {
             let res = text.split_word_bounds().filter(|x| x != &" ");
             return Box::new(res);
@@ -160,8 +163,11 @@ impl VTextTokenizer {
             lang: lang_valid.to_string(),
         }
     }
+}
+
+impl Tokenizer for VTextTokenizer {
     /// Tokenize a string
-    pub fn tokenize<'a>(&self, text: &'a str) -> Box<Iterator<Item = &'a str> + 'a> {
+    fn tokenize<'a>(&self, text: &'a str) -> Box<Iterator<Item = &'a str> + 'a> {
         let tokens = text.split_word_bounds();
 
         let mut res: Vec<&'a str> = Vec::new();
@@ -279,9 +285,11 @@ impl CharacterTokenizer {
             window_size: window_size,
         }
     }
+}
 
+impl Tokenizer for CharacterTokenizer {
     /// Tokenize a string
-    pub fn tokenize<'a>(&self, text: &'a str) -> Box<Iterator<Item = &'a str> + 'a> {
+    fn tokenize<'a>(&self, text: &'a str) -> Box<Iterator<Item = &'a str> + 'a> {
         let res = text
             .char_indices()
             .zip(
