@@ -87,6 +87,8 @@ pub struct HashingVectorizer {
 pub struct CountVectorizer {
     lowercase: bool,
     token_pattern: String,
+    // vocabulary uses i32 indices, to avoid memory copies when converting
+    // to sparse CSR arrays in Python with scipy.sparse
     pub vocabulary: HashMap<String, i32>,
 }
 
@@ -140,16 +142,14 @@ impl CountVectorizer {
 
             indices_local.clear();
             for token in tokens {
-                let token_id = match self.vocabulary.get(token) {
-                    Some(_id) => *_id,
+                match self.vocabulary.get(token) {
+                    Some(_id) => indices_local.push(*_id),
                     None => {
                         self.vocabulary.insert(token.to_string(), vocabulary_size);
+                        indices_local.push(vocabulary_size);
                         vocabulary_size += 1;
-                        vocabulary_size - 1 as i32
                     }
                 };
-
-                indices_local.push(token_id);
             }
             // this takes 10-15% of the compute time
             indices_local.sort_unstable();
