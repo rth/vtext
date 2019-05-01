@@ -68,11 +68,11 @@ Following benchmarks illustrate the tokenization accuracy (F1 score) on [UD tree
 |  de   | GSD       | 0.896    | 0.944     | 0.964    |
 |  fr   | Sequoia   | 0.844    | 0.968     | 0.971    |
 
-and the English tokenization speed in million words per second (MWPS)
+and the English tokenization speed,
 
-|           |regexp    | spacy 2.1 | vtext    | 
-|-----------|----------|-----------|----------|
-| **Speed** | 3.1 MWPS | 0.14 MWPS | 2.1 MWPS |
+|                          |regexp | spacy 2.1 | vtext |
+|--------------------------|-------|-----------|-------|
+| **Speed** (10⁶ tokens/s) | 3.1   | 0.14      | 2.1   |
 
 
 #### Text vectorization
@@ -80,10 +80,10 @@ and the English tokenization speed in million words per second (MWPS)
 Below are  benchmarks for converting
 textual data to a sparse document-term matrix using the 20 newsgroups dataset, 
 
-|                     | scikit-learn 0.20.1  | vtext 0.1.0a1    |
-|---------------------|----------------------|------------------|
-| CountVectorizer     |  14 MB/s             | 35 MB/s          |
-| HashingVectorizer   |  19 MB/s             | 68 MB/s          |
+| Speed (MB/s)       | scikit-learn 0.20.1 | vtext 0.1.0a1 |
+|--------------------|---------------------|---------------|
+| CountVectorizer    |  14                 | 35            |
+| HashingVectorizer  |  19                 | 68            |
 
 
 see [benchmarks/README.md](./benchmarks/README.md) for more details.
