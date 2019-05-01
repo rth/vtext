@@ -51,7 +51,7 @@ fn _sort_features(X: &mut CSRArray, vocabulary: &mut HashMap<String, i32>) {
 
 /// Sum duplicates
 #[inline]
-fn _sum_duplicates(tf: &mut CSRArray, indices_local: &[u32], nnz: &mut usize) {
+fn _sum_duplicates(tf: &mut CSRArray, indices_local: &[i32], nnz: &mut usize) {
     let mut bucket: i32 = 0;
     let mut index_last = indices_local[0];
 
@@ -87,6 +87,8 @@ pub struct HashingVectorizer {
 pub struct CountVectorizer {
     lowercase: bool,
     token_pattern: String,
+    // vocabulary uses i32 indices, to avoid memory copies when converting
+    // to sparse CSR arrays in Python with scipy.sparse
     pub vocabulary: HashMap<String, i32>,
 }
 
@@ -126,38 +128,33 @@ impl CountVectorizer {
 
         tf.indptr.push(0);
 
-        // we use a localy scoped vocabulary
-        let mut vocabulary: HashMap<String, i32> =
-            HashMap::with_capacity_and_hasher(1000, Default::default());
-
         let mut nnz: usize = 0;
-        let mut indices_local = Vec::new();
+        let mut indices_local: Vec<i32> = Vec::new();
 
         let tokenizer = tokenize::RegexpTokenizer::new(TOKEN_PATTERN_DEFAULT.to_string());
 
         let pipe = X.iter().map(|doc| doc.to_ascii_lowercase());
+
+        let mut vocabulary_size: i32 = 0;
 
         for (_document_id, document) in pipe.enumerate() {
             let tokens = tokenizer.tokenize(&document);
 
             indices_local.clear();
             for token in tokens {
-                let vocabulary_size = vocabulary.len() as i32;
-                // TODO: don't convert to Sting here
-                let token_id = vocabulary
-                    .entry(token.to_string())
-                    .or_insert(vocabulary_size);
-                indices_local.push(*token_id as u32);
+                match self.vocabulary.get(token) {
+                    Some(_id) => indices_local.push(*_id),
+                    None => {
+                        self.vocabulary.insert(token.to_string(), vocabulary_size);
+                        indices_local.push(vocabulary_size);
+                        vocabulary_size += 1;
+                    }
+                };
             }
             // this takes 10-15% of the compute time
             indices_local.sort_unstable();
 
-            _sum_duplicates(&mut tf, &indices_local, &mut nnz);
-        }
-
-        // Copy to the vocabulary in the struct and make it own data
-        for (key, value) in vocabulary.drain() {
-            self.vocabulary.insert(key.to_owned(), value);
+            _sum_duplicates(&mut tf, indices_local.as_slice(), &mut nnz);
         }
 
         _sort_features(&mut tf, &mut self.vocabulary);
@@ -222,14 +219,14 @@ impl HashingVectorizer {
             for token in tokens {
                 // set the RNG seeds to get reproducible hashing
                 let hash = seahash::hash_seeded(token.as_bytes(), 1, 1000, 200, 89);
-                let hash = (hash % self.n_features) as u32;
+                let hash = (hash % self.n_features) as i32;
 
                 indices_local.push(hash);
             }
             // this takes 10-15% of the compute time
             indices_local.sort_unstable();
 
-            _sum_duplicates(&mut tf, &indices_local, &mut nnz);
+            _sum_duplicates(&mut tf, indices_local.as_slice(), &mut nnz);
         }
 
         CsMat::new(
