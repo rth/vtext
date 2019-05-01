@@ -8,6 +8,19 @@
 # Vectorization module
 
 This module allows computing a sparse document term matrix from a text corpus.
+
+```rust
+extern crate vtext;
+
+use vtext::vectorize::CountVectorizer;
+let documents = vec![
+    String::from("Some text input"),
+    String::from("Another line"),
+];
+
+let mut vectorizer = CountVectorizer::new();
+let X = vectorizer.fit_transform(&documents);
+// returns a sparse CSR matrix with document-terms counts
 */
 
 use crate::math::CSRArray;
