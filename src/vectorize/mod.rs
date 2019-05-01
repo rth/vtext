@@ -72,20 +72,20 @@ pub struct HashingVectorizer<'b> {
 }
 
 #[derive(Debug)]
-pub struct CountVectorizer {
+pub struct CountVectorizer<'b> {
     lowercase: bool,
-    token_pattern: String,
+    tokenizer: &'b Tokenizer,
     pub vocabulary: HashMap<String, i32>,
 }
 
 pub enum Vectorizer {}
 
-impl CountVectorizer {
+impl<'b> CountVectorizer<'b> {
     /// Initialize a CountVectorizer estimator
-    pub fn new() -> Self {
+    pub fn new(tokenizer: &'b Tokenizer) -> Self {
         CountVectorizer {
             lowercase: true,
-            token_pattern: String::from(TOKEN_PATTERN_DEFAULT),
+            tokenizer: tokenizer,
             vocabulary: HashMap::with_capacity_and_hasher(1000, Default::default()),
         }
     }
