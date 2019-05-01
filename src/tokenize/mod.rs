@@ -50,9 +50,6 @@ assert_eq!(tokens, &["The", "“", "brown", "”", "fox", "ca", "n't", "jump", "
 extern crate regex;
 extern crate unicode_segmentation;
 
-use itertools::Itertools;
-use std::cmp;
-
 use regex::Regex;
 use unicode_segmentation::UnicodeSegmentation;
 
@@ -162,7 +159,7 @@ impl VTextTokenizer {
         let mut punct_last = 'X';
         let mut str_idx: usize = 0;
 
-        for (idx, tok) in tokens.enumerate() {
+        for tok in tokens {
             let tok_len = tok.len();
             str_idx += tok_len;
             if (tok_len == 1) & (tok != " ") {

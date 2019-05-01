@@ -12,7 +12,6 @@ use hashbrown::HashSet;
 use itertools::Itertools;
 use ndarray::{Array, ShapeBuilder};
 use std::cmp::{max, min};
-use std::iter::FromIterator;
 
 ///  Levenshtein edit distance
 ///
