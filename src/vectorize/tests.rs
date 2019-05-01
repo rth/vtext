@@ -98,7 +98,6 @@ fn test_empty_dataset() {
 
 #[test]
 fn test_dynamic_dispatch_tokenizer() {
-
     let tokenizer = VTextTokenizer::new("en");
     CountVectorizer::new(&tokenizer);
     HashingVectorizer::new(&tokenizer);
@@ -111,9 +110,7 @@ fn test_dynamic_dispatch_tokenizer() {
     CountVectorizer::new(&tokenizer);
     HashingVectorizer::new(&tokenizer);
 
-
     let tokenizer = CharacterTokenizer::new(4);
     CountVectorizer::new(&tokenizer);
     HashingVectorizer::new(&tokenizer);
-
 }

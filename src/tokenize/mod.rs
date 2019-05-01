@@ -64,7 +64,6 @@ pub trait Tokenizer: fmt::Debug {
     fn tokenize<'a>(&'a self, text: &'a str) -> Box<Iterator<Item = &'a str> + 'a>;
 }
 
-
 /// Regular expression tokenizer
 ///
 pub struct RegexpTokenizer {
@@ -96,7 +95,6 @@ impl fmt::Debug for RegexpTokenizer {
         write!(f, "RegexpTokenizer {{ pattern:  {} }}", self.pattern)
     }
 }
-
 
 /// Unicode Segmentation tokenizer
 ///
