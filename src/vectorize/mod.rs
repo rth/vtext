@@ -126,10 +126,6 @@ impl CountVectorizer {
 
         tf.indptr.push(0);
 
-        // we use a localy scoped vocabulary
-        let mut vocabulary: HashMap<String, i32> =
-            HashMap::with_capacity_and_hasher(1000, Default::default());
-
         let mut nnz: usize = 0;
         let mut indices_local: Vec<i32> = Vec::new();
 
@@ -138,15 +134,16 @@ impl CountVectorizer {
         let pipe = X.iter().map(|doc| doc.to_ascii_lowercase());
 
         let mut vocabulary_size: i32 = 0;
+
         for (_document_id, document) in pipe.enumerate() {
             let tokens = tokenizer.tokenize(&document);
 
             indices_local.clear();
             for token in tokens {
-                let token_id = match vocabulary.get(token) {
+                let token_id = match self.vocabulary.get(token) {
                     Some(_id) => *_id,
                     None => {
-                        vocabulary.insert(token.to_string(), vocabulary_size);
+                        self.vocabulary.insert(token.to_string(), vocabulary_size);
                         vocabulary_size += 1;
                         vocabulary_size - 1 as i32
                     }
@@ -158,11 +155,6 @@ impl CountVectorizer {
             indices_local.sort_unstable();
 
             _sum_duplicates(&mut tf, indices_local.as_slice(), &mut nnz);
-        }
-
-        // Copy to the vocabulary in the struct and make it own data
-        for (key, value) in vocabulary.drain() {
-            self.vocabulary.insert(key.to_owned(), value);
         }
 
         _sort_features(&mut tf, &mut self.vocabulary);
