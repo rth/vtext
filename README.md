@@ -48,7 +48,7 @@ For more details see the project documentation: [vtext.io/doc/latest/index.html]
 Add the following to `Cargo.toml`,
 ```toml
 [dependencies]
-vtext = "0.1.0-alpha.1"
+vtext = "0.1.0-alpha.2"
 ```
 
 For more details see rust documentation: [docs.rs/vtext](https://docs.rs/vtext)
