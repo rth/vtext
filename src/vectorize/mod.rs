@@ -65,9 +65,9 @@ fn _sum_duplicates(tf: &mut CSRArray, indices_local: &[u32], nnz: &mut usize) {
 }
 
 #[derive(Debug)]
-pub struct HashingVectorizer {
+pub struct HashingVectorizer<'b> {
     lowercase: bool,
-    token_pattern: String,
+    tokenizer: &'b Tokenizer,
     n_features: u64,
 }
 
@@ -165,12 +165,12 @@ impl CountVectorizer {
     }
 }
 
-impl HashingVectorizer {
+impl<'b> HashingVectorizer<'b> {
     /// Create a new HashingVectorizer estimator
-    pub fn new() -> Self {
+    pub fn new(tokenizer: &'b Tokenizer) -> Self {
         HashingVectorizer {
             lowercase: true,
-            token_pattern: String::from(TOKEN_PATTERN_DEFAULT),
+            tokenizer: tokenizer,
             n_features: 1048576,
         }
     }
@@ -195,8 +195,6 @@ impl HashingVectorizer {
         let mut indices_local = Vec::new();
         let mut nnz: usize = 0;
 
-        let tokenizer = tokenize::RegexpTokenizer::new(TOKEN_PATTERN_DEFAULT.to_string());
-
         // String.to_lowercase() is very slow
         // https://www.reddit.com/r/rust/comments/6wbru2/performance_issue_can_i_avoid_of_using_the_slow/
         // https://github.com/rust-lang/rust/issues/26244
@@ -205,7 +203,7 @@ impl HashingVectorizer {
         let pipe = X.iter().map(|doc| doc.to_ascii_lowercase());
 
         for (_document_id, document) in pipe.enumerate() {
-            let tokens = tokenizer.tokenize(&document);
+            let tokens = self.tokenizer.tokenize(&document);
             indices_local.clear();
             for token in tokens {
                 // set the RNG seeds to get reproducible hashing

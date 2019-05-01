@@ -52,6 +52,7 @@ extern crate unicode_segmentation;
 
 use itertools::Itertools;
 use std::cmp;
+use std::fmt;
 
 use regex::Regex;
 use unicode_segmentation::UnicodeSegmentation;
@@ -59,14 +60,13 @@ use unicode_segmentation::UnicodeSegmentation;
 #[cfg(test)]
 mod tests;
 
-pub trait Tokenizer {
+pub trait Tokenizer: fmt::Debug {
     fn tokenize<'a>(&'a self, text: &'a str) -> Box<Iterator<Item = &'a str> + 'a>;
 }
 
 
 /// Regular expression tokenizer
 ///
-#[derive(Debug)]
 pub struct RegexpTokenizer {
     pub pattern: String,
     regexp: Regex,
@@ -90,6 +90,13 @@ impl Tokenizer for RegexpTokenizer {
         Box::new(self.regexp.find_iter(text).map(|m| m.as_str()))
     }
 }
+
+impl fmt::Debug for RegexpTokenizer {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "RegexpTokenizer {{ pattern:  {} }}", self.pattern)
+    }
+}
+
 
 /// Unicode Segmentation tokenizer
 ///

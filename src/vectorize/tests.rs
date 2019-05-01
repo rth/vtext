@@ -4,6 +4,7 @@
 // <http://apache.org/licenses/LICENSE-2.0>. This file may not be copied,
 // modified, or distributed except according to those terms.
 
+use crate::tokenize::*;
 use crate::vectorize::*;
 use crate::*;
 
@@ -47,7 +48,9 @@ fn test_hashing_vectorizer_simple() {
         String::from("The sky is blue"),
     ];
 
-    let vect = HashingVectorizer::new();
+    let tokenizer = VTextTokenizer::new("en");
+
+    let vect = HashingVectorizer::new(&tokenizer);
     let vect = vect.fit(&documents);
     let X = vect.transform(&documents);
     assert_eq!(X.indptr(), &[0, 4, 8]);
@@ -83,10 +86,29 @@ fn test_empty_dataset() {
     assert_eq!(X.indices(), &[]);
     assert_eq!(X.indptr(), &[0]);
 
-    let vectorizer = HashingVectorizer::new();
+    let tokenizer = VTextTokenizer::new("en");
+
+    let vectorizer = HashingVectorizer::new(&tokenizer);
 
     let X = vectorizer.fit_transform(&documents);
     assert_eq!(X.data(), &[]);
     assert_eq!(X.indices(), &[]);
     assert_eq!(X.indptr(), &[0]);
 }
+
+#[test]
+fn test_dynamic_dispatch_tokenizer() {
+
+    let tokenizer = VTextTokenizer::new("en");
+    HashingVectorizer::new(&tokenizer);
+
+    let tokenizer = UnicodeSegmentTokenizer::new(false);
+    HashingVectorizer::new(&tokenizer);
+
+    let tokenizer = RegexpTokenizer::new("\\b\\w+\\w\\b".to_string());
+    HashingVectorizer::new(&tokenizer);
+
+    let tokenizer = CharacterTokenizer::new(4);
+    HashingVectorizer::new(&tokenizer);
+}
+
