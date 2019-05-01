@@ -6,7 +6,6 @@
 
 use crate::tokenize::*;
 use crate::vectorize::*;
-use crate::*;
 
 #[test]
 fn test_count_vectorizer_simple() {
