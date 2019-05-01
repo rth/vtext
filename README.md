@@ -80,10 +80,10 @@ and the English tokenization speed,
 Below are  benchmarks for converting
 textual data to a sparse document-term matrix using the 20 newsgroups dataset, 
 
-| Speed (MB/s)       | scikit-learn 0.20.1 | vtext 0.1.0a1 |
-|--------------------|---------------------|---------------|
-| CountVectorizer    |  14                 | 35            |
-| HashingVectorizer  |  19                 | 68            |
+| Speed (MB/s)       | scikit-learn 0.20.1 | vtext |
+|--------------------|---------------------|-------|
+| CountVectorizer    |  14                 | 45    |
+| HashingVectorizer  |  19                 | 68    |
 
 
 see [benchmarks/README.md](./benchmarks/README.md) for more details.
