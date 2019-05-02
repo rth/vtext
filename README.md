@@ -18,7 +18,7 @@ The API is currently unstable.
  - Stemming: Snowball (in Python 15-20x faster than NLTK)
  - Token counting: converting token counts to sparse matrices for use
    in machine learning libraries. Similar to `CountVectorizer` and
-   `HashingVectorizer` in scikit-learn.
+   `HashingVectorizer` in scikit-learn but will less broad functionality.
  - Levenshtein edit distance; Sørensen-Dice, Jaro, Jaro Winkler string similarities
 
 ## Usage

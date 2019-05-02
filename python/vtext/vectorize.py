@@ -4,8 +4,6 @@
 # <http://apache.org/licenses/LICENSE-2.0>. This file may not be copied,
 # modified, or distributed except according to those terms.
 
-import numbers
-
 import numpy as np
 
 from . import _lib
@@ -171,7 +169,7 @@ class CountVectorizer(BaseEstimator):
 
     Parameters
     ----------
-    analyzer : string, {'word'} 
+    analyzer : string, {'word'}
         Whether the feature should be made of word or character n-grams.
 
         Currently only `analyzer="word"` is implemented.
