@@ -134,7 +134,7 @@ class HashingVectorizer(BaseEstimator):
             data.fill(1)
 
         data = data.astype(self.dtype, copy=False)
-        return sp.csr_matrix((data, indices, indptr), shape=(len(X), self.n_features))
+        return sp.csr_matrix((data, indices, indptr), shape=(len(X), 1048576))
 
     def fit_transform(self, X, y=None):
         """Transform a sequence of documents to a document-term matrix.
