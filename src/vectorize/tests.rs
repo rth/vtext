@@ -4,16 +4,14 @@
 // <http://apache.org/licenses/LICENSE-2.0>. This file may not be copied,
 // modified, or distributed except according to those terms.
 
-use crate::tokenize::*;
 use crate::vectorize::*;
 
 #[test]
 fn test_count_vectorizer_simple() {
     // Example 1
-    let tokenizer = RegexpTokenizer::new("\\b\\w+\\w\\b".to_string());
 
     let documents = vec![String::from("cat dog cat")];
-    let mut vect = CountVectorizer::new(&tokenizer);
+    let mut vect = CountVectorizer::new();
     let X = vect.fit_transform(&documents);
     assert_eq!(X.to_dense(), array![[2, 1]]);
 
@@ -23,7 +21,7 @@ fn test_count_vectorizer_simple() {
         String::from("The sky sky sky is blue"),
     ];
 
-    let mut vect = CountVectorizer::new(&tokenizer);
+    let mut vect = CountVectorizer::new();
     vect.fit(&documents);
     let X = vect.transform(&documents);
 
@@ -48,9 +46,7 @@ fn test_hashing_vectorizer_simple() {
         String::from("The sky is blue"),
     ];
 
-    let tokenizer = VTextTokenizer::new("en");
-
-    let vect = HashingVectorizer::new(&tokenizer);
+    let vect = HashingVectorizer::new();
     let vect = vect.fit(&documents);
     let X = vect.transform(&documents);
     assert_eq!(X.indptr(), &[0, 4, 8]);
@@ -79,37 +75,17 @@ fn test_hashing_vectorizer_simple() {
 fn test_empty_dataset() {
     let documents: Vec<String> = vec![];
 
-    let tokenizer = VTextTokenizer::new("en");
-    let mut vectorizer = CountVectorizer::new(&tokenizer);
+    let mut vectorizer = CountVectorizer::new();
 
     let X = vectorizer.fit_transform(&documents);
     assert_eq!(X.data(), &[]);
     assert_eq!(X.indices(), &[]);
     assert_eq!(X.indptr(), &[0]);
 
-    let vectorizer = HashingVectorizer::new(&tokenizer);
+    let vectorizer = HashingVectorizer::new();
 
     let X = vectorizer.fit_transform(&documents);
     assert_eq!(X.data(), &[]);
     assert_eq!(X.indices(), &[]);
     assert_eq!(X.indptr(), &[0]);
-}
-
-#[test]
-fn test_dynamic_dispatch_tokenizer() {
-    let tokenizer = VTextTokenizer::new("en");
-    CountVectorizer::new(&tokenizer);
-    HashingVectorizer::new(&tokenizer);
-
-    let tokenizer = UnicodeSegmentTokenizer::new(false);
-    CountVectorizer::new(&tokenizer);
-    HashingVectorizer::new(&tokenizer);
-
-    let tokenizer = RegexpTokenizer::new("\\b\\w+\\w\\b".to_string());
-    CountVectorizer::new(&tokenizer);
-    HashingVectorizer::new(&tokenizer);
-
-    let tokenizer = CharacterTokenizer::new(4);
-    CountVectorizer::new(&tokenizer);
-    HashingVectorizer::new(&tokenizer);
 }

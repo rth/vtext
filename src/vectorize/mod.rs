@@ -12,17 +12,13 @@ This module allows computing a sparse document term matrix from a text corpus.
 ```rust
 extern crate vtext;
 
-use vtext::tokenize::{VTextTokenizer,Tokenizer};
 use vtext::vectorize::CountVectorizer;
-
 let documents = vec![
     String::from("Some text input"),
     String::from("Another line"),
 ];
 
-let tokenizer = VTextTokenizer::new("en");
-
-let mut vectorizer = CountVectorizer::new(&tokenizer);
+let mut vectorizer = CountVectorizer::new();
 let X = vectorizer.fit_transform(&documents);
 // returns a sparse CSR matrix with document-terms counts
 */
@@ -82,16 +78,16 @@ fn _sum_duplicates(tf: &mut CSRArray, indices_local: &[i32], nnz: &mut usize) {
 }
 
 #[derive(Debug)]
-pub struct HashingVectorizer<'b> {
+pub struct HashingVectorizer {
     lowercase: bool,
-    tokenizer: &'b Tokenizer,
+    token_pattern: String,
     n_features: u64,
 }
 
 #[derive(Debug)]
-pub struct CountVectorizer<'b> {
+pub struct CountVectorizer {
     lowercase: bool,
-    tokenizer: &'b Tokenizer,
+    token_pattern: String,
     // vocabulary uses i32 indices, to avoid memory copies when converting
     // to sparse CSR arrays in Python with scipy.sparse
     pub vocabulary: HashMap<String, i32>,
@@ -99,12 +95,12 @@ pub struct CountVectorizer<'b> {
 
 pub enum Vectorizer {}
 
-impl<'b> CountVectorizer<'b> {
+impl CountVectorizer {
     /// Initialize a CountVectorizer estimator
-    pub fn new(tokenizer: &'b Tokenizer) -> Self {
+    pub fn new() -> Self {
         CountVectorizer {
             lowercase: true,
-            tokenizer: tokenizer,
+            token_pattern: String::from(TOKEN_PATTERN_DEFAULT),
             vocabulary: HashMap::with_capacity_and_hasher(1000, Default::default()),
         }
     }
@@ -179,12 +175,12 @@ impl<'b> CountVectorizer<'b> {
     }
 }
 
-impl<'b> HashingVectorizer<'b> {
+impl HashingVectorizer {
     /// Create a new HashingVectorizer estimator
-    pub fn new(tokenizer: &'b Tokenizer) -> Self {
+    pub fn new() -> Self {
         HashingVectorizer {
             lowercase: true,
-            tokenizer: tokenizer,
+            token_pattern: String::from(TOKEN_PATTERN_DEFAULT),
             n_features: 1048576,
         }
     }
@@ -209,6 +205,8 @@ impl<'b> HashingVectorizer<'b> {
         let mut indices_local = Vec::new();
         let mut nnz: usize = 0;
 
+        let tokenizer = tokenize::RegexpTokenizer::new(TOKEN_PATTERN_DEFAULT.to_string());
+
         // String.to_lowercase() is very slow
         // https://www.reddit.com/r/rust/comments/6wbru2/performance_issue_can_i_avoid_of_using_the_slow/
         // https://github.com/rust-lang/rust/issues/26244
@@ -217,7 +215,7 @@ impl<'b> HashingVectorizer<'b> {
         let pipe = X.iter().map(|doc| doc.to_ascii_lowercase());
 
         for (_document_id, document) in pipe.enumerate() {
-            let tokens = self.tokenizer.tokenize(&document);
+            let tokens = tokenizer.tokenize(&document);
             indices_local.clear();
             for token in tokens {
                 // set the RNG seeds to get reproducible hashing

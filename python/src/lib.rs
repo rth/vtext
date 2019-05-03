@@ -25,7 +25,6 @@ use pyo3::wrap_pyfunction;
 
 use vtext::metrics;
 use vtext::tokenize;
-use vtext::tokenize::Tokenizer;
 use vtext::vectorize;
 
 type PyCsrArray = (Py<PyArray1<i32>>, Py<PyArray1<i32>>, Py<PyArray1<i32>>);
@@ -60,16 +59,15 @@ fn result_to_csr(py: Python, x: CsMat<i32>) -> PyResult<PyCsrArray> {
 }
 
 #[pyclass]
-pub struct _HashingVectorizerWrapper<'b> {
-    inner: vtext::vectorize::HashingVectorizer<'b>,
+pub struct _HashingVectorizerWrapper {
+    inner: vtext::vectorize::HashingVectorizer,
 }
 
 #[pymethods]
-impl<'b> _HashingVectorizerWrapper<'b> {
+impl _HashingVectorizerWrapper {
     #[new]
     fn new(obj: &PyRawObject) {
-        let tokenizer = vtext::tokenize::RegexpTokenizer::new("\\b\\w\\w+\\b".to_string());
-        let estimator = vtext::vectorize::HashingVectorizer::new(tokenizer);
+        let estimator = vtext::vectorize::HashingVectorizer::new();
         obj.init(_HashingVectorizerWrapper { inner: estimator });
     }
 
@@ -85,16 +83,15 @@ impl<'b> _HashingVectorizerWrapper<'b> {
 }
 
 #[pyclass]
-pub struct _CountVectorizerWrapper<'b> {
-    inner: vtext::vectorize::CountVectorizer<'b>,
+pub struct _CountVectorizerWrapper {
+    inner: vtext::vectorize::CountVectorizer,
 }
 
 #[pymethods]
-impl<'b> _CountVectorizerWrapper<'b> {
+impl _CountVectorizerWrapper {
     #[new]
     fn new(obj: &PyRawObject) {
-        let tokenizer = vtext::tokenize::RegexpTokenizer::new("\\b\\w\\w+\\b".to_string());
-        let estimator = vtext::vectorize::CountVectorizer::new(tokenizer);
+        let estimator = vtext::vectorize::CountVectorizer::new();
         obj.init(_CountVectorizerWrapper { inner: estimator });
     }
 
