@@ -11,12 +11,9 @@ The API is currently unstable.
 
  - Tokenization: Regexp tokenizer, Unicode segmentation + language specific rules
  - Stemming: Snowball (in Python 15-20x faster than NLTK)
- - Analyzers (*planned*): word and character n-grams, skip grams
  - Token counting: converting token counts to sparse matrices for use
    in machine learning libraries. Similar to `CountVectorizer` and
-   `HashingVectorizer` in scikit-learn.
- - Feature weighting (*planned*): feature weighting based on document
-   frequency (TF-IDF), feature normalization.
+   `HashingVectorizer` in scikit-learn but will less broad functionality.
  - Levenshtein edit distance; Sørensen-Dice, Jaro, Jaro Winkler string similarities
 
 

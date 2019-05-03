@@ -27,11 +27,11 @@ def test_count_vectorizer():
 
 def test_hashing_vectorizer():
     text = ["some sentence", "a different sentence"]
-    vect = HashingVectorizer(norm=None)
+    vect = HashingVectorizer()
     vect.fit(text)
     X2 = vect.transform(text)
 
-    vect = HashingVectorizer(norm=None)
+    vect = HashingVectorizer()
     X = vect.fit_transform(text)
     assert X.nnz == 4
     assert_array_equal(X.indices, X2.indices)

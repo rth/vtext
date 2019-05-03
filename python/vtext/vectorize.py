@@ -4,8 +4,6 @@
 # <http://apache.org/licenses/LICENSE-2.0>. This file may not be copied,
 # modified, or distributed except according to those terms.
 
-import numbers
-
 import numpy as np
 
 from . import _lib
@@ -26,119 +24,32 @@ class HashingVectorizer(BaseEstimator):
     """Convert a collection of text documents to a matrix of token occurrences
 
     It turns a collection of text documents into a scipy.sparse matrix holding
-    token occurrence counts (or binary occurrence information), possibly
-    normalized as token frequencies if norm='l1' or projected on the euclidean
-    unit sphere if norm='l2'.
+    token occurrence counts, similarly to the scikit-learn estimator with the
+    same name.
 
     This text vectorizer implementation uses the hashing trick to find the
     token string name to feature integer index mapping.
 
-    This strategy has several advantages:
+    .. note::
+       Experimental more parameters will be added in the future
 
-    - it is very low memory scalable to large datasets as there is no need to
-      store a vocabulary dictionary in memory
-
-    - it is fast to pickle and un-pickle as it holds no state besides the
-      constructor parameters
-
-    - it can be used in a streaming (partial fit) or parallel pipeline as there
-      is no state computed during fit.
-
-    There are also a couple of cons (vs using a CountVectorizer with an
-    in-memory vocabulary):
-
-    - there is no way to compute the inverse transform (from feature indices to
-      string feature names) which can be a problem when trying to introspect
-      which features are most important to a model.
-
-    - there can be collisions: distinct tokens can be mapped to the same
-      feature index. However in practice this is rarely an issue if n_features
-      is large enough (e.g. 2 ** 18 for text classification problems).
-
-    - no IDF weighting as this would render the transformer stateful.
-
-    The hash function employed is the signed 32-bit version of Murmurhash3.
-
-    Read more in the :ref:`User Guide <text_feature_extraction>`.
 
     Parameters
     ----------
-    decode_error : {'strict', 'ignore', 'replace'}
-        Instruction on what to do if a byte sequence is given to analyze that
-        contains characters not of the given `encoding`. By default, it is
-        'strict', meaning that a UnicodeDecodeError will be raised. Other
-        values are 'ignore' and 'replace'.
 
-    strip_accents : {'ascii', 'unicode', None}
-        Remove accents and perform other character normalization
-        during the preprocessing step.
-        'ascii' is a fast method that only works on characters that have
-        an direct ASCII mapping.
-        'unicode' is a slightly slower method that works on any characters.
-        None (default) does nothing.
-
-        Both 'ascii' and 'unicode' use NFKD normalization from
-        :func:`unicodedata.normalize`.
-
-    lowercase : boolean, default=True
-        Convert all characters to lowercase before tokenizing.
-
-    preprocessor : callable or None (default)
-        Override the preprocessing (string transformation) stage while
-        preserving the tokenizing and n-grams generation steps.
-
-    tokenizer : callable or None (default)
-        Override the string tokenization step while preserving the
-        preprocessing and n-grams generation steps.
-        Only applies if ``analyzer == 'word'``.
-
-    stop_words : string {'english'}, list, or None (default)
-        If 'english', a built-in stop word list for English is used.
-        There are several known issues with 'english' and you should
-        consider an alternative (see :ref:`stop_words`).
-
-        If a list, that list is assumed to contain stop words, all of which
-        will be removed from the resulting tokens.
-        Only applies if ``analyzer == 'word'``.
-
-    token_pattern : string
-        Regular expression denoting what constitutes a "token", only used
-        if ``analyzer == 'word'``. The default regexp selects tokens of 2
-        or more alphanumeric characters (punctuation is completely ignored
-        and always treated as a token separator).
-
-    ngram_range : tuple (min_n, max_n), default=(1, 1)
-        The lower and upper boundary of the range of n-values for different
-        n-grams to be extracted. All values of n such that min_n <= n <= max_n
-        will be used.
-
-    analyzer : string, {'word', 'char', 'char_wb'} or callable
+    analyzer : string, {'word'}
         Whether the feature should be made of word or character n-grams.
-        Option 'char_wb' creates character n-grams only from text inside
-        word boundaries; n-grams at the edges of words are padded with space.
 
-        If a callable is passed it is used to extract the sequence of features
-        out of the raw, unprocessed input.
+        Currently only the "word" tokenizer is implemented.
 
-    n_features : integer, default=(2 ** 20)
-        The number of features (columns) in the output matrices. Small numbers
-        of features are likely to cause hash collisions, but large numbers
-        will cause larger coefficient dimensions in linear learners.
-
-    binary : boolean, default=False.
+    binary : boolean, default=False
         If True, all non zero counts are set to 1. This is useful for discrete
         probabilistic models that model binary events rather than integer
         counts.
 
-    alternate_sign : boolean, optional, default True
-        When True, an alternating sign is added to the features as to
-        approximately conserve the inner product in the hashed space even for
-        small n_features. This approach is similar to sparse random projection.
-
-        .. versionadded:: 0.19
-
     dtype : type, optional
         Type of the matrix returned by fit_transform() or transform().
+
 
     Examples
     --------
@@ -149,38 +60,16 @@ class HashingVectorizer(BaseEstimator):
     ...     'And this is the third one.',
     ...     'Is this the first document?',
     ... ]
-    >>> vectorizer = HashingVectorizer(n_features=2**4)
+    >>> vectorizer = HashingVectorizer()
     >>> X = vectorizer.fit_transform(corpus)
     >>> print(X.shape)
     (4, 16)
 
     """
 
-    def __init__(
-        self,
-        lowercase=True,
-        preprocessor=None,
-        tokenizer=None,
-        stop_words=None,
-        token_pattern=r"(?u)\b\w\w+\b",
-        ngram_range=(1, 1),
-        analyzer="word",
-        n_features=(2 ** 20),
-        binary=False,
-        norm="l2",
-        alternate_sign=False,
-        dtype=np.float64,
-    ):
-        self.preprocessor = preprocessor
-        self.tokenizer = tokenizer
+    def __init__(self, *, analyzer="word", binary=False, dtype=np.int32):
         self.analyzer = analyzer
-        self.lowercase = lowercase
-        self.token_pattern = token_pattern
-        self.stop_words = stop_words
-        self.n_features = n_features
-        self.ngram_range = ngram_range
         self.binary = binary
-        self.alternate_sign = alternate_sign
         self.dtype = dtype
 
     def partial_fit(self, X, y=None):
@@ -199,9 +88,6 @@ class HashingVectorizer(BaseEstimator):
     def _validate_params(self):
 
         if self.analyzer != "word":
-            raise NotImplementedError
-
-        if self.stop_words is not None:
             raise NotImplementedError
 
     def fit(self, X, y=None):
@@ -248,7 +134,7 @@ class HashingVectorizer(BaseEstimator):
             data.fill(1)
 
         data = data.astype(self.dtype, copy=False)
-        return sp.csr_matrix((data, indices, indptr), shape=(len(X), self.n_features))
+        return sp.csr_matrix((data, indices, indptr), shape=(len(X), 1048576))
 
     def fit_transform(self, X, y=None):
         """Transform a sequence of documents to a document-term matrix.
@@ -283,78 +169,10 @@ class CountVectorizer(BaseEstimator):
 
     Parameters
     ----------
-    lowercase : boolean, True by default
-        Convert all characters to lowercase before tokenizing.
-
-    preprocessor : callable or None (default)
-        Override the preprocessing (string transformation) stage while
-        preserving the tokenizing and n-grams generation steps.
-
-    tokenizer : callable or None (default)
-        Override the string tokenization step while preserving the
-        preprocessing and n-grams generation steps.
-        Only applies if ``analyzer == 'word'``.
-
-    stop_words : string {'english'}, list, or None (default)
-        If 'english', a built-in stop word list for English is used.
-        There are several known issues with 'english' and you should
-        consider an alternative (see :ref:`stop_words`).
-
-        If a list, that list is assumed to contain stop words, all of which
-        will be removed from the resulting tokens.
-        Only applies if ``analyzer == 'word'``.
-
-        If None, no stop words will be used. max_df can be set to a value
-        in the range [0.7, 1.0) to automatically detect and filter stop
-        words based on intra corpus document frequency of terms.
-
-    token_pattern : string
-        Regular expression denoting what constitutes a "token", only used
-        if ``analyzer == 'word'``. The default regexp select tokens of 2
-        or more alphanumeric characters (punctuation is completely ignored
-        and always treated as a token separator).
-
-    ngram_range : tuple (min_n, max_n)
-        The lower and upper boundary of the range of n-values for different
-        n-grams to be extracted. All values of n such that min_n <= n <= max_n
-        will be used.
-
-    analyzer : string, {'word', 'char', 'char_wb'} or callable
+    analyzer : string, {'word'}
         Whether the feature should be made of word or character n-grams.
-        Option 'char_wb' creates character n-grams only from text inside
-        word boundaries; n-grams at the edges of words are padded with space.
 
-        If a callable is passed it is used to extract the sequence of features
-        out of the raw, unprocessed input.
-
-    max_df : float in range [0.0, 1.0] or int, default=1.0
-        When building the vocabulary ignore terms that have a document
-        frequency strictly higher than the given threshold (corpus-specific
-        stop words).
-        If float, the parameter represents a proportion of documents, integer
-        absolute counts.
-        This parameter is ignored if vocabulary is not None.
-
-    min_df : float in range [0.0, 1.0] or int, default=1
-        When building the vocabulary ignore terms that have a document
-        frequency strictly lower than the given threshold. This value is also
-        called cut-off in the literature.
-        If float, the parameter represents a proportion of documents, integer
-        absolute counts.
-        This parameter is ignored if vocabulary is not None.
-
-    max_features : int or None, default=None
-        If not None, build a vocabulary that only consider the top
-        max_features ordered by term frequency across the corpus.
-
-        This parameter is ignored if vocabulary is not None.
-
-    vocabulary : Mapping or iterable, optional
-        Either a Mapping (e.g., a dict) where keys are terms and values are
-        indices in the feature matrix, or an iterable over terms. If not
-        given, a vocabulary is determined from the input documents. Indices
-        in the mapping should not be repeated and should not have any gap
-        between 0 and the largest index.
+        Currently only `analyzer="word"` is implemented.
 
     binary : boolean, default=False
         If True, all non zero counts are set to 1. This is useful for discrete
@@ -369,14 +187,6 @@ class CountVectorizer(BaseEstimator):
     vocabulary_ : dict
         A mapping of terms to feature indices.
 
-    stop_words_ : set
-        Terms that were ignored because they either:
-
-          - occurred in too many documents (`max_df`)
-          - occurred in too few documents (`min_df`)
-          - were cut off by feature selection (`max_features`).
-
-        This is only available if no vocabulary was given.
 
     Examples
     --------
@@ -399,50 +209,12 @@ class CountVectorizer(BaseEstimator):
 
     See also
     --------
-    HashingVectorizer, TfidfVectorizer
+    HashingVectorizer
 
-    Notes
-    -----
-    The ``stop_words_`` attribute can get large and increase the model size
-    when pickling. This attribute is provided only for introspection and can
-    be safely removed using delattr or set to None before pickling.
     """
 
-    def __init__(
-        self,
-        lowercase=True,
-        preprocessor=None,
-        tokenizer=None,
-        stop_words=None,
-        token_pattern=r"(?u)\b\w\w+\b",
-        ngram_range=(1, 1),
-        analyzer="word",
-        max_df=1.0,
-        min_df=1,
-        max_features=None,
-        vocabulary=None,
-        binary=False,
-        dtype=np.int64,
-    ):
-        self.preprocessor = preprocessor
-        self.tokenizer = tokenizer
+    def __init__(self, *, analyzer="word", binary=False, dtype=np.int64):
         self.analyzer = analyzer
-        self.lowercase = lowercase
-        self.token_pattern = token_pattern
-        self.stop_words = stop_words
-        self.max_df = max_df
-        self.min_df = min_df
-        if max_df < 0 or min_df < 0:
-            raise ValueError("negative value for max_df or min_df")
-        self.max_features = max_features
-        if max_features is not None:
-            if not isinstance(max_features, numbers.Integral) or max_features <= 0:
-                raise ValueError(
-                    "max_features=%r, neither a positive integer nor None"
-                    % max_features
-                )
-        self.ngram_range = ngram_range
-        self.vocabulary = vocabulary
         self.binary = binary
         self.dtype = dtype
 
@@ -455,9 +227,6 @@ class CountVectorizer(BaseEstimator):
     def _validate_params(self):
 
         if self.analyzer != "word":
-            raise NotImplementedError
-
-        if self.stop_words is not None:
             raise NotImplementedError
 
     def fit(self, raw_documents, y=None):

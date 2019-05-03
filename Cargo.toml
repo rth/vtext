@@ -1,6 +1,6 @@
 [package]
 name = "vtext"
-version = "0.1.0-alpha.1"
+version = "0.1.0-alpha.2"
 description = "NLP with Rust"
 license = "Apache-2.0"
 documentation = "https://docs.rs/vtext/"
@@ -9,10 +9,8 @@ readme = "README.md"
 authors = ["Roman Yurchak <rth.yurchak@pm.me>"]
 keywords = [
     "nlp",
-    "information retrieval",
     "tokenization",
-    "bag-of-words",
-    "tf-idf",
+    "tfidf",
     "levenshtein",
     "matching"
 ]

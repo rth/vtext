@@ -19,11 +19,11 @@ Following benchmarks illustrate the tokenization accuracy (F1 score) on `UD tree
 
 and the English tokenization speed in million words per second (MWPS)
 
-========== =========== ==========
- regexp     spacy 2.1   vtext     
-========== =========== ==========
- 3.1 MWPS   0.14 MWPS   2.1 MWPS 
-========== =========== ==========
+================== ========== =========== ==========
+ .                   regexp     spacy 2.1   vtext
+================== ========== =========== ==========
+ **Speed (MB/s)**   3.1 MWPS   0.14 MWPS   2.1 MWPS
+================== ========== =========== ==========
 
 
 Text vectorization
@@ -32,10 +32,10 @@ Text vectorization
 Below are  benchmarks for converting
 textual data to a sparse document-term matrix using the 20 newsgroups dataset, 
 
- ===================  =====================  ===============
-  Estimator            scikit-learn 0.20.1    vtext 0.1.0a1    
- ===================  =====================  ===============
-  CountVectorizer       14 MB/s                35 MB/s          
-  HashingVectorizer     19 MB/s                68 MB/s          
- ===================  =====================  ===============
+ ===================  =====================  =======
+  Speed (MB/s)         scikit-learn 0.20.1    vtext
+ ===================  =====================  =======
+  CountVectorizer       14                     45
+  HashingVectorizer     19                     68
+ ===================  =====================  =======
 

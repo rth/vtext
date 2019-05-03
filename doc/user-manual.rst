@@ -1,6 +1,8 @@
 User manual
 ===========
 
+WIP
+
 Stemming
 --------
 

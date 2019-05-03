@@ -12,8 +12,7 @@ To build the Python package, run,
 
 .. code::
 
-    pip install -r requirements.txt
-    python3 setup.py develop --user
+    python3 setup.py develop
 
 Docker environment
 ------------------
@@ -22,7 +21,6 @@ The easiest might be to use docker to setup a build environment,
 
 .. code::
 
-    docker build -t vtext-py-env .
     ./run_docker_env.sh
     rustup default nightly-2019-02-28-x86_64-unknown-linux-gnu
     python3.7 -m pip install -r /src/python/requirements.txt

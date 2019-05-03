@@ -25,4 +25,4 @@ Add the following to `Cargo.toml`,
 .. code::
 
     [dependencies]
-    vtext = "0.1.0-alpha.1"
+    vtext = "0.1.0-alpha.2"
