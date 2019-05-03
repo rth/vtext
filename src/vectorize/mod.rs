@@ -25,6 +25,7 @@ let X = vectorizer.fit_transform(&documents);
 
 use crate::math::CSRArray;
 use crate::tokenize;
+use crate::tokenize::Tokenizer;
 use hashbrown::HashMap;
 use ndarray::Array;
 use sprs::CsMat;

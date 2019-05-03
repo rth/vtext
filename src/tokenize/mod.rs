@@ -19,7 +19,7 @@ let s = "The “brown” fox can't jump 32.3 feet, right?";
 Using a regular expression tokenizer we would get,
 ```rust
 # let s = "The “brown” fox can't jump 32.3 feet, right?";
-# use vtext::tokenize::RegexpTokenizer;
+# use vtext::tokenize::*;
 let tokenizer = RegexpTokenizer::new(r"\b\w\w+\b".to_string());
 let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
 assert_eq!(tokens, &["The", "brown", "fox", "can", "jump", "32", "feet", "right"]);
@@ -28,7 +28,7 @@ assert_eq!(tokens, &["The", "brown", "fox", "can", "jump", "32", "feet", "right"
 which would remove all punctuation. A more general approach is to apply unicode segmentation,
 ```rust
 # let s = "The “brown” fox can't jump 32.3 feet, right?";
-# use vtext::tokenize::UnicodeSegmentTokenizer;
+# use vtext::tokenize::*;
 let tokenizer = UnicodeSegmentTokenizer::new(true);
 let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
 assert_eq!(tokens, &["The", "“", "brown", "”", "fox", "can't", "jump", "32.3", "feet", ",", "right", "?"]);
@@ -41,7 +41,7 @@ as "ca", "n't" in English. To address such issues, we apply several additional r
 
 ```rust
 # let s = "The “brown” fox can't jump 32.3 feet, right?";
-# use vtext::tokenize::VTextTokenizer;
+# use vtext::tokenize::*;
 let tokenizer = VTextTokenizer::new("en");
 let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
 assert_eq!(tokens, &["The", "“", "brown", "”", "fox", "ca", "n't", "jump", "32.3", "feet", ",", "right", "?"]);
@@ -51,14 +51,18 @@ extern crate regex;
 extern crate unicode_segmentation;
 
 use regex::Regex;
+use std::fmt;
 use unicode_segmentation::UnicodeSegmentation;
 
 #[cfg(test)]
 mod tests;
 
+pub trait Tokenizer: fmt::Debug {
+    fn tokenize<'a>(&'a self, text: &'a str) -> Box<Iterator<Item = &'a str> + 'a>;
+}
+
 /// Regular expression tokenizer
 ///
-#[derive(Debug)]
 pub struct RegexpTokenizer {
     pub pattern: String,
     regexp: Regex,
@@ -74,9 +78,18 @@ impl RegexpTokenizer {
             regexp: regexp,
         }
     }
+}
+
+impl Tokenizer for RegexpTokenizer {
     /// Tokenize a string
-    pub fn tokenize<'a>(&'a self, text: &'a str) -> impl Iterator<Item = &'a str> {
-        self.regexp.find_iter(text).map(|m| m.as_str())
+    fn tokenize<'a>(&'a self, text: &'a str) -> Box<Iterator<Item = &'a str> + 'a> {
+        Box::new(self.regexp.find_iter(text).map(|m| m.as_str()))
+    }
+}
+
+impl fmt::Debug for RegexpTokenizer {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "RegexpTokenizer {{ pattern:  {} }}", self.pattern)
     }
 }
 
@@ -100,8 +113,11 @@ impl UnicodeSegmentTokenizer {
             word_bounds: word_bounds,
         }
     }
+}
+
+impl Tokenizer for UnicodeSegmentTokenizer {
     /// Tokenize a string
-    pub fn tokenize<'a>(&self, text: &'a str) -> Box<Iterator<Item = &'a str> + 'a> {
+    fn tokenize<'a>(&self, text: &'a str) -> Box<Iterator<Item = &'a str> + 'a> {
         if self.word_bounds {
             let res = text.split_word_bounds().filter(|x| x != &" ");
             return Box::new(res);
@@ -149,8 +165,11 @@ impl VTextTokenizer {
             lang: lang_valid.to_string(),
         }
     }
+}
+
+impl Tokenizer for VTextTokenizer {
     /// Tokenize a string
-    pub fn tokenize<'a>(&self, text: &'a str) -> Box<Iterator<Item = &'a str> + 'a> {
+    fn tokenize<'a>(&self, text: &'a str) -> Box<Iterator<Item = &'a str> + 'a> {
         let tokens = text.split_word_bounds();
 
         let mut res: Vec<&'a str> = Vec::new();
@@ -268,9 +287,11 @@ impl CharacterTokenizer {
             window_size: window_size,
         }
     }
+}
 
+impl Tokenizer for CharacterTokenizer {
     /// Tokenize a string
-    pub fn tokenize<'a>(&self, text: &'a str) -> Box<Iterator<Item = &'a str> + 'a> {
+    fn tokenize<'a>(&self, text: &'a str) -> Box<Iterator<Item = &'a str> + 'a> {
         let res = text
             .char_indices()
             .zip(
