@@ -25,6 +25,7 @@ use pyo3::wrap_pyfunction;
 
 use vtext::metrics;
 use vtext::tokenize;
+use vtext::tokenize::Tokenizer;
 use vtext::vectorize;
 
 type PyCsrArray = (Py<PyArray1<i32>>, Py<PyArray1<i32>>, Py<PyArray1<i32>>);
