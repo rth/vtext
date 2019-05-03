@@ -51,6 +51,7 @@ extern crate regex;
 extern crate unicode_segmentation;
 
 use regex::Regex;
+use std::fmt;
 use unicode_segmentation::UnicodeSegmentation;
 
 #[cfg(test)]
