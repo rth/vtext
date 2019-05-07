@@ -20,12 +20,12 @@ if __name__ == "__main__":
     print("# vectorizing {} documents:".format(len(data)))
 
     for label, vect in [
-        ("HashingVectorizer (vtext)", vtext.vectorize.HashingVectorizer(norm=None)),
+        ("HashingVectorizer (vtext)", vtext.vectorize.HashingVectorizer()),
         (
             "HashingVectorizer (scikit-learn)",
             skt.HashingVectorizer(lowercase=False, norm=None),
         ),
-        ("CountVectorizer (vtext)", vtext.vectorize.CountVectorizer(lowercase=False)),
+        ("CountVectorizer (vtext)", vtext.vectorize.CountVectorizer()),
         ("CountVectorizer (scikit-learn)", skt.CountVectorizer(lowercase=False)),
         # (
         #    "CountVectorizer, 4-char ngram (scikit-learn)",
