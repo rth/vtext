@@ -28,8 +28,8 @@ use crate::tokenize;
 use crate::tokenize::Tokenizer;
 use hashbrown::HashMap;
 use ndarray::Array;
-use sprs::CsMat;
 use rayon::prelude::*;
+use sprs::CsMat;
 
 const TOKEN_PATTERN_DEFAULT: &str = r"\b\w\w+\b";
 
@@ -135,7 +135,6 @@ impl CountVectorizer {
 
         let tokenizer = tokenize::RegexpTokenizer::new(TOKEN_PATTERN_DEFAULT.to_string());
 
-
         let mut vocabulary_size: i32 = 0;
 
         let tokenize = |doc: String| -> Vec<String> {
@@ -148,9 +147,7 @@ impl CountVectorizer {
             .map(|doc| tokenize(doc))
             .collect();
 
-
         for tokens in pipe.iter() {
-
             indices_local.clear();
             for token in tokens {
                 match self.vocabulary.get(token) {
@@ -212,7 +209,6 @@ impl HashingVectorizer {
 
         tf.indptr.push(0);
 
-        let mut indices_local = Vec::new();
         let mut nnz: usize = 0;
 
         let tokenizer = tokenize::RegexpTokenizer::new(TOKEN_PATTERN_DEFAULT.to_string());
@@ -222,21 +218,11 @@ impl HashingVectorizer {
         // https://github.com/rust-lang/rust/issues/26244
         // Possibly use: https://github.com/JuliaStrings/utf8proc
         // http://www.unicode.org/faq/casemap_charprop.html
-        
-        let tokenize = |doc: String| -> Vec<String> {
-            tokenizer.tokenize(&doc).map(|x| x.to_string()).collect()
-        };
 
+        let tokenize_hash = |doc: &str| -> Vec<i32> {
+            let mut indices_local: Vec<i32> = Vec::with_capacity(10);
 
-        let pipe: Vec<Vec<String>> = X
-            .par_iter()
-            .map(|doc| doc.to_ascii_lowercase())
-            .map(|doc| tokenize(doc))
-            .collect();
-
-        for tokens in pipe.iter() {
-            indices_local.clear();
-            for token in tokens {
+            for token in tokenizer.tokenize(doc) {
                 // set the RNG seeds to get reproducible hashing
                 let hash = seahash::hash_seeded(token.as_bytes(), 1, 1000, 200, 89);
                 let hash = (hash % self.n_features) as i32;
@@ -245,7 +231,32 @@ impl HashingVectorizer {
             }
             // this takes 10-15% of the compute time
             indices_local.sort_unstable();
+            indices_local
+        };
 
+        let n_jobs = 1;
+
+        let pipe: Box<Iterator<Item = Vec<i32>>>;
+
+        if n_jobs == 1 {
+            pipe = Box::new(
+                X.iter()
+                    .map(|doc| doc.to_ascii_lowercase())
+                    .map(|doc| tokenize_hash(&doc)),
+            );
+        } else if n_jobs > 1 {
+            pipe = Box::new(
+                X.par_iter()
+                    .map(|doc| doc.to_ascii_lowercase())
+                    .map(|doc| tokenize_hash(&doc))
+                    .collect::<Vec<Vec<i32>>>()
+                    .into_iter(),
+            );
+        } else {
+            panic!("n_jobs={} must be > 0", n_jobs);
+        }
+
+        for indices_local in pipe {
             _sum_duplicates(&mut tf, indices_local.as_slice(), &mut nnz);
         }
 

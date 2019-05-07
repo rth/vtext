@@ -46,8 +46,8 @@ extern crate regex;
 extern crate seahash;
 #[macro_use]
 extern crate ndarray;
-extern crate sprs;
 extern crate hashbrown;
+extern crate sprs;
 #[macro_use]
 extern crate itertools;
 extern crate rayon;
