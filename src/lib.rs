@@ -46,13 +46,11 @@ extern crate regex;
 extern crate seahash;
 #[macro_use]
 extern crate ndarray;
-extern crate rayon;
 extern crate sprs;
-
 extern crate hashbrown;
-extern crate sprs;
 #[macro_use]
 extern crate itertools;
+extern crate rayon;
 
 mod math;
 pub mod metrics;
