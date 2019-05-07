@@ -44,3 +44,6 @@ ndarray = "0.12.1"
 sprs = "0.6.3"
 unicode-segmentation = "1.2.1"
 hashbrown = "0.1"
+
+[dev-dependencies]
+float-cmp = "0.4.0" # for asserting floating point differences in test
