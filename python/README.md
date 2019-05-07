@@ -1,27 +1,35 @@
-# py-text-vectorize
+# vtext
 
-This is a Python wrapper for the Rust text-vectorize crate.
+This is a Python wrapper for the Rust vtext crate.
 
-## Installation
+This package aims to provide a high performance toolkit for ingesting textual data for
+machine learning applications.
 
-### Manual install
+The API is currently unstable.
 
-Building requires Python 3.5+ as well as Rust nightly >=1.30.0
-(due to [rust-numpy](https://github.com/rust-numpy/rust-numpy) and
-[pyo3](https://github.com/PyO3/pyo3) requirements),
+### Features
 
-To build the Python package, run,
+ - Tokenization: Regexp tokenizer, Unicode segmentation + language specific rules
+ - Stemming: Snowball (in Python 15-20x faster than NLTK)
+ - Token counting: converting token counts to sparse matrices for use
+   in machine learning libraries. Similar to `CountVectorizer` and
+   `HashingVectorizer` in scikit-learn but will less broad functionality.
+ - Levenshtein edit distance; Sørensen-Dice, Jaro, Jaro Winkler string similarities
+
+
+### Installation
+
+vtext requires Python 3.5+ and can be installed with,
+
 ```
-pip install -r requirements.txt
-python3 setup.py develop --user
+pip install --pre vtext
 ```
 
-### Docker environment
+### Documentation
 
-The easiest might be to use docker to setup a build environment,
+Project documentation: [vtext.io/doc/latest/index.html](https://vtext.io/doc/latest/index.html)
 
-```
-docker build -t py-text-vectorize-env .
-./start_docker_env.sh
-python3 setup.py develop --user
-```
+
+## License
+
+vtext is released under the [Apache License, Version 2.0](./LICENSE).

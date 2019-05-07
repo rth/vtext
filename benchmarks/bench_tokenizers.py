@@ -3,8 +3,26 @@ from glob import glob
 from pathlib import Path
 import re
 
-from pytext_vectorize.tokenize import RegexpTokenizer
-from pytext_vectorize.tokenize import UnicodeSegmentTokenizer
+from vtext.tokenize import RegexpTokenizer
+from vtext.tokenize import UnicodeSegmentTokenizer
+from vtext.tokenize import VTextTokenizer
+from vtext.tokenize import CharacterTokenizer
+
+try:
+    import sacremoses
+except ImportError:
+    sacremoses = None
+
+try:
+    import spacy
+except ImportError:
+    spacy = None
+
+try:
+    import blingfire
+except ImportError:
+    blingfire = None
+
 
 base_dir = Path(__file__).parent.parent.resolve()
 
@@ -25,7 +43,7 @@ if __name__ == "__main__":
     def pyre_tokenizer(txt):
         return list(re.compile(token_regexp).findall(txt))
 
-    for label, func in [
+    db = [
         (r"Python re.findall(r'\b\w\w+\b', ...)", pyre_tokenizer),
         (
             r"RegexpTokenizer(r'\b\w\w+\b')",
@@ -39,13 +57,34 @@ if __name__ == "__main__":
             "UnicodeSegmentTokenizer(word_bounds=True)",
             UnicodeSegmentTokenizer(word_bounds=True).tokenize,
         ),
-    ]:
+        ("VTextTokenizer('en')", VTextTokenizer("en").tokenize),
+        ("CharacterTokenizer(4)", CharacterTokenizer(4).tokenize),
+    ]
 
+    if sacremoses is not None:
+        db.append(("MosesTokenizer()", sacremoses.MosesTokenizer().tokenize))
+    if spacy is not None:
+        from spacy.lang.en import English
+
+        db.append(("Spacy en", English().tokenizer))
+
+    if blingfire is not None:
+        db.append(("BlingFire en", lambda x: blingfire.text_to_words(x).split(" ")))
+
+    for label, func in db:
         t0 = time()
 
+        out = []
+
         for idx, doc in enumerate(data):
-            func(doc)
+            out.append(func(doc))
 
         dt = time() - t0
 
-        print("{:>45}: {:.2f}s [{:.1f} MB/s]".format(label, dt, dataset_size / dt))
+        n_tokens = sum(len(tok) for tok in out)
+
+        print(
+            "{:>45}: {:.2f}s [{:.1f} MB/s, {:.0f} kWPS]".format(
+                label, dt, dataset_size / dt, n_tokens * 1e-3 / dt
+            )
+        )

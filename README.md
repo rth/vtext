@@ -1,84 +1,91 @@
-# text-vectorize
+# vtext
 
-[![CircleCI](https://circleci.com/gh/rth/text-vectorize/tree/master.svg?style=svg)](https://circleci.com/gh/rth/text-vectorize/tree/master)
+[![Crates.io](https://img.shields.io/crates/v/vtext.svg)](https://crates.io/crates/vtext)
+[![PyPI](https://img.shields.io/pypi/v/vtext.svg)](https://pypi.org/project/vtext/)
+[![CircleCI](https://circleci.com/gh/rth/vtext/tree/master.svg?style=svg)](https://circleci.com/gh/rth/vtext/tree/master)
+[![Build Status](https://dev.azure.com/ryurchak/vtext/_apis/build/status/rth.vtext?branchName=master)](https://dev.azure.com/ryurchak/vtext/_build/latest?definitionId=1&branchName=master)
 
-Text vectorizers and TFIDF transforms in Rust with Python bindings (experimental)
+NLP in Rust with Python bindings
 
-Work in progress, the API is unstable.
+This package aims to provide a high performance toolkit for ingesting textual data for
+machine learning applications.
 
-API and implementation inspired by `CountVectorizer` and `HashingVectorizer`
-estimators in [scikit-learn](https://scikit-learn.org/).
+The API is currently unstable.
 
-## Features
+### Features
 
-### Implemented
-
- - bag of word vectorization of text documents
- - hashing vectorizer using MurmurHash3
-
-### Planned
-
- - Python wrapper ([#6](https://github.com/rth/text-vectorize/pull/6))
- - Support for word and character n-grams ([#2](https://github.com/rth/text-vectorize/issues/2))
- - Binary Python wheels ([#3](https://github.com/rth/text-vectorize/issues/3<Paste>))
- - IDF transforms and TfidfVectorizer ([#4](https://github.com/rth/text-vectorize/issues/4))
-
-In general, see https://github.com/rth/text-vectorize/issues. Comments and suggestions are very welcome.
-
+ - Tokenization: Regexp tokenizer, Unicode segmentation + language specific rules
+ - Stemming: Snowball (in Python 15-20x faster than NLTK)
+ - Token counting: converting token counts to sparse matrices for use
+   in machine learning libraries. Similar to `CountVectorizer` and
+   `HashingVectorizer` in scikit-learn but will less broad functionality.
+ - Levenshtein edit distance; Sørensen-Dice, Jaro, Jaro Winkler string similarities
 
 ## Usage
+
+### Usage in Python
+
+vtext requires Python 3.5+ and can be installed with,
+```
+pip install --pre vtext
+```
+
+Below is a simple tokenization example,
+
+```python
+>>> from vtext.tokenize import VTextTokenizer
+>>> VTextTokenizer("en").tokenize("Flights can't depart after 2:00 pm.")
+["Flights", "ca", "n't", "depart" "after", "2:00", "pm", "."]
+```
+
+For more details see the project documentation: [vtext.io/doc/latest/index.html](https://vtext.io/doc/latest/index.html)
 
 ### Usage in Rust
 
 Add the following to `Cargo.toml`,
 ```toml
 [dependencies]
-text-vectorize = {"git" = "https://github.com/rth/text-vectorize"}
-``` 
-A simple example can be found below,
-```rust
-extern crate text_vectorize;
-
-use text_vectorize::CountVectorizer;
-
-let documents = vec![
-    String::from("Some text input"),
-    String::from("Another line"),
-];
-
-let mut vect = CountVectorizer::new();
-let X = vect.fit_transform(&documents);
+vtext = "0.1.0-alpha.2"
 ```
-where `X` is a `CSRArray` struct with the following attributes
-`X.indptr`, `X.indices`, `X.values`.
 
-### Usage in Python
-
-Not implemented yet, see [#1](https://github.com/rth/text-vectorize/pull/1).
-
-The API aims to be compatible with scikit-learn's
-[CountVectorizer](https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.CountVectorizer.html)
-and [HashingVectorizer](https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.HashingVectorizer.html) 
-though only a subset of features will be implemented.
-
+For more details see rust documentation: [docs.rs/vtext](https://docs.rs/vtext)
 
 ## Benchmarks
 
-Below are some very preliminary benchmarks on the 20 newsgroups dataset of 19924 documents (~91 MB in total),
+#### Tokenization
 
-| estimator         | implementation                    | speed        |
-|-------------------|-----------------------------------|--------------|
-| CountVectorizer   | scikit-learn 0.20 (Python)        | 14 MB/s      |
-| CountVectorizer   | text-vectorize 0.1.0-alpha (Rust) | 33 MB/s      |
-| HashingVectorizer | scikit-learn 0.20 (Python+Cython) | 18 MB/s      |
-| HashingVectorizer | text-vectorize 0.1.0-alpha (Rust) | 68 MB/s      |
+Following benchmarks illustrate the tokenization accuracy (F1 score) on [UD treebanks](https://universaldependencies.org/)
+,
+
+                    
+|  lang | dataset   |regexp    | spacy 2.1 | vtext    |         
+|-------|-----------|----------|-----------|----------|
+|  en   | EWT       | 0.812    | 0.972     | 0.966    |
+|  en   | GUM       | 0.881    | 0.989     | 0.996    |
+|  de   | GSD       | 0.896    | 0.944     | 0.964    |
+|  fr   | Sequoia   | 0.844    | 0.968     | 0.971    |
+
+and the English tokenization speed,
+
+|                          |regexp | spacy 2.1 | vtext |
+|--------------------------|-------|-----------|-------|
+| **Speed** (10⁶ tokens/s) | 3.1   | 0.14      | 2.1   |
+
+
+#### Text vectorization
+
+Below are  benchmarks for converting
+textual data to a sparse document-term matrix using the 20 newsgroups dataset, 
+
+| Speed (MB/s)       | scikit-learn 0.20.1 | vtext |
+|--------------------|---------------------|-------|
+| CountVectorizer    |  14                 | 45    |
+| HashingVectorizer  |  19                 | 68    |
+
 
 see [benchmarks/README.md](./benchmarks/README.md) for more details.
-Note that these are not strictly equivalent, because
-they do not account for cost of passing data from Rust to Python. Instead they are meant a
-a rough estimate for the possible performance improvements.
 
 
 ## License
 
-text-vectorize is released under the BSD 3-clause license.
+vtext is released under the [Apache License, Version 2.0](./LICENSE).

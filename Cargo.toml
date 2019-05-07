@@ -1,8 +1,30 @@
 [package]
-name = "text-vectorize"
-version = "0.1.0-alpha.1"
+name = "vtext"
+version = "0.1.0-alpha.2"
+description = "NLP with Rust"
+license = "Apache-2.0"
+documentation = "https://docs.rs/vtext/"
+repository = "https://github.com/rth/vtext"
+readme = "README.md"
 authors = ["Roman Yurchak <rth.yurchak@pm.me>"]
+keywords = [
+    "nlp",
+    "tokenization",
+    "tfidf",
+    "levenshtein",
+    "matching"
+]
 edition = "2018"
+exclude = [
+    "python/*",
+    "benchmarks/*",
+    "evaluation/*",
+    "ud-treebanks-*",
+    "data/*",
+    "*.tgz",
+    "*.zip",
+    "sandbox/*"
+]
 
 [profile.release]
 opt-level = 3
@@ -10,17 +32,16 @@ debug = false
 rpath = false
 lto = false
 debug-assertions = false
-codegen-units = 16
 panic = 'unwind'
-incremental = false
 overflow-checks = false
 
 [dependencies]
 regex = "1"
 lazy_static = "1.2.0"
-fnv = "1.0.3"
-fasthash = "0.3"
+seahash = "3.0.6"
+itertools = "0.8"
 ndarray = "0.12.1"
 sprs = "0.6.3"
 unicode-segmentation = "1.2.1"
+hashbrown = "0.1"
 rayon = "1.0"

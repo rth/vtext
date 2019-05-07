@@ -1,0 +1,48 @@
+parameters:
+  name: ''
+  vmImage: ''
+  matrix: []
+
+jobs:
+- job: ${{ parameters.name }}
+  pool:
+    vmImage: ${{ parameters.vmImage }}
+  variables:
+    - group: AWS_CREDENTIALS
+    - name: TEST_DIR
+      value: '$(Agent.WorkFolder)/tmp_folder'
+    - name: VIRTUALENV
+      value: 'testvenv'
+  strategy:
+    matrix:
+      ${{ insert }}: ${{ parameters.matrix }}
+
+  steps:
+    - bash: echo "##vso[task.prependpath]$CONDA/bin"
+      displayName: Add conda to PATH
+    - script: |
+        ci/azure/install.sh
+      displayName: 'Install'
+    - script: |
+        ci/azure/test_rust.sh
+      displayName: 'Test rust'
+    - script: |
+        ci/azure/test_python.sh
+      displayName: 'Test python'
+    - script: |
+        ci/azure/upload_wheels.sh
+      displayName: 'Upload wheels'
+      env:
+         AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+         AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+      condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
+    - task: PublishTestResults@2
+      inputs:
+        testResultsFiles: '$(TEST_DIR)/$(JUNITXML)'
+        testRunTitle: ${{ format('{0}-$(Agent.JobName)', parameters.name) }}
+      displayName: 'Publish Test Results'
+      condition: succeededOrFailed()
+    - task: PublishPipelineArtifact@0
+      inputs:
+        artifactName: "${{ parameters.name }}-$(PYTHON_VERSION)-wheels"
+        targetPath: python/dist/
