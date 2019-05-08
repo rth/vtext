@@ -128,19 +128,14 @@ impl CountVectorizer {
 
         let tokenizer = tokenize::RegexpTokenizer::new(TOKEN_PATTERN_DEFAULT.to_string());
 
+        let pipe = X.iter().map(|doc| doc.to_ascii_lowercase());
+
         let mut vocabulary_size: i32 = 0;
 
-        let tokenize = |doc: String| -> Vec<String> {
-            tokenizer.tokenize(&doc).map(|x| x.to_string()).collect()
-        };
+        for document in pipe {
 
-        let pipe: Vec<Vec<String>> = X
-            .par_iter()
-            .map(|doc| doc.to_ascii_lowercase())
-            .map(|doc| tokenize(doc))
-            .collect();
+            let tokens = tokenizer.tokenize(&document);
 
-        for tokens in pipe.iter() {
             indices_local.clear();
             for token in tokens {
                 match self.vocabulary.get(token) {

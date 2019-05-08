@@ -21,7 +21,10 @@ if __name__ == "__main__":
 
     for label, vect in [
         ("HashingVectorizer (vtext, n_jobs=1)", vtext.vectorize.HashingVectorizer()),
-        ("HashingVectorizer (vtext, n_jobs=2)", vtext.vectorize.HashingVectorizer(n_jobs=2)),
+        (
+            "HashingVectorizer (vtext, n_jobs=2)",
+            vtext.vectorize.HashingVectorizer(n_jobs=2),
+        ),
         (
             "HashingVectorizer (scikit-learn)",
             skt.HashingVectorizer(lowercase=False, norm=None),
