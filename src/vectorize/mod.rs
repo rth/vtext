@@ -83,6 +83,8 @@ pub struct HashingVectorizer {
     lowercase: bool,
     token_pattern: String,
     n_features: u64,
+    n_jobs: usize,
+    thread_pool: Option<rayon::ThreadPool>,
 }
 
 #[derive(Debug)]
@@ -189,7 +191,27 @@ impl HashingVectorizer {
             lowercase: true,
             token_pattern: String::from(TOKEN_PATTERN_DEFAULT),
             n_features: 1048576,
+            n_jobs: 1,
+            thread_pool: None,
         }
+    }
+
+    /// Set the number of parallel threads to use
+    pub fn n_jobs(mut self, n_jobs: usize) -> Self {
+        self.n_jobs = n_jobs;
+        if n_jobs == 1 {
+            self.thread_pool = None;
+        } else if n_jobs > 1 {
+            self.thread_pool = Some(
+                rayon::ThreadPoolBuilder::new()
+                    .num_threads(n_jobs)
+                    .build()
+                    .unwrap(),
+            );
+        } else {
+            panic!("n_jobs={} must be > 0", n_jobs);
+        }
+        self
     }
 
     /// Fit method
@@ -213,13 +235,9 @@ impl HashingVectorizer {
 
         let tokenizer = tokenize::RegexpTokenizer::new(TOKEN_PATTERN_DEFAULT.to_string());
 
-        // String.to_lowercase() is very slow
-        // https://www.reddit.com/r/rust/comments/6wbru2/performance_issue_can_i_avoid_of_using_the_slow/
-        // https://github.com/rust-lang/rust/issues/26244
-        // Possibly use: https://github.com/JuliaStrings/utf8proc
-        // http://www.unicode.org/faq/casemap_charprop.html
-
         let tokenize_hash = |doc: &str| -> Vec<i32> {
+            // Closure to tokenize a document and returns hash indices for each token
+
             let mut indices_local: Vec<i32> = Vec::with_capacity(10);
 
             for token in tokenizer.tokenize(doc) {
@@ -234,17 +252,24 @@ impl HashingVectorizer {
             indices_local
         };
 
-        let n_jobs = 1;
-
         let pipe: Box<Iterator<Item = Vec<i32>>>;
 
-        if n_jobs == 1 {
+        if self.n_jobs == 1 {
+            // Sequential (streaming) pipelines
             pipe = Box::new(
                 X.iter()
+                    // String.to_lowercase() is very slow
+                    // https://www.reddit.com/r/rust/comments/6wbru2/performance_issue_can_i_avoid_of_using_the_slow/
+                    // https://github.com/rust-lang/rust/issues/26244
+                    // Possibly use: https://github.com/JuliaStrings/utf8proc
+                    // http://www.unicode.org/faq/casemap_charprop.html
                     .map(|doc| doc.to_ascii_lowercase())
                     .map(|doc| tokenize_hash(&doc)),
             );
-        } else if n_jobs > 1 {
+        } else if self.n_jobs > 1 {
+            // Parallel pipeline. The scaling is reasonably good, however it uses more
+            // memory as all the tokens need to be collected into a Vec
+
             pipe = Box::new(
                 X.par_iter()
                     .map(|doc| doc.to_ascii_lowercase())
@@ -253,7 +278,7 @@ impl HashingVectorizer {
                     .into_iter(),
             );
         } else {
-            panic!("n_jobs={} must be > 0", n_jobs);
+            panic!("n_jobs={} must be > 0", self.n_jobs);
         }
 
         for indices_local in pipe {
