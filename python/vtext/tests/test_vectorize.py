@@ -37,6 +37,16 @@ def test_hashing_vectorizer():
     assert_array_equal(X.indices, X2.indices)
 
 
+def test_hashing_vectorizer_params():
+    text = ["some sentence", "a different sentence"]
+    vect = HashingVectorizer(n_jobs=2)
+    vect.fit_transform(text)
+
+    with pytest.raises(ValueError, match="n_jobs=-1 must be a integer >= 1"):
+        vect = HashingVectorizer(n_jobs=-1)
+        vect.fit_transform(text)
+
+
 @pytest.mark.parametrize("Estimator", [HashingVectorizer])
 def test_pickle_vectorizers(Estimator):
 

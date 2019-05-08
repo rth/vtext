@@ -67,8 +67,9 @@ pub struct _HashingVectorizerWrapper {
 #[pymethods]
 impl _HashingVectorizerWrapper {
     #[new]
-    fn new(obj: &PyRawObject) {
-        let estimator = vtext::vectorize::HashingVectorizer::new();
+    #[args(n_jobs = 1)]
+    fn new(obj: &PyRawObject, n_jobs: usize) {
+        let estimator = vtext::vectorize::HashingVectorizer::new().n_jobs(n_jobs);
         obj.init(_HashingVectorizerWrapper { inner: estimator });
     }
 
