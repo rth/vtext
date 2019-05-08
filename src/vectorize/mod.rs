@@ -79,15 +79,6 @@ fn _sum_duplicates(tf: &mut CSRArray, indices_local: &[i32], nnz: &mut usize) {
 }
 
 #[derive(Debug)]
-pub struct HashingVectorizer {
-    lowercase: bool,
-    token_pattern: String,
-    n_features: u64,
-    n_jobs: usize,
-    thread_pool: Option<rayon::ThreadPool>,
-}
-
-#[derive(Debug)]
 pub struct CountVectorizer {
     lowercase: bool,
     token_pattern: String,
@@ -184,6 +175,15 @@ impl CountVectorizer {
     }
 }
 
+#[derive(Debug)]
+pub struct HashingVectorizer {
+    lowercase: bool,
+    token_pattern: String,
+    n_features: u64,
+    _n_jobs: usize,
+    thread_pool: Option<rayon::ThreadPool>,
+}
+
 impl HashingVectorizer {
     /// Create a new HashingVectorizer estimator
     pub fn new() -> Self {
@@ -191,14 +191,14 @@ impl HashingVectorizer {
             lowercase: true,
             token_pattern: String::from(TOKEN_PATTERN_DEFAULT),
             n_features: 1048576,
-            n_jobs: 1,
+            _n_jobs: 1,
             thread_pool: None,
         }
     }
 
     /// Set the number of parallel threads to use
     pub fn n_jobs(mut self, n_jobs: usize) -> Self {
-        self.n_jobs = n_jobs;
+        self._n_jobs = n_jobs;
         if n_jobs == 1 {
             self.thread_pool = None;
         } else if n_jobs > 1 {
@@ -254,7 +254,7 @@ impl HashingVectorizer {
 
         let pipe: Box<Iterator<Item = Vec<i32>>>;
 
-        if self.n_jobs == 1 {
+        if self._n_jobs == 1 {
             // Sequential (streaming) pipelines
             pipe = Box::new(
                 X.iter()
@@ -266,7 +266,7 @@ impl HashingVectorizer {
                     .map(|doc| doc.to_ascii_lowercase())
                     .map(|doc| tokenize_hash(&doc)),
             );
-        } else if self.n_jobs > 1 {
+        } else if self._n_jobs > 1 {
             // Parallel pipeline. The scaling is reasonably good, however it uses more
             // memory as all the tokens need to be collected into a Vec
 
@@ -278,7 +278,7 @@ impl HashingVectorizer {
                     .into_iter(),
             );
         } else {
-            panic!("n_jobs={} must be > 0", self.n_jobs);
+            panic!("n_jobs={} must be > 0", self._n_jobs);
         }
 
         for indices_local in pipe {
