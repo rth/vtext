@@ -133,7 +133,6 @@ impl CountVectorizer {
         let mut vocabulary_size: i32 = 0;
 
         for document in pipe {
-
             let tokens = tokenizer.tokenize(&document);
 
             indices_local.clear();
@@ -192,6 +191,8 @@ impl HashingVectorizer {
     }
 
     /// Set the number of parallel threads to use
+    ///
+    /// Note: currently any value n_jobs > 1 will use all available cores.
     pub fn n_jobs(mut self, n_jobs: usize) -> Self {
         self._n_jobs = n_jobs;
         if n_jobs == 1 {
@@ -265,6 +266,7 @@ impl HashingVectorizer {
             // Parallel pipeline. The scaling is reasonably good, however it uses more
             // memory as all the tokens need to be collected into a Vec
 
+            // TODO: explicitly use self.thread_pool, currently the global thread pool is used
             pipe = Box::new(
                 X.par_iter()
                     .map(|doc| doc.to_ascii_lowercase())

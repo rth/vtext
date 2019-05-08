@@ -46,8 +46,10 @@ class HashingVectorizer(BaseEstimator):
         probabilistic models that model binary events rather than integer
         counts.
     n_jobs : int, default=1
-        number of threads to use for parallel feature extraction. Using n_jobs > 1,
+        number of threads to use for parallel feature extraction. n_jobs > 1,
         is faster, but uses more memory.
+
+        Note: currently any value n_jobs > 1 will use all available cores.
     dtype : type, optional
         Type of the matrix returned by fit_transform() or transform().
 
