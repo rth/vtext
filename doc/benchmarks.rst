@@ -32,10 +32,9 @@ Text vectorization
 Below are  benchmarks for converting
 textual data to a sparse document-term matrix using the 20 newsgroups dataset, 
 
- ===================  =====================  =======
-  Speed (MB/s)         scikit-learn 0.20.1    vtext
- ===================  =====================  =======
-  CountVectorizer       14                     45
-  HashingVectorizer     19                     68
- ===================  =====================  =======
-
+ ===================  =====================  =================== =================
+  Speed (MB/s)         scikit-learn 0.20.1     vtext (n_jobs=1)  vtext (n_jobs=4)
+ ===================  =====================  =================== =================
+  CountVectorizer       14                      49                NA
+  HashingVectorizer     19                      78                227
+ ===================  =====================  =================== =================
