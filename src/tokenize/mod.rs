@@ -29,7 +29,7 @@ which would remove all punctuation. A more general approach is to apply unicode 
 ```rust
 # let s = "The “brown” fox can't jump 32.3 feet, right?";
 # use vtext::tokenize::*;
-let tokenizer = UnicodeSegmentTokenizer::new(true);
+let tokenizer = UnicodeSegmentTokenizer::default();
 let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
 assert_eq!(tokens, &["The", "“", "brown", "”", "fox", "can't", "jump", "32.3", "feet", ",", "right", "?"]);
 ```
@@ -99,7 +99,8 @@ impl fmt::Debug for RegexpTokenizer {
 /// ## References
 ///
 /// * [Unicode® Standard Annex #29](http://www.unicode.org/reports/tr29/)
-#[derive(Debug, Clone)]
+#[derive(Builder, Debug, Clone)]
+#[builder(setter(into))]
 pub struct UnicodeSegmentTokenizer {
     pub word_bounds: bool,
 }
@@ -108,6 +109,11 @@ impl UnicodeSegmentTokenizer {
     /// Create a new instance
     pub fn new(word_bounds: bool) -> UnicodeSegmentTokenizer {
         UnicodeSegmentTokenizer { word_bounds }
+}
+
+impl Default for UnicodeSegmentTokenizer {
+    fn default() -> UnicodeSegmentTokenizer {
+        UnicodeSegmentTokenizer {word_bounds : true }
     }
 }
 

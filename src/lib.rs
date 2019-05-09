@@ -51,6 +51,8 @@ extern crate sprs;
 #[macro_use]
 extern crate itertools;
 extern crate rayon;
+#[macro_use]
+extern crate derive_builder;
 
 mod math;
 pub mod metrics;
