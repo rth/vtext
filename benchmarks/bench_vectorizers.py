@@ -19,18 +19,30 @@ if __name__ == "__main__":
 
     print("# vectorizing {} documents:".format(len(data)))
 
-    for label, vect in [
-        ("HashingVectorizer (vtext, n_jobs=1)", vtext.vectorize.HashingVectorizer()),
+    for label, vect, method in [
+        (
+            "HashingVectorizer (vtext, n_jobs=1)",
+            vtext.vectorize.HashingVectorizer(),
+            "fit_transform",
+        ),
         (
             "HashingVectorizer (vtext, n_jobs=2)",
             vtext.vectorize.HashingVectorizer(n_jobs=2),
+            "fit_transform",
         ),
-        (
-            "HashingVectorizer (scikit-learn)",
-            skt.HashingVectorizer(lowercase=False, norm=None),
-        ),
-        ("CountVectorizer (vtext)", vtext.vectorize.CountVectorizer()),
-        ("CountVectorizer (scikit-learn)", skt.CountVectorizer(lowercase=False)),
+        #(
+        #    "HashingVectorizer (scikit-learn)",
+        #    skt.HashingVectorizer(lowercase=False, norm=None),
+        #    "fit_transform",
+        #),
+        ("CountVectorizer.fit (vtext)", vtext.vectorize.CountVectorizer(), "fit"),
+        ("CountVectorizer.transform (vtext)", vtext.vectorize.CountVectorizer().fit(data), "transform"),
+        ("CountVectorizer (vtext)", vtext.vectorize.CountVectorizer(), "fit_transform"),
+        # (
+        #     "CountVectorizer (scikit-learn)",
+        #     skt.CountVectorizer(lowercase=False),
+        #     "fit_transform",
+        # ),
         # (
         #    "CountVectorizer, 4-char ngram (scikit-learn)",
         #    skt.CountVectorizer(lowercase=False, analyzer="char", ngram_range=(4, 4)),
@@ -39,7 +51,11 @@ if __name__ == "__main__":
 
         t0 = time()
 
-        X = vect.fit_transform(data)
+        X = getattr(vect, method)(data)
+        if not hasattr(X, "shape"):
+            class X():
+                shape = None
+                nnz = None
 
         dt = time() - t0
 
