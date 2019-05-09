@@ -43,5 +43,5 @@ itertools = "0.8"
 ndarray = "0.12.1"
 sprs = "0.6.3"
 unicode-segmentation = "1.2.1"
-hashbrown = "0.1"
+hashbrown = { version = "0.3", features = ["rayon"] }
 rayon = "1.0"

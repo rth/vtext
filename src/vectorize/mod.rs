@@ -89,6 +89,8 @@ pub struct CountVectorizer {
 
 pub enum Vectorizer {}
 
+
+
 impl CountVectorizer {
     /// Initialize a CountVectorizer estimator
     pub fn new() -> Self {
@@ -109,11 +111,13 @@ impl CountVectorizer {
             tokenizer.tokenize(&doc).map(|tok| tok.to_string()).collect()
         };
 
-        let pipe = X.iter()
+        let pipe = X.par_iter()
                      .map(|doc| doc.to_ascii_lowercase())
                      .flat_map(|doc| tokenize(&doc));
 
-        let vocabulary : HashSet<String> = pipe.collect();
+        let mut vocabulary : Vec<String> = pipe.collect::<Vec<String>>();
+        vocabulary.sort_unstable();
+        vocabulary.dedup();
     }
 
     /// Transform
