@@ -28,6 +28,7 @@ use crate::tokenize;
 use crate::tokenize::Tokenizer;
 use hashbrown::HashMap;
 use ndarray::Array;
+use rayon::prelude::*;
 use sprs::CsMat;
 
 const TOKEN_PATTERN_DEFAULT: &str = r"\b\w\w+\b";
@@ -75,13 +76,6 @@ fn _sum_duplicates(tf: &mut CSRArray, indices_local: &[i32], nnz: &mut usize) {
     *nnz += 1;
 
     tf.indptr.push(*nnz);
-}
-
-#[derive(Debug)]
-pub struct HashingVectorizer {
-    lowercase: bool,
-    token_pattern: String,
-    n_features: u64,
 }
 
 #[derive(Debug)]
@@ -138,7 +132,7 @@ impl CountVectorizer {
 
         let mut vocabulary_size: i32 = 0;
 
-        for (_document_id, document) in pipe.enumerate() {
+        for document in pipe {
             let tokens = tokenizer.tokenize(&document);
 
             indices_local.clear();
@@ -175,6 +169,15 @@ impl CountVectorizer {
     }
 }
 
+#[derive(Debug)]
+pub struct HashingVectorizer {
+    lowercase: bool,
+    token_pattern: String,
+    n_features: u64,
+    _n_jobs: usize,
+    thread_pool: Option<rayon::ThreadPool>,
+}
+
 impl HashingVectorizer {
     /// Create a new HashingVectorizer estimator
     pub fn new() -> Self {
@@ -182,7 +185,29 @@ impl HashingVectorizer {
             lowercase: true,
             token_pattern: String::from(TOKEN_PATTERN_DEFAULT),
             n_features: 1048576,
+            _n_jobs: 1,
+            thread_pool: None,
         }
+    }
+
+    /// Set the number of parallel threads to use
+    ///
+    /// Note: currently any value n_jobs > 1 will use all available cores.
+    pub fn n_jobs(mut self, n_jobs: usize) -> Self {
+        self._n_jobs = n_jobs;
+        if n_jobs == 1 {
+            self.thread_pool = None;
+        } else if n_jobs > 1 {
+            self.thread_pool = Some(
+                rayon::ThreadPoolBuilder::new()
+                    .num_threads(n_jobs)
+                    .build()
+                    .unwrap(),
+            );
+        } else {
+            panic!("n_jobs={} must be > 0", n_jobs);
+        }
+        self
     }
 
     /// Fit method
@@ -202,22 +227,16 @@ impl HashingVectorizer {
 
         tf.indptr.push(0);
 
-        let mut indices_local = Vec::new();
         let mut nnz: usize = 0;
 
         let tokenizer = tokenize::RegexpTokenizer::new(TOKEN_PATTERN_DEFAULT.to_string());
 
-        // String.to_lowercase() is very slow
-        // https://www.reddit.com/r/rust/comments/6wbru2/performance_issue_can_i_avoid_of_using_the_slow/
-        // https://github.com/rust-lang/rust/issues/26244
-        // Possibly use: https://github.com/JuliaStrings/utf8proc
-        // http://www.unicode.org/faq/casemap_charprop.html
-        let pipe = X.iter().map(|doc| doc.to_ascii_lowercase());
+        let tokenize_hash = |doc: &str| -> Vec<i32> {
+            // Closure to tokenize a document and returns hash indices for each token
 
-        for (_document_id, document) in pipe.enumerate() {
-            let tokens = tokenizer.tokenize(&document);
-            indices_local.clear();
-            for token in tokens {
+            let mut indices_local: Vec<i32> = Vec::with_capacity(10);
+
+            for token in tokenizer.tokenize(doc) {
                 // set the RNG seeds to get reproducible hashing
                 let hash = seahash::hash_seeded(token.as_bytes(), 1, 1000, 200, 89);
                 let hash = (hash % self.n_features) as i32;
@@ -226,7 +245,40 @@ impl HashingVectorizer {
             }
             // this takes 10-15% of the compute time
             indices_local.sort_unstable();
+            indices_local
+        };
 
+        let pipe: Box<Iterator<Item = Vec<i32>>>;
+
+        if self._n_jobs == 1 {
+            // Sequential (streaming) pipelines
+            pipe = Box::new(
+                X.iter()
+                    // String.to_lowercase() is very slow
+                    // https://www.reddit.com/r/rust/comments/6wbru2/performance_issue_can_i_avoid_of_using_the_slow/
+                    // https://github.com/rust-lang/rust/issues/26244
+                    // Possibly use: https://github.com/JuliaStrings/utf8proc
+                    // http://www.unicode.org/faq/casemap_charprop.html
+                    .map(|doc| doc.to_ascii_lowercase())
+                    .map(|doc| tokenize_hash(&doc)),
+            );
+        } else if self._n_jobs > 1 {
+            // Parallel pipeline. The scaling is reasonably good, however it uses more
+            // memory as all the tokens need to be collected into a Vec
+
+            // TODO: explicitly use self.thread_pool, currently the global thread pool is used
+            pipe = Box::new(
+                X.par_iter()
+                    .map(|doc| doc.to_ascii_lowercase())
+                    .map(|doc| tokenize_hash(&doc))
+                    .collect::<Vec<Vec<i32>>>()
+                    .into_iter(),
+            );
+        } else {
+            panic!("n_jobs={} must be > 0", self._n_jobs);
+        }
+
+        for indices_local in pipe {
             _sum_duplicates(&mut tf, indices_local.as_slice(), &mut nnz);
         }
 

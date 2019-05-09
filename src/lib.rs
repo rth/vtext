@@ -50,6 +50,7 @@ extern crate hashbrown;
 extern crate sprs;
 #[macro_use]
 extern crate itertools;
+extern crate rayon;
 
 mod math;
 pub mod metrics;
