@@ -107,7 +107,7 @@ impl CountVectorizer {
     pub fn fit(&mut self, X: &[String]) -> () {
         let tokenizer = tokenize::RegexpTokenizer::new(TOKEN_PATTERN_DEFAULT.to_string());
 
-        let tokenize = |X: Vec<&String>| -> HashSet<String> {
+        let tokenize = |X: &[String]| -> HashSet<String> {
             let mut _vocab: HashSet<String> = HashSet::with_capacity(1000);
 
             for doc in X {
@@ -123,9 +123,11 @@ impl CountVectorizer {
             _vocab
         };
 
-        let pipe = X.par_iter()
-                     .chunks(4)
-                     .flat_map(tokenize);
+        //let vocabulary = tokenize(X);
+        
+
+        let pipe = X.par_chunks(X.len() / 4)
+                    .flat_map(tokenize);
 
         let mut vocabulary : HashSet<String> = pipe.collect();
     }
