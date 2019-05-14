@@ -30,13 +30,17 @@ if __name__ == "__main__":
             vtext.vectorize.HashingVectorizer(n_jobs=2),
             "fit_transform",
         ),
-        #(
+        # (
         #    "HashingVectorizer (scikit-learn)",
         #    skt.HashingVectorizer(lowercase=False, norm=None),
         #    "fit_transform",
-        #),
+        # ),
         ("CountVectorizer.fit (vtext)", vtext.vectorize.CountVectorizer(), "fit"),
-        ("CountVectorizer.transform (vtext)", vtext.vectorize.CountVectorizer().fit(data), "transform"),
+        (
+            "CountVectorizer.transform (vtext)",
+            vtext.vectorize.CountVectorizer().fit(data),
+            "transform",
+        ),
         ("CountVectorizer (vtext)", vtext.vectorize.CountVectorizer(), "fit_transform"),
         # (
         #     "CountVectorizer (scikit-learn)",
@@ -53,7 +57,8 @@ if __name__ == "__main__":
 
         X = getattr(vect, method)(data)
         if not hasattr(X, "shape"):
-            class X():
+
+            class X:
                 shape = None
                 nnz = None
 

@@ -26,7 +26,7 @@ let X = vectorizer.fit_transform(&documents);
 use crate::math::CSRArray;
 use crate::tokenize;
 use crate::tokenize::Tokenizer;
-use hashbrown::{HashMap,HashSet};
+use hashbrown::{HashMap, HashSet};
 use ndarray::Array;
 use rayon::prelude::*;
 use sprs::CsMat;
@@ -89,8 +89,6 @@ pub struct CountVectorizer {
 
 pub enum Vectorizer {}
 
-
-
 impl CountVectorizer {
     /// Initialize a CountVectorizer estimator
     pub fn new() -> Self {
@@ -123,17 +121,15 @@ impl CountVectorizer {
             _vocab
         };
 
-        //let vocabulary = tokenize(X);
-        
+        let pipe = X.par_chunks(X.len() / 4).flat_map(tokenize);
 
-        let pipe = X.par_chunks(X.len() / 4)
-                    .flat_map(tokenize);
+        let mut vocabulary: HashSet<String> = pipe.collect();
 
-        let mut vocabulary : HashSet<String> = pipe.collect();
-
-        self.vocabulary = vocabulary.iter().zip((0..vocabulary.len()))
-                                .map(|(tok, idx)| (tok.to_owned(), idx as i32))
-                                .collect();
+        self.vocabulary = vocabulary
+            .iter()
+            .zip((0..vocabulary.len()))
+            .map(|(tok, idx)| (tok.to_owned(), idx as i32))
+            .collect();
     }
 
     /// Transform
