@@ -130,6 +130,10 @@ impl CountVectorizer {
                     .flat_map(tokenize);
 
         let mut vocabulary : HashSet<String> = pipe.collect();
+
+        self.vocabulary = vocabulary.iter().zip((0..vocabulary.len()))
+                                .map(|(tok, idx)| (tok.to_owned(), idx as i32))
+                                .collect();
     }
 
     /// Transform
@@ -140,7 +144,7 @@ impl CountVectorizer {
     }
 
     /// Fit and transform (with optional fixed vocabulary)
-    fn _fit_transform(&mut self, X: &[String], _fixed_vocabulary: bool) -> CsMat<i32> {
+    fn _fit_transform(&mut self, X: &[String], fixed_vocabulary: bool) -> CsMat<i32> {
         let mut tf = crate::math::CSRArray {
             indices: Vec::new(),
             indptr: Vec::new(),
@@ -162,15 +166,25 @@ impl CountVectorizer {
             let tokens = tokenizer.tokenize(&document);
 
             indices_local.clear();
-            for token in tokens {
-                match self.vocabulary.get(token) {
-                    Some(_id) => indices_local.push(*_id),
-                    None => {
-                        self.vocabulary.insert(token.to_string(), vocabulary_size);
-                        indices_local.push(vocabulary_size);
-                        vocabulary_size += 1;
-                    }
-                };
+
+            if fixed_vocabulary {
+                for token in tokens {
+                    match self.vocabulary.get(token) {
+                        Some(_id) => indices_local.push(*_id),
+                        None => {}
+                    };
+                }
+            } else {
+                for token in tokens {
+                    match self.vocabulary.get(token) {
+                        Some(_id) => indices_local.push(*_id),
+                        None => {
+                            self.vocabulary.insert(token.to_string(), vocabulary_size);
+                            indices_local.push(vocabulary_size);
+                            vocabulary_size += 1;
+                        }
+                    };
+                }
             }
             // this takes 10-15% of the compute time
             indices_local.sort_unstable();
