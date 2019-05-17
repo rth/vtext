@@ -150,11 +150,6 @@ impl CountVectorizer {
     ///
     /// Converts a sequence of text documents to a CSR Matrix
     pub fn transform(&mut self, X: &[String]) -> CsMat<i32> {
-        self._fit_transform(X, true)
-    }
-
-    /// Fit and transform (with optional fixed vocabulary)
-    fn _fit_transform(&mut self, X: &[String], fixed_vocabulary: bool) -> CsMat<i32> {
         let mut tf = crate::math::CSRArray {
             indices: Vec::new(),
             indptr: Vec::new(),
@@ -177,32 +172,15 @@ impl CountVectorizer {
 
             indices_local.clear();
 
-            if fixed_vocabulary {
-                for token in tokens {
-                    match self.vocabulary.get(token) {
-                        Some(_id) => indices_local.push(*_id),
-                        None => {}
-                    };
-                }
-            } else {
-                for token in tokens {
-                    match self.vocabulary.get(token) {
-                        Some(_id) => indices_local.push(*_id),
-                        None => {
-                            self.vocabulary.insert(token.to_string(), vocabulary_size);
-                            indices_local.push(vocabulary_size);
-                            vocabulary_size += 1;
-                        }
-                    };
-                }
+            for token in tokens {
+                match self.vocabulary.get(token) {
+                    Some(_id) => indices_local.push(*_id),
+                    None => {}
+                };
             }
             // this takes 10-15% of the compute time
             indices_local.sort_unstable();
             _sum_duplicates(&mut tf, indices_local.as_slice(), &mut nnz);
-        }
-
-        if !fixed_vocabulary {
-            _sort_features(&mut tf, &mut self.vocabulary);
         }
 
         CsMat::new(
@@ -215,8 +193,53 @@ impl CountVectorizer {
 
     /// Fit and transform
     ///
+    /// This is a single pass vectorization
     pub fn fit_transform(&mut self, X: &[String]) -> CsMat<i32> {
-        self._fit_transform(X, false)
+        let mut tf = crate::math::CSRArray {
+            indices: Vec::new(),
+            indptr: Vec::new(),
+            data: Vec::new(),
+        };
+
+        tf.indptr.push(0);
+
+        let mut nnz: usize = 0;
+        let mut indices_local: Vec<i32> = Vec::new();
+
+        let tokenizer = tokenize::RegexpTokenizer::new(TOKEN_PATTERN_DEFAULT.to_string());
+
+        let pipe = X.iter().map(|doc| doc.to_ascii_lowercase());
+
+        let mut vocabulary_size: i32 = 0;
+
+        for document in pipe {
+            let tokens = tokenizer.tokenize(&document);
+
+            indices_local.clear();
+
+            for token in tokens {
+                match self.vocabulary.get(token) {
+                    Some(_id) => indices_local.push(*_id),
+                    None => {
+                        self.vocabulary.insert(token.to_string(), vocabulary_size);
+                        indices_local.push(vocabulary_size);
+                        vocabulary_size += 1;
+                    }
+                };
+            }
+            // this takes 10-15% of the compute time
+            indices_local.sort_unstable();
+            _sum_duplicates(&mut tf, indices_local.as_slice(), &mut nnz);
+        }
+
+        _sort_features(&mut tf, &mut self.vocabulary);
+
+        CsMat::new(
+            (tf.indptr.len() - 1, self.vocabulary.len()),
+            tf.indptr,
+            tf.indices,
+            tf.data,
+        )
     }
 }
 
