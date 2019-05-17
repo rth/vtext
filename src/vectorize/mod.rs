@@ -159,20 +159,16 @@ impl CountVectorizer {
         tf.indptr.push(0);
 
         let mut nnz: usize = 0;
-        let mut indices_local: Vec<i32> = Vec::new();
 
         let tokenizer = tokenize::RegexpTokenizer::new(TOKEN_PATTERN_DEFAULT.to_string());
 
-        let pipe = X.iter().map(|doc| doc.to_ascii_lowercase());
 
-        let mut vocabulary_size: i32 = 0;
+        let tokenize_map = |doc: &str| -> Vec<i32> {
+            // Closure to tokenize a document and returns hash indices for each token
 
-        for document in pipe {
-            let tokens = tokenizer.tokenize(&document);
+            let mut indices_local: Vec<i32> = Vec::with_capacity(10);
 
-            indices_local.clear();
-
-            for token in tokens {
+            for token in tokenizer.tokenize(doc) {
                 match self.vocabulary.get(token) {
                     Some(_id) => indices_local.push(*_id),
                     None => {}
@@ -180,6 +176,18 @@ impl CountVectorizer {
             }
             // this takes 10-15% of the compute time
             indices_local.sort_unstable();
+            indices_local
+        };
+
+        let pipe = Box::new(
+            X.par_iter()
+                .map(|doc| doc.to_ascii_lowercase())
+                .map(|doc| tokenize_map(&doc))
+                .collect::<Vec<Vec<i32>>>()
+                .into_iter(),
+        );
+
+        for indices_local in pipe {
             _sum_duplicates(&mut tf, indices_local.as_slice(), &mut nnz);
         }
 
