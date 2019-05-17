@@ -30,6 +30,21 @@ fn test_count_vectorizer_simple() {
 }
 
 #[test]
+fn test_count_vectorizer_fit_transform() {
+    for documents in &[vec![String::from("cat dog cat")]] {
+        let mut vect = CountVectorizer::new();
+        vect.fit(&documents);
+        let X = vect.transform(&documents);
+
+        let mut vect2 = CountVectorizer::new();
+        let X2 = vect2.fit_transform(&documents);
+        assert_eq!(vect.vocabulary, vect2.vocabulary);
+        println!("{:?}", vect.vocabulary);
+        assert_eq!(X.to_dense(), X2.to_dense());
+    }
+}
+
+#[test]
 fn test_hashing_vectorizer_simple() {
     // Results with scikit-learn 0.20.0
     // >>> vect = HashingVectorizer(norm=None, alternate_sign=False)

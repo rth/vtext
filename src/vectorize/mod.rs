@@ -27,9 +27,11 @@ use crate::math::CSRArray;
 use crate::tokenize;
 use crate::tokenize::Tokenizer;
 use hashbrown::{HashMap, HashSet};
+use itertools::sorted;
 use ndarray::Array;
 use rayon::prelude::*;
 use sprs::CsMat;
+use std::cmp;
 
 const TOKEN_PATTERN_DEFAULT: &str = r"\b\w\w+\b";
 
@@ -40,11 +42,18 @@ mod tests;
 ///
 /// Returns a reordered matrix and modifies the vocabulary in place
 fn _sort_features(X: &mut CSRArray, vocabulary: &mut HashMap<String, i32>) {
-    let mut vocabulary_sorted: Vec<_> = vocabulary.iter().collect();
+    let mut vocabulary_sorted: Vec<_> = vocabulary
+        .iter()
+        .map(|(key, val)| (key.clone(), val.clone()))
+        .collect();
     vocabulary_sorted.sort_unstable();
+    //vocabulary = vocabulary_sorted.into_iter().collect();
     let mut idx_map: Array<usize, _> = Array::zeros(vocabulary_sorted.len());
     for (idx_new, (_term, idx_old)) in vocabulary_sorted.iter().enumerate() {
-        idx_map[**idx_old as usize] = idx_new;
+        idx_map[*idx_old as usize] = idx_new;
+        vocabulary
+            .entry(_term.to_string())
+            .and_modify(|e| *e = idx_new as i32);
     }
     for idx in 0..X.indices.len() {
         X.indices[idx] = idx_map[X.indices[idx]];
@@ -54,25 +63,27 @@ fn _sort_features(X: &mut CSRArray, vocabulary: &mut HashMap<String, i32>) {
 /// Sum duplicates
 #[inline]
 fn _sum_duplicates(tf: &mut CSRArray, indices_local: &[i32], nnz: &mut usize) {
-    let mut bucket: i32 = 0;
-    let mut index_last = indices_local[0];
+    if indices_local.len() > 0 {
+        let mut bucket: i32 = 0;
+        let mut index_last = indices_local[0];
 
-    for index_current in indices_local.iter().skip(1) {
-        bucket += 1;
-        if *index_current != index_last {
-            tf.indices.push(index_last as usize);
-            tf.data.push(bucket);
-            *nnz += 1;
-            index_last = *index_current;
-            bucket = 0;
+        for index_current in indices_local.iter().skip(1) {
+            bucket += 1;
+            if *index_current != index_last {
+                tf.indices.push(index_last as usize);
+                tf.data.push(bucket);
+                *nnz += 1;
+                index_last = *index_current;
+                bucket = 0;
+            }
         }
+        tf.indices
+            .push(indices_local[indices_local.len() - 1] as usize);
+        if bucket == 0 {
+            bucket += 1
+        }
+        tf.data.push(bucket);
     }
-    tf.indices
-        .push(indices_local[indices_local.len() - 1] as usize);
-    if bucket == 0 {
-        bucket += 1
-    }
-    tf.data.push(bucket);
     *nnz += 1;
 
     tf.indptr.push(*nnz);
@@ -121,15 +132,18 @@ impl CountVectorizer {
             _vocab
         };
 
-        let pipe = X.par_chunks(X.len() / 4).flat_map(tokenize);
+        let chunk_size = cmp::max(X.len() / 4, 1);
+
+        let pipe = X.par_chunks(chunk_size).flat_map(tokenize);
 
         let mut vocabulary: HashSet<String> = pipe.collect();
 
-        self.vocabulary = vocabulary
-            .iter()
-            .zip((0..vocabulary.len()))
-            .map(|(tok, idx)| (tok.to_owned(), idx as i32))
-            .collect();
+        if vocabulary.len() > 0 {
+            self.vocabulary = sorted(vocabulary.iter())
+                .zip((0..vocabulary.len()))
+                .map(|(tok, idx)| (tok.to_owned(), idx as i32))
+                .collect();
+        }
     }
 
     /// Transform
@@ -184,11 +198,12 @@ impl CountVectorizer {
             }
             // this takes 10-15% of the compute time
             indices_local.sort_unstable();
-
             _sum_duplicates(&mut tf, indices_local.as_slice(), &mut nnz);
         }
 
-        _sort_features(&mut tf, &mut self.vocabulary);
+        if !fixed_vocabulary {
+            _sort_features(&mut tf, &mut self.vocabulary);
+        }
 
         CsMat::new(
             (tf.indptr.len() - 1, self.vocabulary.len()),
@@ -201,7 +216,7 @@ impl CountVectorizer {
     /// Fit and transform
     ///
     pub fn fit_transform(&mut self, X: &[String]) -> CsMat<i32> {
-        self._fit_transform(X, true)
+        self._fit_transform(X, false)
     }
 }
 
