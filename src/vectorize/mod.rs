@@ -26,10 +26,12 @@ let X = vectorizer.fit_transform(&documents);
 use crate::math::CSRArray;
 use crate::tokenize;
 use crate::tokenize::Tokenizer;
-use hashbrown::HashMap;
+use hashbrown::{HashMap, HashSet};
+use itertools::sorted;
 use ndarray::Array;
 use rayon::prelude::*;
 use sprs::CsMat;
+use std::cmp;
 
 const TOKEN_PATTERN_DEFAULT: &str = r"\b\w\w+\b";
 
@@ -40,11 +42,17 @@ mod tests;
 ///
 /// Returns a reordered matrix and modifies the vocabulary in place
 fn _sort_features(X: &mut CSRArray, vocabulary: &mut HashMap<String, i32>) {
-    let mut vocabulary_sorted: Vec<_> = vocabulary.iter().collect();
+    let mut vocabulary_sorted: Vec<_> = vocabulary
+        .iter()
+        .map(|(key, val)| (key.clone(), val.clone()))
+        .collect();
     vocabulary_sorted.sort_unstable();
     let mut idx_map: Array<usize, _> = Array::zeros(vocabulary_sorted.len());
     for (idx_new, (_term, idx_old)) in vocabulary_sorted.iter().enumerate() {
-        idx_map[**idx_old as usize] = idx_new;
+        idx_map[*idx_old as usize] = idx_new;
+        vocabulary
+            .entry(_term.to_string())
+            .and_modify(|e| *e = idx_new as i32);
     }
     for idx in 0..X.indices.len() {
         X.indices[idx] = idx_map[X.indices[idx]];
@@ -54,26 +62,26 @@ fn _sort_features(X: &mut CSRArray, vocabulary: &mut HashMap<String, i32>) {
 /// Sum duplicates
 #[inline]
 fn _sum_duplicates(tf: &mut CSRArray, indices_local: &[i32], nnz: &mut usize) {
-    let mut bucket: i32 = 0;
-    let mut index_last = indices_local[0];
+    if indices_local.len() > 0 {
+        let mut bucket: i32 = 1;
+        let mut index_last = indices_local[0];
 
-    for index_current in indices_local.iter().skip(1) {
-        bucket += 1;
-        if *index_current != index_last {
-            tf.indices.push(index_last as usize);
-            tf.data.push(bucket);
-            *nnz += 1;
-            index_last = *index_current;
-            bucket = 0;
+        for index_current in indices_local.iter().skip(1) {
+            if *index_current != index_last {
+                tf.indices.push(index_last as usize);
+                tf.data.push(bucket);
+                *nnz += 1;
+                index_last = *index_current;
+                bucket = 1;
+            } else {
+                bucket += 1;
+            }
         }
+        tf.indices
+            .push(indices_local[indices_local.len() - 1] as usize);
+        tf.data.push(bucket);
+        *nnz += 1;
     }
-    tf.indices
-        .push(indices_local[indices_local.len() - 1] as usize);
-    if bucket == 0 {
-        bucket += 1
-    }
-    tf.data.push(bucket);
-    *nnz += 1;
 
     tf.indptr.push(*nnz);
 }
@@ -82,6 +90,7 @@ fn _sum_duplicates(tf: &mut CSRArray, indices_local: &[i32], nnz: &mut usize) {
 pub struct CountVectorizer {
     lowercase: bool,
     token_pattern: String,
+    _n_jobs: usize,
     // vocabulary uses i32 indices, to avoid memory copies when converting
     // to sparse CSR arrays in Python with scipy.sparse
     pub vocabulary: HashMap<String, i32>,
@@ -96,25 +105,130 @@ impl CountVectorizer {
             lowercase: true,
             token_pattern: String::from(TOKEN_PATTERN_DEFAULT),
             vocabulary: HashMap::with_capacity_and_hasher(1000, Default::default()),
+            _n_jobs: 1,
         }
+    }
+
+    /// Set the number of parallel threads to use
+    ///
+    /// Note: currently any value n_jobs > 1 will use all available cores.
+    pub fn n_jobs(mut self, n_jobs: usize) -> Self {
+        self._n_jobs = n_jobs;
+        if n_jobs < 1 {
+            panic!("n_jobs={} must be > 0", n_jobs);
+        }
+        self
     }
 
     /// Fit the estimator
     ///
     /// This lists the vocabulary
     pub fn fit(&mut self, X: &[String]) -> () {
-        self._fit_transform(X, false);
+        let tokenizer = tokenize::RegexpTokenizer::new(TOKEN_PATTERN_DEFAULT.to_string());
+
+        let tokenize = |X: &[String]| -> HashSet<String> {
+            let mut _vocab: HashSet<String> = HashSet::with_capacity(1000);
+
+            for doc in X {
+                let doc = doc.to_ascii_lowercase();
+                let tokens = tokenizer.tokenize(&doc);
+
+                for token in tokens {
+                    if !_vocab.contains(token) {
+                        _vocab.insert(token.to_string());
+                    };
+                }
+            }
+            _vocab
+        };
+        let mut vocabulary: HashSet<String>;
+
+        if self._n_jobs == 1 {
+            vocabulary = tokenize(X);
+        } else if self._n_jobs > 1 {
+            let chunk_size = cmp::max(X.len() / (self._n_jobs * 4), 1);
+
+            let pipe = X.par_chunks(chunk_size).flat_map(tokenize);
+            vocabulary = pipe.collect();
+        } else {
+            panic!("n_jobs={} must be > 0", self._n_jobs);
+        }
+
+        if vocabulary.len() > 0 {
+            self.vocabulary = sorted(vocabulary.iter())
+                .zip(0..vocabulary.len())
+                .map(|(tok, idx)| (tok.to_owned(), idx as i32))
+                .collect();
+        }
     }
 
     /// Transform
     ///
     /// Converts a sequence of text documents to a CSR Matrix
     pub fn transform(&mut self, X: &[String]) -> CsMat<i32> {
-        self._fit_transform(X, true)
+        let mut tf = crate::math::CSRArray {
+            indices: Vec::new(),
+            indptr: Vec::new(),
+            data: Vec::new(),
+        };
+
+        tf.indptr.push(0);
+
+        let mut nnz: usize = 0;
+
+        let tokenizer = tokenize::RegexpTokenizer::new(TOKEN_PATTERN_DEFAULT.to_string());
+
+        let tokenize_map = |doc: &str| -> Vec<i32> {
+            // Closure to tokenize a document and returns hash indices for each token
+
+            let mut indices_local: Vec<i32> = Vec::with_capacity(10);
+
+            for token in tokenizer.tokenize(doc) {
+                match self.vocabulary.get(token) {
+                    Some(_id) => indices_local.push(*_id),
+                    None => {}
+                };
+            }
+            // this takes 10-15% of the compute time
+            indices_local.sort_unstable();
+            indices_local
+        };
+        let pipe: Box<Iterator<Item = Vec<i32>>>;
+
+        if self._n_jobs == 1 {
+            pipe = Box::new(
+                X.iter()
+                    .map(|doc| doc.to_ascii_lowercase())
+                    .map(|doc| tokenize_map(&doc)),
+            );
+        } else if self._n_jobs > 1 {
+            pipe = Box::new(
+                X.par_iter()
+                    .map(|doc| doc.to_ascii_lowercase())
+                    .map(|doc| tokenize_map(&doc))
+                    .collect::<Vec<Vec<i32>>>()
+                    .into_iter(),
+            );
+        } else {
+            panic!("n_jobs={} must be > 0", self._n_jobs);
+        }
+
+        for indices_local in pipe {
+            _sum_duplicates(&mut tf, indices_local.as_slice(), &mut nnz);
+        }
+
+        CsMat::new(
+            (tf.indptr.len() - 1, self.vocabulary.len()),
+            tf.indptr,
+            tf.indices,
+            tf.data,
+        )
     }
 
-    /// Fit and transform (with optional fixed vocabulary)
-    fn _fit_transform(&mut self, X: &[String], _fixed_vocabulary: bool) -> CsMat<i32> {
+    /// Fit and transform
+    ///
+    /// This is a single pass vectorization
+    pub fn fit_transform(&mut self, X: &[String]) -> CsMat<i32> {
         let mut tf = crate::math::CSRArray {
             indices: Vec::new(),
             indptr: Vec::new(),
@@ -136,6 +250,7 @@ impl CountVectorizer {
             let tokens = tokenizer.tokenize(&document);
 
             indices_local.clear();
+
             for token in tokens {
                 match self.vocabulary.get(token) {
                     Some(_id) => indices_local.push(*_id),
@@ -148,7 +263,6 @@ impl CountVectorizer {
             }
             // this takes 10-15% of the compute time
             indices_local.sort_unstable();
-
             _sum_duplicates(&mut tf, indices_local.as_slice(), &mut nnz);
         }
 
@@ -160,12 +274,6 @@ impl CountVectorizer {
             tf.indices,
             tf.data,
         )
-    }
-
-    /// Fit and transform
-    ///
-    pub fn fit_transform(&mut self, X: &[String]) -> CsMat<i32> {
-        self._fit_transform(X, true)
     }
 }
 

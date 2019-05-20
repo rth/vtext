@@ -92,8 +92,9 @@ pub struct _CountVectorizerWrapper {
 #[pymethods]
 impl _CountVectorizerWrapper {
     #[new]
-    fn new(obj: &PyRawObject) {
-        let estimator = vtext::vectorize::CountVectorizer::new();
+    #[args(n_jobs = 1)]
+    fn new(obj: &PyRawObject, n_jobs: usize) {
+        let estimator = vtext::vectorize::CountVectorizer::new().n_jobs(n_jobs);
         obj.init(_CountVectorizerWrapper { inner: estimator });
     }
 

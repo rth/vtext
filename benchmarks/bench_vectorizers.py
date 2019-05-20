@@ -19,32 +19,72 @@ if __name__ == "__main__":
 
     print("# vectorizing {} documents:".format(len(data)))
 
-    for label, vect in [
-        ("HashingVectorizer (vtext, n_jobs=1)", vtext.vectorize.HashingVectorizer()),
+    for label, vect, method in [
         (
-            "HashingVectorizer (vtext, n_jobs=2)",
-            vtext.vectorize.HashingVectorizer(n_jobs=2),
+            "HashingVectorizer(n_jobs=1).transform [vtext]",
+            vtext.vectorize.HashingVectorizer(),
+            "fit_transform",
         ),
         (
-            "HashingVectorizer (scikit-learn)",
+            "HashingVectorizer(n_jobs=4).transform [vtext]",
+            vtext.vectorize.HashingVectorizer(n_jobs=4),
+            "fit_transform",
+        ),
+        (
+            "HashingVectorizer().transform [scikit-learn]",
             skt.HashingVectorizer(lowercase=False, norm=None),
+            "fit_transform",
         ),
-        ("CountVectorizer (vtext)", vtext.vectorize.CountVectorizer()),
-        ("CountVectorizer (scikit-learn)", skt.CountVectorizer(lowercase=False)),
+        (
+            "CountVectorizer(n_jobs=1).fit [vtext]",
+            vtext.vectorize.CountVectorizer(),
+            "fit",
+        ),
+        (
+            "CountVectorizer(n_jobs=4).fit [vtext]",
+            vtext.vectorize.CountVectorizer(n_jobs=4),
+            "fit",
+        ),
+        (
+            "CountVectorizer(n_jobs=1).transform [vtext]",
+            vtext.vectorize.CountVectorizer().fit(data),
+            "transform",
+        ),
+        (
+            "CountVectorizer(n_jobs=4).transform [vtext]",
+            vtext.vectorize.CountVectorizer(n_jobs=4).fit(data),
+            "transform",
+        ),
+        (
+            "CountVectorizer().fit_transform [vtext]",
+            vtext.vectorize.CountVectorizer(),
+            "fit_transform",
+        ),
+        (
+            "CountVectorizer().fit_transform [scikit-learn]",
+            skt.CountVectorizer(lowercase=True),
+            "fit_transform",
+        ),
         # (
-        #    "CountVectorizer, 4-char ngram (scikit-learn)",
-        #    skt.CountVectorizer(lowercase=False, analyzer="char", ngram_range=(4, 4)),
+        #     "CountVectorizer, 10-char ngram [scikit-learn]",
+        #     skt.CountVectorizer(analyzer="char", ngram_range=(10, 10)),
+        #     "fit_transform"
         # ),
     ]:
 
         t0 = time()
 
-        X = vect.fit_transform(data)
+        X = getattr(vect, method)(data)
+        if not hasattr(X, "shape"):
+
+            class X:
+                shape = None
+                nnz = None
 
         dt = time() - t0
 
         print(
-            "{:>40}: {:.2f}s [{:.1f} MB/s], shape={}, nnz={}".format(
+            "{:>50}: {:.2f}s [{:.1f} MB/s], shape={}, nnz={}".format(
                 label, dt, dataset_size / dt, X.shape, X.nnz
             )
         )

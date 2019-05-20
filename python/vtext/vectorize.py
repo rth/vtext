@@ -190,6 +190,11 @@ class CountVectorizer(BaseEstimator):
         If True, all non zero counts are set to 1. This is useful for discrete
         probabilistic models that model binary events rather than integer
         counts.
+    n_jobs : int, default=1
+        number of threads to use for parallel feature extraction. n_jobs > 1,
+        is faster, but uses more memory.
+
+        Note: currently any value n_jobs > 1 will use all available cores.
 
     dtype : type, optional
         Type of the matrix returned by fit_transform() or transform().
@@ -225,9 +230,10 @@ class CountVectorizer(BaseEstimator):
 
     """
 
-    def __init__(self, *, analyzer="word", binary=False, dtype=np.int64):
+    def __init__(self, *, analyzer="word", binary=False, n_jobs=1, dtype=np.int64):
         self.analyzer = analyzer
         self.binary = binary
+        self.n_jobs = n_jobs
         self.dtype = dtype
 
     def _check_vocabulary(self):
@@ -241,6 +247,9 @@ class CountVectorizer(BaseEstimator):
         if self.analyzer != "word":
             raise NotImplementedError
 
+        if not isinstance(self.n_jobs, int) or self.n_jobs < 1:
+            raise ValueError("n_jobs={} must be a integer >= 1".format(self.n_jobs))
+
     def fit(self, raw_documents, y=None):
         """Learn a vocabulary dictionary of all tokens in the raw documents.
 
@@ -253,7 +262,8 @@ class CountVectorizer(BaseEstimator):
         -------
         self
         """
-        self._vect = _lib._CountVectorizerWrapper()
+        self._validate_params()
+        self._vect = _lib._CountVectorizerWrapper(self.n_jobs)
         self._vect.fit(raw_documents)
         return self
 
@@ -284,7 +294,7 @@ class CountVectorizer(BaseEstimator):
         self._validate_params()
         self._validate_vocabulary()
 
-        self._vect = _lib._CountVectorizerWrapper()
+        self._vect = _lib._CountVectorizerWrapper(n_jobs=self.n_jobs)
         indices, indptr, data = self._vect.fit_transform(raw_documents)
         n_features = self._vect.get_n_features()
         X = sp.csr_matrix((data, indices, indptr), shape=(len(indptr) - 1, n_features))
