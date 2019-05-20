@@ -247,6 +247,9 @@ class CountVectorizer(BaseEstimator):
         if self.analyzer != "word":
             raise NotImplementedError
 
+        if not isinstance(self.n_jobs, int) or self.n_jobs < 1:
+            raise ValueError("n_jobs={} must be a integer >= 1".format(self.n_jobs))
+
     def fit(self, raw_documents, y=None):
         """Learn a vocabulary dictionary of all tokens in the raw documents.
 
@@ -259,6 +262,7 @@ class CountVectorizer(BaseEstimator):
         -------
         self
         """
+        self._validate_params()
         self._vect = _lib._CountVectorizerWrapper(self.n_jobs)
         self._vect.fit(raw_documents)
         return self
