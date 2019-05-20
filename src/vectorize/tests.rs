@@ -30,8 +30,29 @@ fn test_count_vectorizer_simple() {
 }
 
 #[test]
+fn test_vectorize_empty_countvectorizer() {
+    let documents = vec!["some tokens".to_string(), "".to_string()];
+
+    let mut vect = CountVectorizer::new();
+    vect.fit_transform(&documents);
+
+    vect.fit(&documents);
+    vect.transform(&documents);
+}
+
+#[test]
+fn test_vectorize_empty_hashingvectorizer() {
+    let documents = vec!["some tokens".to_string(), "".to_string()];
+
+    let vect = HashingVectorizer::new();
+    vect.fit_transform(&documents);
+
+    vect.transform(&documents);
+}
+
+#[test]
 fn test_count_vectorizer_fit_transform() {
-    for documents in &[vec![String::from("cat dog cat")]] {
+    for documents in &[vec!["cat dog cat".to_string()]] {
         let mut vect = CountVectorizer::new();
         vect.fit(&documents);
         let X = vect.transform(&documents);

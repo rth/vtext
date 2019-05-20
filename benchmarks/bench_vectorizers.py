@@ -67,7 +67,7 @@ if __name__ == "__main__":
         ),
         # (
         #     "CountVectorizer, 10-char ngram [scikit-learn]",
-        #     skt.CountVectorizer(lowercase=True, analyzer="char", ngram_range=(10, 10)),
+        #     skt.CountVectorizer(analyzer="char", ngram_range=(10, 10)),
         #     "fit_transform"
         # ),
     ]:

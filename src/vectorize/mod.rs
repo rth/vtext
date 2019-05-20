@@ -47,7 +47,6 @@ fn _sort_features(X: &mut CSRArray, vocabulary: &mut HashMap<String, i32>) {
         .map(|(key, val)| (key.clone(), val.clone()))
         .collect();
     vocabulary_sorted.sort_unstable();
-    //vocabulary = vocabulary_sorted.into_iter().collect();
     let mut idx_map: Array<usize, _> = Array::zeros(vocabulary_sorted.len());
     for (idx_new, (_term, idx_old)) in vocabulary_sorted.iter().enumerate() {
         idx_map[*idx_old as usize] = idx_new;
@@ -83,8 +82,8 @@ fn _sum_duplicates(tf: &mut CSRArray, indices_local: &[i32], nnz: &mut usize) {
             bucket += 1
         }
         tf.data.push(bucket);
+        *nnz += 1;
     }
-    *nnz += 1;
 
     tf.indptr.push(*nnz);
 }
