@@ -63,24 +63,22 @@ fn _sort_features(X: &mut CSRArray, vocabulary: &mut HashMap<String, i32>) {
 #[inline]
 fn _sum_duplicates(tf: &mut CSRArray, indices_local: &[i32], nnz: &mut usize) {
     if indices_local.len() > 0 {
-        let mut bucket: i32 = 0;
+        let mut bucket: i32 = 1;
         let mut index_last = indices_local[0];
 
         for index_current in indices_local.iter().skip(1) {
-            bucket += 1;
             if *index_current != index_last {
                 tf.indices.push(index_last as usize);
                 tf.data.push(bucket);
                 *nnz += 1;
                 index_last = *index_current;
-                bucket = 0;
+                bucket = 1;
+            } else {
+                bucket += 1;
             }
         }
         tf.indices
             .push(indices_local[indices_local.len() - 1] as usize);
-        if bucket == 0 {
-            bucket += 1
-        }
         tf.data.push(bucket);
         *nnz += 1;
     }
