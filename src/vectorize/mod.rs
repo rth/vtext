@@ -108,7 +108,7 @@ impl CountVectorizer {
             lowercase: true,
             token_pattern: String::from(TOKEN_PATTERN_DEFAULT),
             vocabulary: HashMap::with_capacity_and_hasher(1000, Default::default()),
-            _n_jobs: 1
+            _n_jobs: 1,
         }
     }
 
@@ -149,14 +149,13 @@ impl CountVectorizer {
         if self._n_jobs == 1 {
             vocabulary = tokenize(X);
         } else if self._n_jobs > 1 {
-            let chunk_size = cmp::max(X.len() / 4, 1);
+            let chunk_size = cmp::max(X.len() / (self._n_jobs * 4), 1);
 
             let pipe = X.par_chunks(chunk_size).flat_map(tokenize);
             vocabulary = pipe.collect();
         } else {
             panic!("n_jobs={} must be > 0", self._n_jobs);
         }
-
 
         if vocabulary.len() > 0 {
             self.vocabulary = sorted(vocabulary.iter())
@@ -182,7 +181,6 @@ impl CountVectorizer {
 
         let tokenizer = tokenize::RegexpTokenizer::new(TOKEN_PATTERN_DEFAULT.to_string());
 
-
         let tokenize_map = |doc: &str| -> Vec<i32> {
             // Closure to tokenize a document and returns hash indices for each token
 
@@ -204,7 +202,7 @@ impl CountVectorizer {
             pipe = Box::new(
                 X.iter()
                     .map(|doc| doc.to_ascii_lowercase())
-                    .map(|doc| tokenize_map(&doc))
+                    .map(|doc| tokenize_map(&doc)),
             );
         } else if self._n_jobs > 1 {
             pipe = Box::new(
@@ -212,7 +210,7 @@ impl CountVectorizer {
                     .map(|doc| doc.to_ascii_lowercase())
                     .map(|doc| tokenize_map(&doc))
                     .collect::<Vec<Vec<i32>>>()
-                    .into_iter()
+                    .into_iter(),
             );
         } else {
             panic!("n_jobs={} must be > 0", self._n_jobs);
