@@ -93,6 +93,7 @@ fn _sum_duplicates(tf: &mut CSRArray, indices_local: &[i32], nnz: &mut usize) {
 pub struct CountVectorizer {
     lowercase: bool,
     token_pattern: String,
+    _n_jobs: usize,
     // vocabulary uses i32 indices, to avoid memory copies when converting
     // to sparse CSR arrays in Python with scipy.sparse
     pub vocabulary: HashMap<String, i32>,
@@ -107,7 +108,19 @@ impl CountVectorizer {
             lowercase: true,
             token_pattern: String::from(TOKEN_PATTERN_DEFAULT),
             vocabulary: HashMap::with_capacity_and_hasher(1000, Default::default()),
+            _n_jobs: 1
         }
+    }
+
+    /// Set the number of parallel threads to use
+    ///
+    /// Note: currently any value n_jobs > 1 will use all available cores.
+    pub fn n_jobs(mut self, n_jobs: usize) -> Self {
+        self._n_jobs = n_jobs;
+        if n_jobs < 1 {
+            panic!("n_jobs={} must be > 0", n_jobs);
+        }
+        self
     }
 
     /// Fit the estimator
@@ -131,16 +144,23 @@ impl CountVectorizer {
             }
             _vocab
         };
+        let mut vocabulary: HashSet<String>;
 
-        let chunk_size = cmp::max(X.len() / 4, 1);
+        if self._n_jobs == 1 {
+            vocabulary = tokenize(X);
+        } else if self._n_jobs > 1 {
+            let chunk_size = cmp::max(X.len() / 4, 1);
 
-        let pipe = X.par_chunks(chunk_size).flat_map(tokenize);
+            let pipe = X.par_chunks(chunk_size).flat_map(tokenize);
+            vocabulary = pipe.collect();
+        } else {
+            panic!("n_jobs={} must be > 0", self._n_jobs);
+        }
 
-        let mut vocabulary: HashSet<String> = pipe.collect();
 
         if vocabulary.len() > 0 {
             self.vocabulary = sorted(vocabulary.iter())
-                .zip((0..vocabulary.len()))
+                .zip(0..vocabulary.len())
                 .map(|(tok, idx)| (tok.to_owned(), idx as i32))
                 .collect();
         }
@@ -178,14 +198,25 @@ impl CountVectorizer {
             indices_local.sort_unstable();
             indices_local
         };
+        let pipe: Box<Iterator<Item = Vec<i32>>>;
 
-        let pipe = Box::new(
-            X.par_iter()
-                .map(|doc| doc.to_ascii_lowercase())
-                .map(|doc| tokenize_map(&doc))
-                .collect::<Vec<Vec<i32>>>()
-                .into_iter(),
-        );
+        if self._n_jobs == 1 {
+            pipe = Box::new(
+                X.iter()
+                    .map(|doc| doc.to_ascii_lowercase())
+                    .map(|doc| tokenize_map(&doc))
+            );
+        } else if self._n_jobs > 1 {
+            pipe = Box::new(
+                X.par_iter()
+                    .map(|doc| doc.to_ascii_lowercase())
+                    .map(|doc| tokenize_map(&doc))
+                    .collect::<Vec<Vec<i32>>>()
+                    .into_iter()
+            );
+        } else {
+            panic!("n_jobs={} must be > 0", self._n_jobs);
+        }
 
         for indices_local in pipe {
             _sum_duplicates(&mut tf, indices_local.as_slice(), &mut nnz);
