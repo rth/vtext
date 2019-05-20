@@ -20,13 +20,11 @@ use sprs::CsMat;
 
 use pyo3::exceptions;
 use pyo3::prelude::*;
-use pyo3::types::{PyIterator, PyString};
+use pyo3::types::PyIterator;
 use pyo3::wrap_pyfunction;
 
 use vtext::metrics;
-use vtext::tokenize;
 use vtext::tokenize::Tokenizer;
-use vtext::vectorize;
 
 type PyCsrArray = (Py<PyArray1<i32>>, Py<PyArray1<i32>>, Py<PyArray1<i32>>);
 
@@ -179,7 +177,7 @@ impl UnicodeSegmentTokenizer {
     fn tokenize(&self, py: Python, x: &str) -> PyResult<(Vec<String>)> {
         let res = self.inner.tokenize(x);
         let res = res.map(|s| s.to_string()).collect();
-        Ok((res))
+        Ok(res)
     }
 }
 
@@ -232,7 +230,7 @@ impl VTextTokenizer {
     fn tokenize(&self, py: Python, x: &str) -> PyResult<(Vec<String>)> {
         let res = self.inner.tokenize(x);
         let res = res.map(|s| s.to_string()).collect();
-        Ok((res))
+        Ok(res)
     }
 }
 
@@ -275,7 +273,7 @@ impl RegexpTokenizer {
         // TODO: reduce the number of copies here
         let res = self.inner.tokenize(x);
         let res: Vec<String> = res.map(|s| s.to_string()).collect();
-        Ok((res))
+        Ok(res)
     }
 }
 
@@ -331,7 +329,7 @@ impl CharacterTokenizer {
         // TODO: reduce the number of copies here
         let res = self.inner.tokenize(x);
         let res: Vec<String> = res.map(|s| s.to_string()).collect();
-        Ok((res))
+        Ok(res)
     }
 }
 
@@ -400,7 +398,7 @@ impl SnowballStemmer {
     ///      stemmed word
     fn stem(&self, py: Python, word: &str) -> PyResult<(String)> {
         let res = self.inner.stem(word).to_string();
-        Ok((res))
+        Ok(res)
     }
 }
 
