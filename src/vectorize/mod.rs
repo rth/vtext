@@ -44,7 +44,7 @@ mod tests;
 fn _sort_features(X: &mut CSRArray, vocabulary: &mut HashMap<String, i32>) {
     let mut vocabulary_sorted: Vec<_> = vocabulary
         .iter()
-        .map(|(key, val)| (key.clone(), val.clone()))
+        .map(|(key, val)| (key.clone(), *val))
         .collect();
     vocabulary_sorted.sort_unstable();
     let mut idx_map: Array<usize, _> = Array::zeros(vocabulary_sorted.len());
@@ -62,7 +62,7 @@ fn _sort_features(X: &mut CSRArray, vocabulary: &mut HashMap<String, i32>) {
 /// Sum duplicates
 #[inline]
 fn _sum_duplicates(tf: &mut CSRArray, indices_local: &[i32], nnz: &mut usize) {
-    if indices_local.len() > 0 {
+    if !indices_local.is_empty() {
         let mut bucket: i32 = 1;
         let mut index_last = indices_local[0];
 
@@ -154,7 +154,7 @@ impl CountVectorizer {
             panic!("n_jobs={} must be > 0", self._n_jobs);
         }
 
-        if vocabulary.len() > 0 {
+        if !vocabulary.is_empty() {
             self.vocabulary = sorted(vocabulary.iter())
                 .zip(0..vocabulary.len())
                 .map(|(tok, idx)| (tok.to_owned(), idx as i32))
@@ -184,9 +184,8 @@ impl CountVectorizer {
             let mut indices_local: Vec<i32> = Vec::with_capacity(10);
 
             for token in tokenizer.tokenize(doc) {
-                match self.vocabulary.get(token) {
-                    Some(_id) => indices_local.push(*_id),
-                    None => {}
+                if let Some(_id) = self.vocabulary.get(token) {
+                    indices_local.push(*_id)
                 };
             }
             // this takes 10-15% of the compute time

@@ -73,10 +73,7 @@ impl RegexpTokenizer {
     pub fn new(pattern: String) -> RegexpTokenizer {
         let regexp = Regex::new(&pattern).unwrap();
 
-        RegexpTokenizer {
-            pattern: pattern,
-            regexp: regexp,
-        }
+        RegexpTokenizer { pattern, regexp }
     }
 }
 
@@ -109,9 +106,7 @@ pub struct UnicodeSegmentTokenizer {
 impl UnicodeSegmentTokenizer {
     /// Create a new instance
     pub fn new(word_bounds: bool) -> UnicodeSegmentTokenizer {
-        UnicodeSegmentTokenizer {
-            word_bounds: word_bounds,
-        }
+        UnicodeSegmentTokenizer { word_bounds }
     }
 }
 
@@ -120,9 +115,9 @@ impl Tokenizer for UnicodeSegmentTokenizer {
     fn tokenize<'a>(&self, text: &'a str) -> Box<Iterator<Item = &'a str> + 'a> {
         if self.word_bounds {
             let res = text.split_word_bounds().filter(|x| x != &" ");
-            return Box::new(res);
+            Box::new(res)
         } else {
-            return Box::new(text.unicode_words());
+            Box::new(text.unicode_words())
         }
     }
 }
@@ -208,7 +203,7 @@ impl Tokenizer for VTextTokenizer {
                         let mut apostroph_idx = apostroph_idx;
                         if tok.ends_with(&"n't") {
                             // also include the "n" from "n't"
-                            apostroph_idx = apostroph_idx - 1;
+                            apostroph_idx -= 1;
                         }
                         res.push(&tok[..apostroph_idx]);
                         res.push(&tok[apostroph_idx..]);
@@ -218,7 +213,7 @@ impl Tokenizer for VTextTokenizer {
                         let mut apostroph_idx = apostroph_idx;
                         if tok.ends_with(&"n’t") {
                             // also include the "n" from "n't"
-                            apostroph_idx = apostroph_idx - 1;
+                            apostroph_idx -= 1;
                         }
                         res.push(&tok[..apostroph_idx]);
                         res.push(&tok[apostroph_idx..]);
@@ -246,7 +241,7 @@ impl Tokenizer for VTextTokenizer {
                 let tok0 = res[res.len() - 3];
                 let tok1 = res[res.len() - 2];
                 let tok2 = res[res.len() - 1];
-                if (tok0 != " ") & (tok2 != " ") & (tok0.len() > 0) & (tok2.len() > 0) {
+                if (tok0 != " ") & (tok2 != " ") & !tok0.is_empty() & !tok2.is_empty() {
                     let char0_last = tok0.chars().last().unwrap();
                     let char2_first = tok0.chars().next().unwrap();
                     let f1 = ((tok1 == "-") | (tok1 == "@") | (tok1 == "&"))
@@ -270,7 +265,7 @@ impl Tokenizer for VTextTokenizer {
 
         // remove whitespace tokens
         let res = res.into_iter().filter(|x| x != &" ");
-        return Box::new(res);
+        Box::new(res)
     }
 }
 
@@ -283,9 +278,7 @@ pub struct CharacterTokenizer {
 impl CharacterTokenizer {
     /// Create a new instance
     pub fn new(window_size: usize) -> CharacterTokenizer {
-        CharacterTokenizer {
-            window_size: window_size,
-        }
+        CharacterTokenizer { window_size }
     }
 }
 
