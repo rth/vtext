@@ -175,10 +175,8 @@ impl UnicodeSegmentTokenizer {
     /// tokens : List[str]
     ///    computed tokens
     fn tokenize<'py>(&self, py: Python<'py>, x: &str) -> PyResult<(&'py PyList)> {
-        let list = PyList::empty(py);
-        for token in self.inner.tokenize(x) {
-            list.append(token)?;
-        }
+        let res: Vec<&str> = self.inner.tokenize(x).collect();
+        let list = PyList::new(py, res);
         Ok(list)
     }
 }
@@ -230,10 +228,8 @@ impl VTextTokenizer {
     /// tokens : List[str]
     ///    computed tokens
     fn tokenize<'py>(&self, py: Python<'py>, x: &str) -> PyResult<(&'py PyList)> {
-        let list = PyList::empty(py);
-        for token in self.inner.tokenize(x) {
-            list.append(token)?;
-        }
+        let res: Vec<&str> = self.inner.tokenize(x).collect();
+        let list = PyList::new(py, res);
         Ok(list)
     }
 }
@@ -274,10 +270,8 @@ impl RegexpTokenizer {
     /// tokens : List[str]
     ///    computed tokens
     fn tokenize<'py>(&self, py: Python<'py>, x: &str) -> PyResult<(&'py PyList)> {
-        let list = PyList::empty(py);
-        for token in self.inner.tokenize(x) {
-            list.append(token)?;
-        }
+        let res: Vec<&str> = self.inner.tokenize(x).collect();
+        let list = PyList::new(py, res);
         Ok(list)
     }
 }
@@ -331,10 +325,8 @@ impl CharacterTokenizer {
     /// tokens : List[str]
     ///    computed tokens
     fn tokenize<'py>(&self, py: Python<'py>, x: &str) -> PyResult<(&'py PyList)> {
-        let list = PyList::empty(py);
-        for token in self.inner.tokenize(x) {
-            list.append(token)?;
-        }
+        let res: Vec<&str> = self.inner.tokenize(x).collect();
+        let list = PyList::new(py, res);
         Ok(list)
     }
 }
