@@ -31,6 +31,8 @@ cd python/
 pip install -r requirements.txt
 python setup.py bdist_wheel
 
+pip install pytest-faulthandler
+
 @rem Install the generated wheel package to test it
 pip install --pre --no-index --find-links dist\ vtext
 
