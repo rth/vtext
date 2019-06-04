@@ -55,7 +55,8 @@ jobs:
                 "$PYBIN" -m pip uninstall -y vtext
                 cd /tmp/
                 "$PYBIN" -m pip install --pre --no-index --find-links /root/repo/python/dist/ vtext
-                "$PYBIN" -m pytest --pyargs vtext
+                "$PYBIN" -m pip install pytest-faulthandler
+                "$PYBIN" -m pytest -sv --pyargs vtext
                 cd -
             done
       - persist_to_workspace:
