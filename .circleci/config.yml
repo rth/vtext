@@ -32,7 +32,7 @@ jobs:
           name: dependencies
           command: |
             python3.7 -m pip install tox
-            rustup default nightly-2019-02-28
+            rustup default nightly-2019-06-04
             rustup target add x86_64-unknown-linux-musl
       - run:
           name: build-wheels
@@ -55,7 +55,8 @@ jobs:
                 "$PYBIN" -m pip uninstall -y vtext
                 cd /tmp/
                 "$PYBIN" -m pip install --pre --no-index --find-links /root/repo/python/dist/ vtext
-                "$PYBIN" -m pytest --pyargs vtext
+                "$PYBIN" -m pip install pytest-faulthandler
+                "$PYBIN" -m pytest -sv --pyargs vtext
                 cd -
             done
       - persist_to_workspace:

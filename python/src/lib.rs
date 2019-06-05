@@ -20,7 +20,7 @@ use sprs::CsMat;
 
 use pyo3::exceptions;
 use pyo3::prelude::*;
-use pyo3::types::PyIterator;
+use pyo3::types::{PyIterator, PyList};
 use pyo3::wrap_pyfunction;
 
 use vtext::metrics;
@@ -174,10 +174,10 @@ impl UnicodeSegmentTokenizer {
     /// -------
     /// tokens : List[str]
     ///    computed tokens
-    fn tokenize(&self, py: Python, x: &str) -> PyResult<(Vec<String>)> {
-        let res = self.inner.tokenize(x);
-        let res = res.map(|s| s.to_string()).collect();
-        Ok(res)
+    fn tokenize<'py>(&self, py: Python<'py>, x: &str) -> PyResult<(&'py PyList)> {
+        let res: Vec<&str> = self.inner.tokenize(x).collect();
+        let list = PyList::new(py, res);
+        Ok(list)
     }
 }
 
@@ -227,10 +227,10 @@ impl VTextTokenizer {
     /// -------
     /// tokens : List[str]
     ///    computed tokens
-    fn tokenize(&self, py: Python, x: &str) -> PyResult<(Vec<String>)> {
-        let res = self.inner.tokenize(x);
-        let res = res.map(|s| s.to_string()).collect();
-        Ok(res)
+    fn tokenize<'py>(&self, py: Python<'py>, x: &str) -> PyResult<(&'py PyList)> {
+        let res: Vec<&str> = self.inner.tokenize(x).collect();
+        let list = PyList::new(py, res);
+        Ok(list)
     }
 }
 
@@ -269,11 +269,10 @@ impl RegexpTokenizer {
     /// -------
     /// tokens : List[str]
     ///    computed tokens
-    fn tokenize(&self, py: Python, x: &str) -> PyResult<(Vec<String>)> {
-        // TODO: reduce the number of copies here
-        let res = self.inner.tokenize(x);
-        let res: Vec<String> = res.map(|s| s.to_string()).collect();
-        Ok(res)
+    fn tokenize<'py>(&self, py: Python<'py>, x: &str) -> PyResult<(&'py PyList)> {
+        let res: Vec<&str> = self.inner.tokenize(x).collect();
+        let list = PyList::new(py, res);
+        Ok(list)
     }
 }
 
@@ -325,11 +324,10 @@ impl CharacterTokenizer {
     /// -------
     /// tokens : List[str]
     ///    computed tokens
-    fn tokenize(&self, py: Python, x: &str) -> PyResult<(Vec<String>)> {
-        // TODO: reduce the number of copies here
-        let res = self.inner.tokenize(x);
-        let res: Vec<String> = res.map(|s| s.to_string()).collect();
-        Ok(res)
+    fn tokenize<'py>(&self, py: Python<'py>, x: &str) -> PyResult<(&'py PyList)> {
+        let res: Vec<&str> = self.inner.tokenize(x).collect();
+        let list = PyList::new(py, res);
+        Ok(list)
     }
 }
 
