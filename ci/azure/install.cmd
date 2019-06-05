@@ -20,11 +20,11 @@ pip --version
 pip install numpy>=1.12.0 scipy>=1.0.0 pytest>=4.0.0 wheel>=0.31.1
 
 curl -sSf -o rustup-init.exe https://win.rustup.rs
-rustup-init.exe -y --default-toolchain nightly-2019-02-28
+rustup-init.exe -y --default-toolchain nightly-2019-06-04
 set PATH=%PATH%;%USERPROFILE%\.cargo\bin
 echo "##vso[task.setvariable variable=PATH;]%PATH%;%USERPROFILE%\.cargo\bin"
 
-rustup default nightly-2019-02-28
+rustup default nightly-2019-06-04
 
 @rem Install the build and runtime dependencies of the project.
 cd python/
