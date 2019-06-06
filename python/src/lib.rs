@@ -20,13 +20,11 @@ use sprs::CsMat;
 
 use pyo3::exceptions;
 use pyo3::prelude::*;
-use pyo3::types::{PyIterator, PyString};
+use pyo3::types::{PyIterator, PyList};
 use pyo3::wrap_pyfunction;
 
 use vtext::metrics;
-use vtext::tokenize;
 use vtext::tokenize::Tokenizer;
-use vtext::vectorize;
 
 type PyCsrArray = (Py<PyArray1<i32>>, Py<PyArray1<i32>>, Py<PyArray1<i32>>);
 
@@ -67,9 +65,11 @@ pub struct _HashingVectorizerWrapper<'b> {
 #[pymethods]
 impl<'b> _HashingVectorizerWrapper<'b> {
     #[new]
-    fn new(obj: &PyRawObject) {
+    #[args(n_jobs = 1)]
+    fn new(obj: &PyRawObject, n_jobs: usize) {
         let tokenizer = vtext::tokenize::RegexpTokenizer::new("\\b\\w\\w+\\b".to_string());
-        let estimator = vtext::vectorize::HashingVectorizer::new(tokenizer);
+        let estimator = vtext::vectorize::HashingVectorizer::new(tokenizer).n_jobs(n_jobs);
+      
         obj.init(_HashingVectorizerWrapper { inner: estimator });
     }
 
@@ -92,9 +92,10 @@ pub struct _CountVectorizerWrapper<'b> {
 #[pymethods]
 impl<'b> _CountVectorizerWrapper<'b> {
     #[new]
-    fn new(obj: &PyRawObject) {
+
+    fn new(obj: &PyRawObject, n_jobs: usize) {
         let tokenizer = vtext::tokenize::RegexpTokenizer::new("\\b\\w\\w+\\b".to_string());
-        let estimator = vtext::vectorize::CountVectorizer::new(tokenizer);
+        let estimator = vtext::vectorize::CountVectorizer::new(tokenizer).n_jobs(n_jobs);
         obj.init(_CountVectorizerWrapper { inner: estimator });
     }
 
@@ -176,10 +177,10 @@ impl UnicodeSegmentTokenizer {
     /// -------
     /// tokens : List[str]
     ///    computed tokens
-    fn tokenize(&self, py: Python, x: &str) -> PyResult<(Vec<String>)> {
-        let res = self.inner.tokenize(x);
-        let res = res.map(|s| s.to_string()).collect();
-        Ok((res))
+    fn tokenize<'py>(&self, py: Python<'py>, x: &str) -> PyResult<(&'py PyList)> {
+        let res: Vec<&str> = self.inner.tokenize(x).collect();
+        let list = PyList::new(py, res);
+        Ok(list)
     }
 }
 
@@ -229,10 +230,10 @@ impl VTextTokenizer {
     /// -------
     /// tokens : List[str]
     ///    computed tokens
-    fn tokenize(&self, py: Python, x: &str) -> PyResult<(Vec<String>)> {
-        let res = self.inner.tokenize(x);
-        let res = res.map(|s| s.to_string()).collect();
-        Ok((res))
+    fn tokenize<'py>(&self, py: Python<'py>, x: &str) -> PyResult<(&'py PyList)> {
+        let res: Vec<&str> = self.inner.tokenize(x).collect();
+        let list = PyList::new(py, res);
+        Ok(list)
     }
 }
 
@@ -271,11 +272,10 @@ impl RegexpTokenizer {
     /// -------
     /// tokens : List[str]
     ///    computed tokens
-    fn tokenize(&self, py: Python, x: &str) -> PyResult<(Vec<String>)> {
-        // TODO: reduce the number of copies here
-        let res = self.inner.tokenize(x);
-        let res: Vec<String> = res.map(|s| s.to_string()).collect();
-        Ok((res))
+    fn tokenize<'py>(&self, py: Python<'py>, x: &str) -> PyResult<(&'py PyList)> {
+        let res: Vec<&str> = self.inner.tokenize(x).collect();
+        let list = PyList::new(py, res);
+        Ok(list)
     }
 }
 
@@ -327,11 +327,10 @@ impl CharacterTokenizer {
     /// -------
     /// tokens : List[str]
     ///    computed tokens
-    fn tokenize(&self, py: Python, x: &str) -> PyResult<(Vec<String>)> {
-        // TODO: reduce the number of copies here
-        let res = self.inner.tokenize(x);
-        let res: Vec<String> = res.map(|s| s.to_string()).collect();
-        Ok((res))
+    fn tokenize<'py>(&self, py: Python<'py>, x: &str) -> PyResult<(&'py PyList)> {
+        let res: Vec<&str> = self.inner.tokenize(x).collect();
+        let list = PyList::new(py, res);
+        Ok(list)
     }
 }
 
@@ -400,7 +399,7 @@ impl SnowballStemmer {
     ///      stemmed word
     fn stem(&self, py: Python, word: &str) -> PyResult<(String)> {
         let res = self.inner.stem(word).to_string();
-        Ok((res))
+        Ok(res)
     }
 }
 

@@ -11,24 +11,65 @@ use crate::vectorize::*;
 fn test_count_vectorizer_simple() {
     // Example 1
     let tokenizer = RegexpTokenizer::new("\\b\\w+\\w\\b".to_string());
-
-    let documents = vec![String::from("cat dog cat")];
+  
+    let documents = vec!["cat dog cat".to_string()];
     let mut vect = CountVectorizer::new(&tokenizer);
+
     let X = vect.fit_transform(&documents);
     assert_eq!(X.to_dense(), array![[2, 1]]);
 
     // Example 1
     let documents = vec![
-        String::from("the moon in the sky"),
-        String::from("The sky sky sky is blue"),
+        "the moon in the sky".to_string(),
+        "The sky sky sky is blue".to_string(),
     ];
-
+    let X_ref = array![[0, 1, 0, 1, 1, 2], [1, 0, 1, 0, 3, 1]];
     let mut vect = CountVectorizer::new(&tokenizer);
+
+    let X = vect.fit_transform(&documents);
+    assert_eq!(X.to_dense().shape(), X_ref.shape());
+    assert_eq!(X.to_dense(), X_ref);
+
     vect.fit(&documents);
     let X = vect.transform(&documents);
+    assert_eq!(X.to_dense().shape(), X_ref.shape());
+    assert_eq!(X.to_dense(), X_ref);
+}
 
-    assert_eq!(X.to_dense().shape(), [2, 6]);
-    assert_eq!(X.to_dense(), array![[0, 1, 0, 1, 1, 2], [1, 0, 1, 0, 3, 1]])
+#[test]
+fn test_vectorize_empty_countvectorizer() {
+    let documents = vec!["some tokens".to_string(), "".to_string()];
+
+    let mut vect = CountVectorizer::new();
+    vect.fit_transform(&documents);
+
+    vect.fit(&documents);
+    vect.transform(&documents);
+}
+
+#[test]
+fn test_vectorize_empty_hashingvectorizer() {
+    let documents = vec!["some tokens".to_string(), "".to_string()];
+
+    let vect = HashingVectorizer::new();
+    vect.fit_transform(&documents);
+
+    vect.transform(&documents);
+}
+
+#[test]
+fn test_count_vectorizer_fit_transform() {
+    for documents in &[vec!["cat dog cat".to_string()]] {
+        let mut vect = CountVectorizer::new();
+        vect.fit(&documents);
+        let X = vect.transform(&documents);
+
+        let mut vect2 = CountVectorizer::new();
+        let X2 = vect2.fit_transform(&documents);
+        assert_eq!(vect.vocabulary, vect2.vocabulary);
+        println!("{:?}", vect.vocabulary);
+        assert_eq!(X.to_dense(), X2.to_dense());
+    }
 }
 
 #[test]

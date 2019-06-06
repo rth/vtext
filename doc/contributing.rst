@@ -22,7 +22,7 @@ The easiest might be to use docker to setup a build environment,
 .. code::
 
     ./run_docker_env.sh
-    rustup default nightly-2019-02-28-x86_64-unknown-linux-gnu
+    rustup default nightly-2019-06-04
     python3.7 -m pip install -r /src/python/requirements.txt
     cd /src/python && python3.7 setup.py install
     python3.7 -m pip install pandas conllu
