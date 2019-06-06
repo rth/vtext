@@ -58,7 +58,7 @@ use unicode_segmentation::UnicodeSegmentation;
 mod tests;
 
 pub trait Tokenizer: fmt::Debug {
-    fn tokenize<'a>(&'a self, text: &'a str) -> Box<Iterator<Item = &'a str> + 'a>;
+    fn tokenize<'a>(&'a self, text: &'a str) -> Box<dyn Iterator<Item = &'a str> + 'a>;
 }
 
 /// Regular expression tokenizer
@@ -79,7 +79,7 @@ impl RegexpTokenizer {
 
 impl Tokenizer for RegexpTokenizer {
     /// Tokenize a string
-    fn tokenize<'a>(&'a self, text: &'a str) -> Box<Iterator<Item = &'a str> + 'a> {
+    fn tokenize<'a>(&'a self, text: &'a str) -> Box<dyn Iterator<Item = &'a str> + 'a> {
         Box::new(self.regexp.find_iter(text).map(|m| m.as_str()))
     }
 }
@@ -112,7 +112,7 @@ impl UnicodeSegmentTokenizer {
 
 impl Tokenizer for UnicodeSegmentTokenizer {
     /// Tokenize a string
-    fn tokenize<'a>(&self, text: &'a str) -> Box<Iterator<Item = &'a str> + 'a> {
+    fn tokenize<'a>(&self, text: &'a str) -> Box<dyn Iterator<Item = &'a str> + 'a> {
         if self.word_bounds {
             let res = text.split_word_bounds().filter(|x| x != &" ");
             Box::new(res)
@@ -164,7 +164,7 @@ impl VTextTokenizer {
 
 impl Tokenizer for VTextTokenizer {
     /// Tokenize a string
-    fn tokenize<'a>(&self, text: &'a str) -> Box<Iterator<Item = &'a str> + 'a> {
+    fn tokenize<'a>(&self, text: &'a str) -> Box<dyn Iterator<Item = &'a str> + 'a> {
         let tokens = text.split_word_bounds();
 
         let mut res: Vec<&'a str> = Vec::new();
@@ -284,7 +284,7 @@ impl CharacterTokenizer {
 
 impl Tokenizer for CharacterTokenizer {
     /// Tokenize a string
-    fn tokenize<'a>(&self, text: &'a str) -> Box<Iterator<Item = &'a str> + 'a> {
+    fn tokenize<'a>(&self, text: &'a str) -> Box<dyn Iterator<Item = &'a str> + 'a> {
         let res = text
             .char_indices()
             .zip(
