@@ -194,7 +194,7 @@ impl<'b> CountVectorizer<'b> {
             indices_local.sort_unstable();
             indices_local
         };
-        let pipe: Box<Iterator<Item = Vec<i32>>>;
+        let pipe: Box<dyn Iterator<Item = Vec<i32>>>;
 
         if self._n_jobs == 1 {
             pipe = Box::new(
@@ -355,7 +355,7 @@ impl<'b> HashingVectorizer<'b> {
             indices_local
         };
 
-        let pipe: Box<Iterator<Item = Vec<i32>>>;
+        let pipe: Box<dyn Iterator<Item = Vec<i32>>>;
 
         if self._n_jobs == 1 {
             // Sequential (streaming) pipelines
