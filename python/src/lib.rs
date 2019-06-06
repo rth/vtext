@@ -69,7 +69,7 @@ impl<'b> _HashingVectorizerWrapper<'b> {
     fn new(obj: &PyRawObject, n_jobs: usize) {
         let tokenizer = vtext::tokenize::RegexpTokenizer::new("\\b\\w\\w+\\b".to_string());
         let estimator = vtext::vectorize::HashingVectorizer::new(tokenizer).n_jobs(n_jobs);
-      
+
         obj.init(_HashingVectorizerWrapper { inner: estimator });
     }
 

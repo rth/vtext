@@ -91,21 +91,13 @@ fn _sum_duplicates(tf: &mut CSRArray, indices_local: &[i32], nnz: &mut usize) {
 }
 
 #[derive(Debug)]
-pub struct HashingVectorizer<'b> {
-    lowercase: bool,
-    tokenizer: &'b Tokenizer,
-    n_features: u64,
-    _n_jobs: usize
-}
-
-#[derive(Debug)]
 pub struct CountVectorizer<'b> {
     lowercase: bool,
     tokenizer: &'b Tokenizer,
     // vocabulary uses i32 indices, to avoid memory copies when converting
     // to sparse CSR arrays in Python with scipy.sparse
     pub vocabulary: HashMap<String, i32>,
-    _n_jobs: usize
+    _n_jobs: usize,
 }
 
 pub enum Vectorizer {}
@@ -287,9 +279,9 @@ impl<'b> CountVectorizer<'b> {
 }
 
 #[derive(Debug)]
-pub struct HashingVectorizer {
+pub struct HashingVectorizer<'b> {
     lowercase: bool,
-    token_pattern: String,
+    tokenizer: &'b Tokenizer,
     n_features: u64,
     _n_jobs: usize,
     thread_pool: Option<rayon::ThreadPool>,

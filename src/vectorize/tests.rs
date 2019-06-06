@@ -11,7 +11,7 @@ use crate::vectorize::*;
 fn test_count_vectorizer_simple() {
     // Example 1
     let tokenizer = RegexpTokenizer::new("\\b\\w+\\w\\b".to_string());
-  
+
     let documents = vec!["cat dog cat".to_string()];
     let mut vect = CountVectorizer::new(&tokenizer);
 
@@ -40,7 +40,9 @@ fn test_count_vectorizer_simple() {
 fn test_vectorize_empty_countvectorizer() {
     let documents = vec!["some tokens".to_string(), "".to_string()];
 
-    let mut vect = CountVectorizer::new();
+    let tokenizer = RegexpTokenizer::new("\\b\\w+\\w\\b".to_string());
+
+    let mut vect = CountVectorizer::new(&tokenizer);
     vect.fit_transform(&documents);
 
     vect.fit(&documents);
@@ -50,8 +52,9 @@ fn test_vectorize_empty_countvectorizer() {
 #[test]
 fn test_vectorize_empty_hashingvectorizer() {
     let documents = vec!["some tokens".to_string(), "".to_string()];
+    let tokenizer = RegexpTokenizer::new("\\b\\w+\\w\\b".to_string());
 
-    let vect = HashingVectorizer::new();
+    let vect = HashingVectorizer::new(&tokenizer);
     vect.fit_transform(&documents);
 
     vect.transform(&documents);
@@ -59,12 +62,13 @@ fn test_vectorize_empty_hashingvectorizer() {
 
 #[test]
 fn test_count_vectorizer_fit_transform() {
+    let tokenizer = RegexpTokenizer::new("\\b\\w+\\w\\b".to_string());
     for documents in &[vec!["cat dog cat".to_string()]] {
-        let mut vect = CountVectorizer::new();
+        let mut vect = CountVectorizer::new(&tokenizer);
         vect.fit(&documents);
         let X = vect.transform(&documents);
 
-        let mut vect2 = CountVectorizer::new();
+        let mut vect2 = CountVectorizer::new(&tokenizer);
         let X2 = vect2.fit_transform(&documents);
         assert_eq!(vect.vocabulary, vect2.vocabulary);
         println!("{:?}", vect.vocabulary);
