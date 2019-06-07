@@ -63,6 +63,7 @@ pub trait Tokenizer: fmt::Debug {
 
 /// Regular expression tokenizer
 ///
+#[derive(Clone)]
 pub struct RegexpTokenizer {
     pub pattern: String,
     regexp: Regex,
@@ -98,7 +99,7 @@ impl fmt::Debug for RegexpTokenizer {
 /// ## References
 ///
 /// * [Unicode® Standard Annex #29](http://www.unicode.org/reports/tr29/)
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct UnicodeSegmentTokenizer {
     pub word_bounds: bool,
 }
@@ -135,7 +136,7 @@ impl Tokenizer for UnicodeSegmentTokenizer {
 /// ## References
 ///
 /// * [Unicode® Standard Annex #29](http://www.unicode.org/reports/tr29/)
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct VTextTokenizer {
     pub lang: String,
 }
@@ -270,7 +271,7 @@ impl Tokenizer for VTextTokenizer {
 }
 
 /// Character tokenizer
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct CharacterTokenizer {
     pub window_size: usize,
 }

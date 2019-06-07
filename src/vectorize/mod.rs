@@ -22,13 +22,12 @@ let documents = vec![
 
 let tokenizer = VTextTokenizer::new("en");
 
-let mut vectorizer = CountVectorizer::new();
+let mut vectorizer = CountVectorizer::new(tokenizer);
 let X = vectorizer.fit_transform(&documents);
 // returns a sparse CSR matrix with document-terms counts
 */
 
 use crate::math::CSRArray;
-use crate::tokenize;
 use crate::tokenize::Tokenizer;
 use hashbrown::{HashMap, HashSet};
 use itertools::sorted;
@@ -91,9 +90,9 @@ fn _sum_duplicates(tf: &mut CSRArray, indices_local: &[i32], nnz: &mut usize) {
 }
 
 #[derive(Debug)]
-pub struct CountVectorizer {
+pub struct CountVectorizer<T> {
     lowercase: bool,
-    //tokenizer: d Tokenizer + Sync,
+    tokenizer: T,
     // vocabulary uses i32 indices, to avoid memory copies when converting
     // to sparse CSR arrays in Python with scipy.sparse
     pub vocabulary: HashMap<String, i32>,
@@ -102,13 +101,14 @@ pub struct CountVectorizer {
 
 pub enum Vectorizer {}
 
-impl CountVectorizer {
+impl<T: Tokenizer + Sync> CountVectorizer<T> {
     /// Initialize a CountVectorizer estimator
-    pub fn new() -> Self {
+    pub fn new(tokenizer: T) -> Self {
         CountVectorizer {
             lowercase: true,
             vocabulary: HashMap::with_capacity_and_hasher(1000, Default::default()),
             _n_jobs: 1,
+            tokenizer,
         }
     }
 
@@ -127,14 +127,12 @@ impl CountVectorizer {
     ///
     /// This lists the vocabulary
     pub fn fit(&mut self, X: &[String]) -> () {
-        let tokenizer = tokenize::RegexpTokenizer::new(TOKEN_PATTERN_DEFAULT.to_string());
-
         let tokenize = |X: &[String]| -> HashSet<String> {
             let mut _vocab: HashSet<String> = HashSet::with_capacity(1000);
 
             for doc in X {
                 let doc = doc.to_ascii_lowercase();
-                let tokens = tokenizer.tokenize(&doc);
+                let tokens = self.tokenizer.tokenize(&doc);
 
                 for token in tokens {
                     if !_vocab.contains(token) {
@@ -178,14 +176,13 @@ impl CountVectorizer {
         tf.indptr.push(0);
 
         let mut nnz: usize = 0;
-        let tokenizer = tokenize::RegexpTokenizer::new(TOKEN_PATTERN_DEFAULT.to_string());
 
         let tokenize_map = |doc: &str| -> Vec<i32> {
             // Closure to tokenize a document and returns hash indices for each token
 
             let mut indices_local: Vec<i32> = Vec::with_capacity(10);
 
-            for token in tokenizer.tokenize(doc) {
+            for token in self.tokenizer.tokenize(doc) {
                 if let Some(_id) = self.vocabulary.get(token) {
                     indices_local.push(*_id)
                 };
@@ -241,14 +238,12 @@ impl CountVectorizer {
         let mut nnz: usize = 0;
         let mut indices_local: Vec<i32> = Vec::new();
 
-        let tokenizer = tokenize::RegexpTokenizer::new(TOKEN_PATTERN_DEFAULT.to_string());
-
         let pipe = X.iter().map(|doc| doc.to_ascii_lowercase());
 
         let mut vocabulary_size: i32 = 0;
 
         for document in pipe {
-            let tokens = tokenizer.tokenize(&document);
+            let tokens = self.tokenizer.tokenize(&document);
 
             indices_local.clear();
 
@@ -279,23 +274,23 @@ impl CountVectorizer {
 }
 
 #[derive(Debug)]
-pub struct HashingVectorizer {
+pub struct HashingVectorizer<T> {
     lowercase: bool,
-    tokenizer: &Tokenizer + Sync,
+    tokenizer: T,
     n_features: u64,
     _n_jobs: usize,
     thread_pool: Option<rayon::ThreadPool>,
 }
 
-impl HashingVectorizer {
+impl<T: Tokenizer + Sync> HashingVectorizer<T> {
     /// Create a new HashingVectorizer estimator
-    pub fn new(tokenizer: &Tokenizer + Sync) -> Self {
+    pub fn new(tokenizer: T) -> Self {
         HashingVectorizer {
             lowercase: true,
-            tokenizer: tokenizer,
             n_features: 1048576,
             _n_jobs: 1,
             thread_pool: None,
+            tokenizer,
         }
     }
 
