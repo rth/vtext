@@ -22,7 +22,7 @@ let documents = vec![
 
 let tokenizer = VTextTokenizer::new("en");
 
-let mut vectorizer = CountVectorizer::new(&tokenizer);
+let mut vectorizer = CountVectorizer::new();
 let X = vectorizer.fit_transform(&documents);
 // returns a sparse CSR matrix with document-terms counts
 */
@@ -91,9 +91,9 @@ fn _sum_duplicates(tf: &mut CSRArray, indices_local: &[i32], nnz: &mut usize) {
 }
 
 #[derive(Debug)]
-pub struct CountVectorizer<'b> {
+pub struct CountVectorizer {
     lowercase: bool,
-    tokenizer: &'b Tokenizer,
+    //tokenizer: d Tokenizer + Sync,
     // vocabulary uses i32 indices, to avoid memory copies when converting
     // to sparse CSR arrays in Python with scipy.sparse
     pub vocabulary: HashMap<String, i32>,
@@ -102,12 +102,11 @@ pub struct CountVectorizer<'b> {
 
 pub enum Vectorizer {}
 
-impl<'b> CountVectorizer<'b> {
+impl CountVectorizer {
     /// Initialize a CountVectorizer estimator
-    pub fn new(tokenizer: &'b Tokenizer) -> Self {
+    pub fn new() -> Self {
         CountVectorizer {
             lowercase: true,
-            tokenizer: tokenizer,
             vocabulary: HashMap::with_capacity_and_hasher(1000, Default::default()),
             _n_jobs: 1,
         }
@@ -179,13 +178,14 @@ impl<'b> CountVectorizer<'b> {
         tf.indptr.push(0);
 
         let mut nnz: usize = 0;
+        let tokenizer = tokenize::RegexpTokenizer::new(TOKEN_PATTERN_DEFAULT.to_string());
 
         let tokenize_map = |doc: &str| -> Vec<i32> {
             // Closure to tokenize a document and returns hash indices for each token
 
             let mut indices_local: Vec<i32> = Vec::with_capacity(10);
 
-            for token in self.tokenizer.tokenize(doc) {
+            for token in tokenizer.tokenize(doc) {
                 if let Some(_id) = self.vocabulary.get(token) {
                     indices_local.push(*_id)
                 };
@@ -279,17 +279,17 @@ impl<'b> CountVectorizer<'b> {
 }
 
 #[derive(Debug)]
-pub struct HashingVectorizer<'b> {
+pub struct HashingVectorizer {
     lowercase: bool,
-    tokenizer: &'b Tokenizer,
+    tokenizer: &Tokenizer + Sync,
     n_features: u64,
     _n_jobs: usize,
     thread_pool: Option<rayon::ThreadPool>,
 }
 
-impl<'b> HashingVectorizer<'b> {
+impl HashingVectorizer {
     /// Create a new HashingVectorizer estimator
-    pub fn new(tokenizer: &'b Tokenizer) -> Self {
+    pub fn new(tokenizer: &Tokenizer + Sync) -> Self {
         HashingVectorizer {
             lowercase: true,
             tokenizer: tokenizer,
