@@ -12,19 +12,22 @@ This module allows computing a sparse document term matrix from a text corpus.
 ```rust
 extern crate vtext;
 
+use vtext::tokenize::{VTextTokenizer,Tokenizer};
 use vtext::vectorize::CountVectorizer;
+
 let documents = vec![
     String::from("Some text input"),
     String::from("Another line"),
 ];
 
-let mut vectorizer = CountVectorizer::new();
+let tokenizer = VTextTokenizer::new("en");
+
+let mut vectorizer = CountVectorizer::new(tokenizer);
 let X = vectorizer.fit_transform(&documents);
 // returns a sparse CSR matrix with document-terms counts
 */
 
 use crate::math::CSRArray;
-use crate::tokenize;
 use crate::tokenize::Tokenizer;
 use hashbrown::{HashMap, HashSet};
 use itertools::sorted;
@@ -87,25 +90,25 @@ fn _sum_duplicates(tf: &mut CSRArray, indices_local: &[i32], nnz: &mut usize) {
 }
 
 #[derive(Debug)]
-pub struct CountVectorizer {
+pub struct CountVectorizer<T> {
     lowercase: bool,
-    token_pattern: String,
-    _n_jobs: usize,
+    tokenizer: T,
     // vocabulary uses i32 indices, to avoid memory copies when converting
     // to sparse CSR arrays in Python with scipy.sparse
     pub vocabulary: HashMap<String, i32>,
+    _n_jobs: usize,
 }
 
 pub enum Vectorizer {}
 
-impl CountVectorizer {
+impl<T: Tokenizer + Sync> CountVectorizer<T> {
     /// Initialize a CountVectorizer estimator
-    pub fn new() -> Self {
+    pub fn new(tokenizer: T) -> Self {
         CountVectorizer {
             lowercase: true,
-            token_pattern: String::from(TOKEN_PATTERN_DEFAULT),
             vocabulary: HashMap::with_capacity_and_hasher(1000, Default::default()),
             _n_jobs: 1,
+            tokenizer,
         }
     }
 
@@ -124,14 +127,12 @@ impl CountVectorizer {
     ///
     /// This lists the vocabulary
     pub fn fit(&mut self, X: &[String]) -> () {
-        let tokenizer = tokenize::RegexpTokenizer::new(TOKEN_PATTERN_DEFAULT.to_string());
-
         let tokenize = |X: &[String]| -> HashSet<String> {
             let mut _vocab: HashSet<String> = HashSet::with_capacity(1000);
 
             for doc in X {
                 let doc = doc.to_ascii_lowercase();
-                let tokens = tokenizer.tokenize(&doc);
+                let tokens = self.tokenizer.tokenize(&doc);
 
                 for token in tokens {
                     if !_vocab.contains(token) {
@@ -176,14 +177,12 @@ impl CountVectorizer {
 
         let mut nnz: usize = 0;
 
-        let tokenizer = tokenize::RegexpTokenizer::new(TOKEN_PATTERN_DEFAULT.to_string());
-
         let tokenize_map = |doc: &str| -> Vec<i32> {
             // Closure to tokenize a document and returns hash indices for each token
 
             let mut indices_local: Vec<i32> = Vec::with_capacity(10);
 
-            for token in tokenizer.tokenize(doc) {
+            for token in self.tokenizer.tokenize(doc) {
                 if let Some(_id) = self.vocabulary.get(token) {
                     indices_local.push(*_id)
                 };
@@ -239,14 +238,12 @@ impl CountVectorizer {
         let mut nnz: usize = 0;
         let mut indices_local: Vec<i32> = Vec::new();
 
-        let tokenizer = tokenize::RegexpTokenizer::new(TOKEN_PATTERN_DEFAULT.to_string());
-
         let pipe = X.iter().map(|doc| doc.to_ascii_lowercase());
 
         let mut vocabulary_size: i32 = 0;
 
         for document in pipe {
-            let tokens = tokenizer.tokenize(&document);
+            let tokens = self.tokenizer.tokenize(&document);
 
             indices_local.clear();
 
@@ -277,23 +274,23 @@ impl CountVectorizer {
 }
 
 #[derive(Debug)]
-pub struct HashingVectorizer {
+pub struct HashingVectorizer<T> {
     lowercase: bool,
-    token_pattern: String,
+    tokenizer: T,
     n_features: u64,
     _n_jobs: usize,
     thread_pool: Option<rayon::ThreadPool>,
 }
 
-impl HashingVectorizer {
+impl<T: Tokenizer + Sync> HashingVectorizer<T> {
     /// Create a new HashingVectorizer estimator
-    pub fn new() -> Self {
+    pub fn new(tokenizer: T) -> Self {
         HashingVectorizer {
             lowercase: true,
-            token_pattern: String::from(TOKEN_PATTERN_DEFAULT),
             n_features: 1048576,
             _n_jobs: 1,
             thread_pool: None,
+            tokenizer,
         }
     }
 
@@ -336,14 +333,12 @@ impl HashingVectorizer {
 
         let mut nnz: usize = 0;
 
-        let tokenizer = tokenize::RegexpTokenizer::new(TOKEN_PATTERN_DEFAULT.to_string());
-
         let tokenize_hash = |doc: &str| -> Vec<i32> {
             // Closure to tokenize a document and returns hash indices for each token
 
             let mut indices_local: Vec<i32> = Vec::with_capacity(10);
 
-            for token in tokenizer.tokenize(doc) {
+            for token in self.tokenizer.tokenize(doc) {
                 // set the RNG seeds to get reproducible hashing
                 let hash = seahash::hash_seeded(token.as_bytes(), 1, 1000, 200, 89);
                 let hash = (hash % self.n_features) as i32;

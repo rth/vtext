@@ -59,7 +59,7 @@ fn result_to_csr(py: Python, x: CsMat<i32>) -> PyResult<PyCsrArray> {
 
 #[pyclass]
 pub struct _HashingVectorizerWrapper {
-    inner: vtext::vectorize::HashingVectorizer,
+    inner: vtext::vectorize::HashingVectorizer<vtext::tokenize::RegexpTokenizer>,
 }
 
 #[pymethods]
@@ -67,7 +67,9 @@ impl _HashingVectorizerWrapper {
     #[new]
     #[args(n_jobs = 1)]
     fn new(obj: &PyRawObject, n_jobs: usize) {
-        let estimator = vtext::vectorize::HashingVectorizer::new().n_jobs(n_jobs);
+        let tokenizer = vtext::tokenize::RegexpTokenizer::new("\\b\\w\\w+\\b".to_string());
+        let estimator = vtext::vectorize::HashingVectorizer::new(tokenizer).n_jobs(n_jobs);
+
         obj.init(_HashingVectorizerWrapper { inner: estimator });
     }
 
@@ -84,7 +86,7 @@ impl _HashingVectorizerWrapper {
 
 #[pyclass]
 pub struct _CountVectorizerWrapper {
-    inner: vtext::vectorize::CountVectorizer,
+    inner: vtext::vectorize::CountVectorizer<vtext::tokenize::RegexpTokenizer>,
 }
 
 #[pymethods]
@@ -92,7 +94,8 @@ impl _CountVectorizerWrapper {
     #[new]
     #[args(n_jobs = 1)]
     fn new(obj: &PyRawObject, n_jobs: usize) {
-        let estimator = vtext::vectorize::CountVectorizer::new().n_jobs(n_jobs);
+        let tokenizer = vtext::tokenize::RegexpTokenizer::new("\\b\\w\\w+\\b".to_string());
+        let estimator = vtext::vectorize::CountVectorizer::new(tokenizer).n_jobs(n_jobs);
         obj.init(_CountVectorizerWrapper { inner: estimator });
     }
 
