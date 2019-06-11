@@ -17,14 +17,10 @@ fn iterable_to_collection(text: PyIterator) -> PyResult<Vec<String>> {
     // This should not be necessary, ideally PyIterator should be converted
     // to a Rust iterator
 
-    let mut collection: Vec<String> = Vec::new();
-
-    for document in text {
-        let document = document?;
-        let document = ObjectProtocol::extract::<String>(document)?;
-        collection.push(document);
-    }
-    Ok(collection)
+    let collection: Result<Vec<_>, _> = text
+        .map(|doc| doc.and_then(ObjectProtocol::extract::<String>))
+        .collect();
+    Ok(collection?)
 }
 
 fn result_to_csr(py: Python, x: CsMat<i32>) -> PyResult<PyCsrArray> {
