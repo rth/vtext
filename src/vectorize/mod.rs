@@ -36,8 +36,6 @@ use rayon::prelude::*;
 use sprs::CsMat;
 use std::cmp;
 
-const TOKEN_PATTERN_DEFAULT: &str = r"\b\w\w+\b";
-
 #[cfg(test)]
 mod tests;
 

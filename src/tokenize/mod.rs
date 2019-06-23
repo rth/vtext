@@ -20,7 +20,7 @@ Using a regular expression tokenizer we would get,
 ```rust
 # let s = "The “brown” fox can't jump 32.3 feet, right?";
 # use vtext::tokenize::*;
-let tokenizer = RegexpTokenizer::new(r"\b\w\w+\b".to_string());
+let tokenizer = RegexpTokenizerParams::default().build().unwrap();
 let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
 assert_eq!(tokens, &["The", "brown", "fox", "can", "jump", "32", "feet", "right"]);
 ```
@@ -70,12 +70,28 @@ pub struct RegexpTokenizer {
     regexp: Regex,
 }
 
-impl RegexpTokenizer {
-    /// Create a new instance
-    pub fn new(pattern: String) -> RegexpTokenizer {
-        let regexp = Regex::new(&pattern).unwrap();
+/// Builder for the regexp tokenizer
+#[derive(Debug, Clone)]
+pub struct RegexpTokenizerParams {
+    pattern: String,
+}
 
-        RegexpTokenizer { pattern, regexp }
+impl RegexpTokenizerParams {
+    pub fn pattern(&mut self, value: &str) -> RegexpTokenizerParams {
+        self.pattern = value.to_string();
+        self.clone()
+    }
+    pub fn build(&mut self) -> Result<RegexpTokenizer, VTextError> {
+        let pattern = &self.pattern;
+        let regexp = Regex::new(pattern).unwrap();
+        Ok(RegexpTokenizer { pattern: pattern.to_string(), regexp: regexp })
+    }
+}
+
+impl Default for RegexpTokenizerParams {
+    /// Create a new instance
+    fn default () -> RegexpTokenizerParams {
+        RegexpTokenizerParams { pattern : r"\b\w\w+\b".to_string() }
     }
 }
 
@@ -105,14 +121,7 @@ pub struct UnicodeSegmentTokenizer {
     pub word_bounds: bool,
 }
 
-/// Builder for the unicod segmentation tokenizer
-///
-/// This implementation is a thin wrapper around the
-/// `unicode-segmentation` crate
-///
-/// ## References
-///
-/// * [Unicode® Standard Annex #29](http://www.unicode.org/reports/tr29/)
+/// Builder for the unicode segmentation tokenizer
 #[derive(Debug, Clone)]
 pub struct UnicodeSegmentTokenizerParams {
     params: UnicodeSegmentTokenizer,

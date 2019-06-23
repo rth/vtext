@@ -10,7 +10,7 @@ use crate::tokenize::*;
 fn test_regexp_tokenizer() {
     let s = "fox can't jump 32.3 feet, right?";
 
-    let tokenizer = RegexpTokenizer::new(r"\b\w\w+\b".to_string());
+    let tokenizer = RegexpTokenizerParams::default().build().unwrap();
     let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
     let b: &[_] = &["fox", "can", "jump", "32", "feet", "right"];
     assert_eq!(tokens, b);
