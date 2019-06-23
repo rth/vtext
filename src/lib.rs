@@ -54,6 +54,7 @@ extern crate rayon;
 #[macro_use]
 extern crate derive_builder;
 
+pub mod errors;
 mod math;
 pub mod metrics;
 pub mod tokenize;

@@ -146,7 +146,10 @@ fn test_dispatch_tokenizer() {
     CountVectorizer::new(tokenizer.clone());
     HashingVectorizer::new(tokenizer);
 
-    let tokenizer = UnicodeSegmentTokenizer::new(false);
+    let tokenizer = UnicodeSegmentTokenizerParams::default()
+        .word_bounds(false)
+        .build()
+        .unwrap();
     CountVectorizer::new(tokenizer.clone());
     HashingVectorizer::new(tokenizer);
 

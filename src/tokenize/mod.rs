@@ -29,7 +29,7 @@ which would remove all punctuation. A more general approach is to apply unicode 
 ```rust
 # let s = "The “brown” fox can't jump 32.3 feet, right?";
 # use vtext::tokenize::*;
-let tokenizer = UnicodeSegmentTokenizer::default();
+let tokenizer = UnicodeSegmentTokenizerParams::default().build().unwrap();
 let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
 assert_eq!(tokens, &["The", "“", "brown", "”", "fox", "can't", "jump", "32.3", "feet", ",", "right", "?"]);
 ```
@@ -50,6 +50,7 @@ assert_eq!(tokens, &["The", "“", "brown", "”", "fox", "ca", "n't", "jump", "
 extern crate regex;
 extern crate unicode_segmentation;
 
+use crate::errors::VTextError;
 use regex::Regex;
 use std::fmt;
 use unicode_segmentation::UnicodeSegmentation;
@@ -99,21 +100,39 @@ impl fmt::Debug for RegexpTokenizer {
 /// ## References
 ///
 /// * [Unicode® Standard Annex #29](http://www.unicode.org/reports/tr29/)
-#[derive(Builder, Debug, Clone)]
-#[builder(setter(into))]
+#[derive(Debug, Clone)]
 pub struct UnicodeSegmentTokenizer {
     pub word_bounds: bool,
 }
 
-impl UnicodeSegmentTokenizer {
-    /// Create a new instance
-    pub fn new(word_bounds: bool) -> UnicodeSegmentTokenizer {
-        UnicodeSegmentTokenizer { word_bounds }
+/// Builder for the unicod segmentation tokenizer
+///
+/// This implementation is a thin wrapper around the
+/// `unicode-segmentation` crate
+///
+/// ## References
+///
+/// * [Unicode® Standard Annex #29](http://www.unicode.org/reports/tr29/)
+#[derive(Debug, Clone)]
+pub struct UnicodeSegmentTokenizerParams {
+    params: UnicodeSegmentTokenizer,
 }
 
-impl Default for UnicodeSegmentTokenizer {
-    fn default() -> UnicodeSegmentTokenizer {
-        UnicodeSegmentTokenizer {word_bounds : true }
+impl UnicodeSegmentTokenizerParams {
+    pub fn word_bounds(&mut self, value: bool) -> UnicodeSegmentTokenizerParams {
+        self.params.word_bounds = value;
+        self.clone()
+    }
+    pub fn build(&mut self) -> Result<UnicodeSegmentTokenizer, VTextError> {
+        Ok(self.params.clone())
+    }
+}
+
+impl Default for UnicodeSegmentTokenizerParams {
+    fn default() -> UnicodeSegmentTokenizerParams {
+        UnicodeSegmentTokenizerParams {
+            params: UnicodeSegmentTokenizer { word_bounds: true },
+        }
     }
 }
 
