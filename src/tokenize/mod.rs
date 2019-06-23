@@ -20,7 +20,7 @@ Using a regular expression tokenizer we would get,
 ```rust
 # let s = "The “brown” fox can't jump 32.3 feet, right?";
 # use vtext::tokenize::*;
-let tokenizer = RegexpTokenizerParams::default().build().unwrap();
+let tokenizer = RegexpTokenizer::default();
 let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
 assert_eq!(tokens, &["The", "brown", "fox", "can", "jump", "32", "feet", "right"]);
 ```
@@ -29,7 +29,7 @@ which would remove all punctuation. A more general approach is to apply unicode 
 ```rust
 # let s = "The “brown” fox can't jump 32.3 feet, right?";
 # use vtext::tokenize::*;
-let tokenizer = UnicodeSegmentTokenizerParams::default().build().unwrap();
+let tokenizer = UnicodeSegmentTokenizer::default();
 let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
 assert_eq!(tokens, &["The", "“", "brown", "”", "fox", "can't", "jump", "32.3", "feet", ",", "right", "?"]);
 ```
@@ -42,7 +42,7 @@ as "ca", "n't" in English. To address such issues, we apply several additional r
 ```rust
 # let s = "The “brown” fox can't jump 32.3 feet, right?";
 # use vtext::tokenize::*;
-let tokenizer = VTextTokenizerParams::default().build().unwrap();
+let tokenizer = VTextTokenizerParams::default().lang("en").build().unwrap();
 let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
 assert_eq!(tokens, &["The", "“", "brown", "”", "fox", "ca", "n't", "jump", "32.3", "feet", ",", "right", "?"]);
 
@@ -95,6 +95,13 @@ impl Default for RegexpTokenizerParams {
     }
 }
 
+impl Default for RegexpTokenizer {
+    /// Create a new instance
+    fn default () -> RegexpTokenizer {
+        RegexpTokenizerParams::default().build().unwrap()
+    }
+}
+
 impl Tokenizer for RegexpTokenizer {
     /// Tokenize a string
     fn tokenize<'a>(&'a self, text: &'a str) -> Box<dyn Iterator<Item = &'a str> + 'a> {
@@ -137,6 +144,8 @@ impl UnicodeSegmentTokenizerParams {
     }
 }
 
+
+
 impl Default for UnicodeSegmentTokenizerParams {
     fn default() -> UnicodeSegmentTokenizerParams {
         UnicodeSegmentTokenizerParams {
@@ -144,6 +153,14 @@ impl Default for UnicodeSegmentTokenizerParams {
         }
     }
 }
+
+impl Default for UnicodeSegmentTokenizer {
+    /// Create a new instance
+    fn default () -> UnicodeSegmentTokenizer {
+        UnicodeSegmentTokenizerParams::default().build().unwrap()
+    }
+}
+
 
 impl Tokenizer for UnicodeSegmentTokenizer {
     /// Tokenize a string
@@ -207,11 +224,17 @@ impl VTextTokenizerParams {
 }
 
 
-
 impl Default for VTextTokenizerParams {
     /// Create a new instance
     fn default() -> VTextTokenizerParams {
         VTextTokenizerParams {lang: "en".to_string()}
+    }
+}
+
+impl Default for VTextTokenizer {
+    /// Create a new instance
+    fn default () -> VTextTokenizer {
+        VTextTokenizerParams::default().build().unwrap()
     }
 }
 

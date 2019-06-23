@@ -12,7 +12,7 @@ This module allows computing a sparse document term matrix from a text corpus.
 ```rust
 extern crate vtext;
 
-use vtext::tokenize::{VTextTokenizerParams,Tokenizer};
+use vtext::tokenize::{VTextTokenizer,Tokenizer};
 use vtext::vectorize::CountVectorizer;
 
 let documents = vec![
@@ -20,7 +20,7 @@ let documents = vec![
     String::from("Another line"),
 ];
 
-let tokenizer = VTextTokenizerParams::default().build().unwrap();
+let tokenizer = VTextTokenizer::default();
 
 let mut vectorizer = CountVectorizer::new(tokenizer);
 let X = vectorizer.fit_transform(&documents);
