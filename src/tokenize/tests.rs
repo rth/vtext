@@ -102,7 +102,10 @@ fn test_vtext_tokenizer_fr() {
 
 #[test]
 fn test_vtext_tokenizer_invalid_lang() {
-    let tokenizer = VTextTokenizerParams::default().lang("unknown").build().unwrap();
+    let tokenizer = VTextTokenizerParams::default()
+        .lang("unknown")
+        .build()
+        .unwrap();
     assert_eq!(tokenizer.lang, "any");
 }
 
@@ -110,7 +113,7 @@ fn test_vtext_tokenizer_invalid_lang() {
 fn test_character_tokenizer() {
     let s = "fox can't";
 
-    let tokenizer = CharacterTokenizer::new(4);
+    let tokenizer = CharacterTokenizer::default();
     let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
     let b: &[_] = &["fox ", "ox c", "x ca", " can", "can'", "an't"];
     assert_eq!(tokens, b);

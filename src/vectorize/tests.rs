@@ -157,7 +157,10 @@ fn test_dispatch_tokenizer() {
     CountVectorizer::new(tokenizer.clone());
     HashingVectorizer::new(tokenizer);
 
-    let tokenizer = CharacterTokenizer::new(4);
+    let tokenizer = CharacterTokenizerParams::default()
+        .window_size(3)
+        .build()
+        .unwrap();
     CountVectorizer::new(tokenizer.clone());
     HashingVectorizer::new(tokenizer);
 }

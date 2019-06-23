@@ -84,20 +84,25 @@ impl RegexpTokenizerParams {
     pub fn build(&mut self) -> Result<RegexpTokenizer, VTextError> {
         let pattern = &self.pattern;
         let regexp = Regex::new(pattern).unwrap();
-        Ok(RegexpTokenizer { pattern: pattern.to_string(), regexp: regexp })
+        Ok(RegexpTokenizer {
+            pattern: pattern.to_string(),
+            regexp: regexp,
+        })
     }
 }
 
 impl Default for RegexpTokenizerParams {
     /// Create a new instance
-    fn default () -> RegexpTokenizerParams {
-        RegexpTokenizerParams { pattern : r"\b\w\w+\b".to_string() }
+    fn default() -> RegexpTokenizerParams {
+        RegexpTokenizerParams {
+            pattern: r"\b\w\w+\b".to_string(),
+        }
     }
 }
 
 impl Default for RegexpTokenizer {
     /// Create a new instance
-    fn default () -> RegexpTokenizer {
+    fn default() -> RegexpTokenizer {
         RegexpTokenizerParams::default().build().unwrap()
     }
 }
@@ -144,8 +149,6 @@ impl UnicodeSegmentTokenizerParams {
     }
 }
 
-
-
 impl Default for UnicodeSegmentTokenizerParams {
     fn default() -> UnicodeSegmentTokenizerParams {
         UnicodeSegmentTokenizerParams {
@@ -156,11 +159,10 @@ impl Default for UnicodeSegmentTokenizerParams {
 
 impl Default for UnicodeSegmentTokenizer {
     /// Create a new instance
-    fn default () -> UnicodeSegmentTokenizer {
+    fn default() -> UnicodeSegmentTokenizer {
         UnicodeSegmentTokenizerParams::default().build().unwrap()
     }
 }
-
 
 impl Tokenizer for UnicodeSegmentTokenizer {
     /// Tokenize a string
@@ -195,7 +197,7 @@ pub struct VTextTokenizer {
 /// Builder for the VTextTokenizer
 #[derive(Debug, Clone)]
 pub struct VTextTokenizerParams {
-    lang: String
+    lang: String,
 }
 
 impl VTextTokenizerParams {
@@ -223,17 +225,18 @@ impl VTextTokenizerParams {
     }
 }
 
-
 impl Default for VTextTokenizerParams {
     /// Create a new instance
     fn default() -> VTextTokenizerParams {
-        VTextTokenizerParams {lang: "en".to_string()}
+        VTextTokenizerParams {
+            lang: "en".to_string(),
+        }
     }
 }
 
 impl Default for VTextTokenizer {
     /// Create a new instance
-    fn default () -> VTextTokenizer {
+    fn default() -> VTextTokenizer {
         VTextTokenizerParams::default().build().unwrap()
     }
 }
@@ -351,10 +354,33 @@ pub struct CharacterTokenizer {
     pub window_size: usize,
 }
 
-impl CharacterTokenizer {
+#[derive(Debug, Clone)]
+pub struct CharacterTokenizerParams {
+    window_size: usize,
+}
+
+impl CharacterTokenizerParams {
+    pub fn window_size(&mut self, value: usize) -> CharacterTokenizerParams {
+        self.window_size = value;
+        self.clone()
+    }
+    pub fn build(&mut self) -> Result<CharacterTokenizer, VTextError> {
+        Ok(CharacterTokenizer {
+            window_size: self.window_size,
+        })
+    }
+}
+
+impl Default for CharacterTokenizerParams {
+    fn default() -> CharacterTokenizerParams {
+        CharacterTokenizerParams { window_size: 4 }
+    }
+}
+
+impl Default for CharacterTokenizer {
     /// Create a new instance
-    pub fn new(window_size: usize) -> CharacterTokenizer {
-        CharacterTokenizer { window_size }
+    fn default() -> CharacterTokenizer {
+        CharacterTokenizerParams::default().build().unwrap()
     }
 }
 
