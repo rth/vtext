@@ -93,7 +93,7 @@ fn test_hashing_vectorizer_simple() {
         String::from("The sky is blue"),
     ];
 
-    let tokenizer = VTextTokenizer::new("en");
+    let tokenizer = VTextTokenizerParams::default().build().unwrap();
 
     let vect = HashingVectorizer::new(tokenizer);
     let vect = vect.fit(&documents);
@@ -124,7 +124,7 @@ fn test_hashing_vectorizer_simple() {
 fn test_empty_dataset() {
     let documents: Vec<String> = vec![];
 
-    let tokenizer = VTextTokenizer::new("en");
+    let tokenizer = VTextTokenizerParams::default().build().unwrap();
     let mut vectorizer = CountVectorizer::new(tokenizer.clone());
 
     let X = vectorizer.fit_transform(&documents);
@@ -142,7 +142,7 @@ fn test_empty_dataset() {
 
 #[test]
 fn test_dispatch_tokenizer() {
-    let tokenizer = VTextTokenizer::new("en");
+    let tokenizer = VTextTokenizerParams::default().build().unwrap();
     CountVectorizer::new(tokenizer.clone());
     HashingVectorizer::new(tokenizer);
 

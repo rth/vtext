@@ -42,7 +42,7 @@ as "ca", "n't" in English. To address such issues, we apply several additional r
 ```rust
 # let s = "The “brown” fox can't jump 32.3 feet, right?";
 # use vtext::tokenize::*;
-let tokenizer = VTextTokenizer::new("en");
+let tokenizer = VTextTokenizerParams::default().build().unwrap();
 let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
 assert_eq!(tokens, &["The", "“", "brown", "”", "fox", "ca", "n't", "jump", "32.3", "feet", ",", "right", "?"]);
 
@@ -175,11 +175,20 @@ pub struct VTextTokenizer {
     pub lang: String,
 }
 
-impl VTextTokenizer {
-    /// Create a new instance
-    pub fn new(lang: &str) -> VTextTokenizer {
-        let lang_valid = match lang {
-            "en" | "fr" => lang,
+/// Builder for the VTextTokenizer
+#[derive(Debug, Clone)]
+pub struct VTextTokenizerParams {
+    lang: String
+}
+
+impl VTextTokenizerParams {
+    pub fn lang(&mut self, value: &str) -> VTextTokenizerParams {
+        self.lang = value.to_string();
+        self.clone()
+    }
+    pub fn build(&mut self) -> Result<VTextTokenizer, VTextError> {
+        let lang = match &self.lang[..] {
+            "en" | "fr" => &self.lang[..],
             _ => {
                 // TODO: add some warning message here
                 //println!(
@@ -191,9 +200,18 @@ impl VTextTokenizer {
                 "any"
             }
         };
-        VTextTokenizer {
-            lang: lang_valid.to_string(),
-        }
+        Ok(VTextTokenizer {
+            lang: lang.to_string(),
+        })
+    }
+}
+
+
+
+impl Default for VTextTokenizerParams {
+    /// Create a new instance
+    fn default() -> VTextTokenizerParams {
+        VTextTokenizerParams {lang: "en".to_string()}
     }
 }
 

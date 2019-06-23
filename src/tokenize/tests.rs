@@ -41,7 +41,7 @@ fn test_unicode_tokenizer() {
 
 #[test]
 fn test_vtext_tokenizer_all_lang() {
-    let tokenizer = VTextTokenizer::new("en");
+    let tokenizer = VTextTokenizerParams::default().build().unwrap();
 
     for (s, tokens_ref) in [
         // float numbers
@@ -75,7 +75,7 @@ fn test_vtext_tokenizer_all_lang() {
 
 #[test]
 fn test_vtext_tokenizer_en() {
-    let tokenizer = VTextTokenizer::new("en");
+    let tokenizer = VTextTokenizerParams::default().build().unwrap();
 
     for (s, tokens_ref) in [
         ("We can't", vec!["We", "ca", "n't"]),
@@ -92,7 +92,7 @@ fn test_vtext_tokenizer_en() {
 
 #[test]
 fn test_vtext_tokenizer_fr() {
-    let tokenizer = VTextTokenizer::new("fr");
+    let tokenizer = VTextTokenizerParams::default().lang("fr").build().unwrap();
 
     for (s, tokens_ref) in [("l'image", vec!["l'", "image"])].iter() {
         let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
@@ -102,7 +102,7 @@ fn test_vtext_tokenizer_fr() {
 
 #[test]
 fn test_vtext_tokenizer_invalid_lang() {
-    let tokenizer = VTextTokenizer::new("unknown");
+    let tokenizer = VTextTokenizerParams::default().lang("unknown").build().unwrap();
     assert_eq!(tokenizer.lang, "any");
 }
 
