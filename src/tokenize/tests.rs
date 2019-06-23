@@ -106,7 +106,7 @@ fn test_vtext_tokenizer_invalid_lang() {
         .lang("unknown")
         .build()
         .unwrap();
-    assert_eq!(tokenizer.lang, "any");
+    assert_eq!(tokenizer.params.lang, "any");
 }
 
 #[test]
@@ -122,5 +122,5 @@ fn test_character_tokenizer() {
 #[test]
 fn test_tokenizer_defaults() {
     let tokenizer = UnicodeSegmentTokenizer::default();
-    assert_eq!(tokenizer.word_bounds, true);
+    assert_eq!(tokenizer.params.word_bounds, true);
 }

@@ -66,7 +66,7 @@ pub trait Tokenizer: fmt::Debug {
 ///
 #[derive(Clone)]
 pub struct RegexpTokenizer {
-    pub pattern: String,
+    pub params : RegexpTokenizerParams,
     regexp: Regex,
 }
 
@@ -85,7 +85,7 @@ impl RegexpTokenizerParams {
         let pattern = &self.pattern;
         let regexp = Regex::new(pattern).unwrap();
         Ok(RegexpTokenizer {
-            pattern: pattern.to_string(),
+            params: self.clone(),
             regexp: regexp,
         })
     }
@@ -116,7 +116,7 @@ impl Tokenizer for RegexpTokenizer {
 
 impl fmt::Debug for RegexpTokenizer {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "RegexpTokenizer {{ pattern:  {} }}", self.pattern)
+        write!(f, "RegexpTokenizer {{ pattern:  {} }}", self.params.pattern)
     }
 }
 
@@ -130,29 +130,29 @@ impl fmt::Debug for RegexpTokenizer {
 /// * [Unicode® Standard Annex #29](http://www.unicode.org/reports/tr29/)
 #[derive(Debug, Clone)]
 pub struct UnicodeSegmentTokenizer {
-    pub word_bounds: bool,
+    pub params: UnicodeSegmentTokenizerParams
 }
 
 /// Builder for the unicode segmentation tokenizer
 #[derive(Debug, Clone)]
 pub struct UnicodeSegmentTokenizerParams {
-    params: UnicodeSegmentTokenizer,
+    word_bounds: bool
 }
 
 impl UnicodeSegmentTokenizerParams {
     pub fn word_bounds(&mut self, value: bool) -> UnicodeSegmentTokenizerParams {
-        self.params.word_bounds = value;
+        self.word_bounds = value;
         self.clone()
     }
     pub fn build(&mut self) -> Result<UnicodeSegmentTokenizer, VTextError> {
-        Ok(self.params.clone())
+        Ok(UnicodeSegmentTokenizer { params: self.clone()} )
     }
 }
 
 impl Default for UnicodeSegmentTokenizerParams {
     fn default() -> UnicodeSegmentTokenizerParams {
         UnicodeSegmentTokenizerParams {
-            params: UnicodeSegmentTokenizer { word_bounds: true },
+            word_bounds: true 
         }
     }
 }
@@ -167,7 +167,7 @@ impl Default for UnicodeSegmentTokenizer {
 impl Tokenizer for UnicodeSegmentTokenizer {
     /// Tokenize a string
     fn tokenize<'a>(&self, text: &'a str) -> Box<dyn Iterator<Item = &'a str> + 'a> {
-        if self.word_bounds {
+        if self.params.word_bounds {
             let res = text.split_word_bounds().filter(|x| x != &" ");
             Box::new(res)
         } else {
@@ -191,7 +191,7 @@ impl Tokenizer for UnicodeSegmentTokenizer {
 /// * [Unicode® Standard Annex #29](http://www.unicode.org/reports/tr29/)
 #[derive(Debug, Clone)]
 pub struct VTextTokenizer {
-    pub lang: String,
+    pub params: VTextTokenizerParams
 }
 
 /// Builder for the VTextTokenizer
@@ -219,9 +219,8 @@ impl VTextTokenizerParams {
                 "any"
             }
         };
-        Ok(VTextTokenizer {
-            lang: lang.to_string(),
-        })
+        self.lang = lang.to_string();
+        Ok(VTextTokenizer {params: self.clone() })
     }
 }
 
@@ -275,7 +274,7 @@ impl Tokenizer for VTextTokenizer {
                 punct_last = 'X';
             }
 
-            match self.lang.as_ref() {
+            match self.params.lang.as_ref() {
                 "en" => {
                     // Handle contractions
                     if let Some(apostroph_idx) = tok.find(&"'") {
@@ -351,7 +350,7 @@ impl Tokenizer for VTextTokenizer {
 /// Character tokenizer
 #[derive(Debug, Clone)]
 pub struct CharacterTokenizer {
-    pub window_size: usize,
+    pub params: CharacterTokenizerParams
 }
 
 #[derive(Debug, Clone)]
@@ -366,7 +365,7 @@ impl CharacterTokenizerParams {
     }
     pub fn build(&mut self) -> Result<CharacterTokenizer, VTextError> {
         Ok(CharacterTokenizer {
-            window_size: self.window_size,
+            params: self.clone(),
         })
     }
 }
@@ -391,7 +390,7 @@ impl Tokenizer for CharacterTokenizer {
             .char_indices()
             .zip(
                 text.char_indices()
-                    .skip(self.window_size)
+                    .skip(self.params.window_size)
                     .chain(Some((text.len(), ' '))),
             )
             .map(move |((i, _), (j, _))| &text[i..j]);
