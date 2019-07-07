@@ -66,7 +66,7 @@ pub trait Tokenizer: fmt::Debug {
 ///
 #[derive(Clone)]
 pub struct RegexpTokenizer {
-    pub params : RegexpTokenizerParams,
+    pub params: RegexpTokenizerParams,
     regexp: Regex,
 }
 
@@ -130,13 +130,13 @@ impl fmt::Debug for RegexpTokenizer {
 /// * [Unicode® Standard Annex #29](http://www.unicode.org/reports/tr29/)
 #[derive(Debug, Clone)]
 pub struct UnicodeSegmentTokenizer {
-    pub params: UnicodeSegmentTokenizerParams
+    pub params: UnicodeSegmentTokenizerParams,
 }
 
 /// Builder for the unicode segmentation tokenizer
 #[derive(Debug, Clone)]
 pub struct UnicodeSegmentTokenizerParams {
-    word_bounds: bool
+    word_bounds: bool,
 }
 
 impl UnicodeSegmentTokenizerParams {
@@ -145,15 +145,15 @@ impl UnicodeSegmentTokenizerParams {
         self.clone()
     }
     pub fn build(&mut self) -> Result<UnicodeSegmentTokenizer, VTextError> {
-        Ok(UnicodeSegmentTokenizer { params: self.clone()} )
+        Ok(UnicodeSegmentTokenizer {
+            params: self.clone(),
+        })
     }
 }
 
 impl Default for UnicodeSegmentTokenizerParams {
     fn default() -> UnicodeSegmentTokenizerParams {
-        UnicodeSegmentTokenizerParams {
-            word_bounds: true 
-        }
+        UnicodeSegmentTokenizerParams { word_bounds: true }
     }
 }
 
@@ -191,7 +191,7 @@ impl Tokenizer for UnicodeSegmentTokenizer {
 /// * [Unicode® Standard Annex #29](http://www.unicode.org/reports/tr29/)
 #[derive(Debug, Clone)]
 pub struct VTextTokenizer {
-    pub params: VTextTokenizerParams
+    pub params: VTextTokenizerParams,
 }
 
 /// Builder for the VTextTokenizer
@@ -220,7 +220,9 @@ impl VTextTokenizerParams {
             }
         };
         self.lang = lang.to_string();
-        Ok(VTextTokenizer {params: self.clone() })
+        Ok(VTextTokenizer {
+            params: self.clone(),
+        })
     }
 }
 
@@ -350,7 +352,7 @@ impl Tokenizer for VTextTokenizer {
 /// Character tokenizer
 #[derive(Debug, Clone)]
 pub struct CharacterTokenizer {
-    pub params: CharacterTokenizerParams
+    pub params: CharacterTokenizerParams,
 }
 
 #[derive(Debug, Clone)]

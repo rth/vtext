@@ -27,8 +27,10 @@ let X = vectorizer.fit_transform(&documents);
 // returns a sparse CSR matrix with document-terms counts
 */
 
+use crate::errors::VTextError;
 use crate::math::CSRArray;
 use crate::tokenize::Tokenizer;
+
 use hashbrown::{HashMap, HashSet};
 use itertools::sorted;
 use ndarray::Array;
@@ -87,38 +89,73 @@ fn _sum_duplicates(tf: &mut CSRArray, indices_local: &[i32], nnz: &mut usize) {
     tf.indptr.push(*nnz);
 }
 
-#[derive(Debug)]
-pub struct CountVectorizer<T> {
+#[derive(Debug, Clone)]
+pub struct CountVectorizerParams<T> {
     lowercase: bool,
     tokenizer: T,
+    n_jobs: usize,
+}
+
+impl<T: Tokenizer + Clone> CountVectorizerParams<T> {
+    pub fn lowercase(&mut self, value: bool) -> CountVectorizerParams<T> {
+        self.lowercase = value;
+        self.clone()
+    }
+    pub fn tokenizer(&mut self, value: T) -> CountVectorizerParams<T> {
+        self.tokenizer = value.clone();
+        self.clone()
+    }
+    pub fn n_jobs(&mut self, value: usize) -> CountVectorizerParams<T> {
+        self.n_jobs = value;
+        self.clone()
+    }
+    pub fn build(&mut self) -> Result<CountVectorizer<T>, VTextError> {
+        if self.n_jobs < 1 {
+            panic!("n_jobs={} must be > 0", self.n_jobs);
+        }
+        Ok(CountVectorizer {
+            params: self.clone(),
+            vocabulary: HashMap::with_capacity_and_hasher(1000, Default::default()),
+        })
+    }
+}
+
+impl<T: Tokenizer + Clone + Default> Default for CountVectorizerParams<T> {
+    /// Create a new instance
+    fn default() -> CountVectorizerParams<T> {
+        let tokenizer = T::default();
+        CountVectorizerParams {
+            lowercase: true,
+            tokenizer: tokenizer,
+            n_jobs: 1,
+        }
+    }
+}
+
+impl<T: Tokenizer + Clone + Default> Default for CountVectorizer<T> {
+    /// Create a new instance
+    fn default() -> CountVectorizer<T> {
+        CountVectorizerParams::default().build().unwrap()
+    }
+}
+
+#[derive(Debug)]
+pub struct CountVectorizer<T> {
+    pub params: CountVectorizerParams<T>,
     // vocabulary uses i32 indices, to avoid memory copies when converting
     // to sparse CSR arrays in Python with scipy.sparse
     pub vocabulary: HashMap<String, i32>,
-    _n_jobs: usize,
 }
 
 pub enum Vectorizer {}
 
 impl<T: Tokenizer + Sync> CountVectorizer<T> {
     /// Initialize a CountVectorizer estimator
-    pub fn new(tokenizer: T) -> Self {
-        CountVectorizer {
-            lowercase: true,
-            vocabulary: HashMap::with_capacity_and_hasher(1000, Default::default()),
-            _n_jobs: 1,
-            tokenizer,
-        }
-    }
-
-    /// Set the number of parallel threads to use
-    ///
-    /// Note: currently any value n_jobs > 1 will use all available cores.
-    pub fn n_jobs(mut self, n_jobs: usize) -> Self {
-        self._n_jobs = n_jobs;
-        if n_jobs < 1 {
-            panic!("n_jobs={} must be > 0", n_jobs);
-        }
-        self
+    pub fn with_params_and_vocabulary(
+        params: CountVectorizerParams<T>,
+        vocabulary: HashMap<String, i32>,
+    ) -> Self {
+        CountVectorizer { params, vocabulary }
     }
 
     /// Fit the estimator
@@ -130,7 +167,7 @@ impl<T: Tokenizer + Sync> CountVectorizer<T> {
 
             for doc in X {
                 let doc = doc.to_ascii_lowercase();
-                let tokens = self.tokenizer.tokenize(&doc);
+                let tokens = self.params.tokenizer.tokenize(&doc);
 
                 for token in tokens {
                     if !_vocab.contains(token) {
@@ -142,15 +179,15 @@ impl<T: Tokenizer + Sync> CountVectorizer<T> {
         };
         let mut vocabulary: HashSet<String>;
 
-        if self._n_jobs == 1 {
+        if self.params.n_jobs == 1 {
             vocabulary = tokenize(X);
-        } else if self._n_jobs > 1 {
-            let chunk_size = cmp::max(X.len() / (self._n_jobs * 4), 1);
+        } else if self.params.n_jobs > 1 {
+            let chunk_size = cmp::max(X.len() / (self.params.n_jobs * 4), 1);
 
             let pipe = X.par_chunks(chunk_size).flat_map(tokenize);
             vocabulary = pipe.collect();
         } else {
-            panic!("n_jobs={} must be > 0", self._n_jobs);
+            panic!("n_jobs={} must be > 0", self.params.n_jobs);
         }
 
         if !vocabulary.is_empty() {
@@ -180,7 +217,7 @@ impl<T: Tokenizer + Sync> CountVectorizer<T> {
 
             let mut indices_local: Vec<i32> = Vec::with_capacity(10);
 
-            for token in self.tokenizer.tokenize(doc) {
+            for token in self.params.tokenizer.tokenize(doc) {
                 if let Some(_id) = self.vocabulary.get(token) {
                     indices_local.push(*_id)
                 };
@@ -191,13 +228,13 @@ impl<T: Tokenizer + Sync> CountVectorizer<T> {
         };
         let pipe: Box<dyn Iterator<Item = Vec<i32>>>;
 
-        if self._n_jobs == 1 {
+        if self.params.n_jobs == 1 {
             pipe = Box::new(
                 X.iter()
                     .map(|doc| doc.to_ascii_lowercase())
                     .map(|doc| tokenize_map(&doc)),
             );
-        } else if self._n_jobs > 1 {
+        } else if self.params.n_jobs > 1 {
             pipe = Box::new(
                 X.par_iter()
                     .map(|doc| doc.to_ascii_lowercase())
@@ -206,7 +243,7 @@ impl<T: Tokenizer + Sync> CountVectorizer<T> {
                     .into_iter(),
             );
         } else {
-            panic!("n_jobs={} must be > 0", self._n_jobs);
+            panic!("n_jobs={} must be > 0", self.params.n_jobs);
         }
 
         for indices_local in pipe {
@@ -241,7 +278,7 @@ impl<T: Tokenizer + Sync> CountVectorizer<T> {
         let mut vocabulary_size: i32 = 0;
 
         for document in pipe {
-            let tokens = self.tokenizer.tokenize(&document);
+            let tokens = self.params.tokenizer.tokenize(&document);
 
             indices_local.clear();
 

@@ -10,10 +10,9 @@ use crate::vectorize::*;
 #[test]
 fn test_count_vectorizer_simple() {
     // Example 1
-    let tokenizer = RegexpTokenizerParams::default().build().unwrap();
 
     let documents = vec!["cat dog cat".to_string()];
-    let mut vect = CountVectorizer::new(tokenizer.clone());
+    let mut vect = CountVectorizer::default();
 
     let X = vect.fit_transform(&documents);
     assert_eq!(X.to_dense(), array![[2, 1]]);
@@ -24,7 +23,7 @@ fn test_count_vectorizer_simple() {
         "The sky sky sky is blue".to_string(),
     ];
     let X_ref = array![[0, 1, 0, 1, 1, 2], [1, 0, 1, 0, 3, 1]];
-    let mut vect = CountVectorizer::new(tokenizer);
+    let mut vect = CountVectorizer::default();
 
     let X = vect.fit_transform(&documents);
     assert_eq!(X.to_dense().shape(), X_ref.shape());
@@ -40,9 +39,7 @@ fn test_count_vectorizer_simple() {
 fn test_vectorize_empty_countvectorizer() {
     let documents = vec!["some tokens".to_string(), "".to_string()];
 
-    let tokenizer = RegexpTokenizerParams::default().build().unwrap();
-
-    let mut vect = CountVectorizer::new(tokenizer);
+    let mut vect = CountVectorizer::default();
     vect.fit_transform(&documents);
 
     vect.fit(&documents);
@@ -62,13 +59,12 @@ fn test_vectorize_empty_hashingvectorizer() {
 
 #[test]
 fn test_count_vectorizer_fit_transform() {
-    let tokenizer = RegexpTokenizerParams::default().build().unwrap();
     for documents in &[vec!["cat dog cat".to_string()]] {
-        let mut vect = CountVectorizer::new(tokenizer.clone());
+        let mut vect = CountVectorizer::default();
         vect.fit(&documents);
         let X = vect.transform(&documents);
 
-        let mut vect2 = CountVectorizer::new(tokenizer.clone());
+        let mut vect2 = CountVectorizer::default();
         let X2 = vect2.fit_transform(&documents);
         assert_eq!(vect.vocabulary, vect2.vocabulary);
         println!("{:?}", vect.vocabulary);
@@ -125,7 +121,9 @@ fn test_empty_dataset() {
     let documents: Vec<String> = vec![];
 
     let tokenizer = VTextTokenizerParams::default().build().unwrap();
-    let mut vectorizer = CountVectorizer::new(tokenizer.clone());
+    let mut vectorizer = CountVectorizerParams::default()
+        .tokenizer(tokenizer.clone())
+        .build();
 
     let X = vectorizer.fit_transform(&documents);
     assert_eq!(X.data(), &[]);
@@ -143,24 +141,32 @@ fn test_empty_dataset() {
 #[test]
 fn test_dispatch_tokenizer() {
     let tokenizer = VTextTokenizerParams::default().build().unwrap();
-    CountVectorizer::new(tokenizer.clone());
+    CountVectorizerParams::default()
+        .tokenizer(tokenizer.clone())
+        .build();
     HashingVectorizer::new(tokenizer);
 
     let tokenizer = UnicodeSegmentTokenizerParams::default()
         .word_bounds(false)
         .build()
         .unwrap();
-    CountVectorizer::new(tokenizer.clone());
+    CountVectorizerParams::default()
+        .tokenizer(tokenizer.clone())
+        .build();
     HashingVectorizer::new(tokenizer);
 
     let tokenizer = RegexpTokenizerParams::default().build().unwrap();
-    CountVectorizer::new(tokenizer.clone());
+    CountVectorizerParams::default()
+        .tokenizer(tokenizer.clone())
+        .build();
     HashingVectorizer::new(tokenizer);
 
     let tokenizer = CharacterTokenizerParams::default()
         .window_size(3)
         .build()
         .unwrap();
-    CountVectorizer::new(tokenizer.clone());
+    CountVectorizerParams::default()
+        .tokenizer(tokenizer.clone())
+        .build();
     HashingVectorizer::new(tokenizer);
 }
