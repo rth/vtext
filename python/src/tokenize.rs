@@ -7,7 +7,7 @@
 use pyo3::prelude::*;
 use pyo3::types::PyList;
 
-use vtext::tokenize::Tokenizer;
+use vtext::tokenize::*;
 
 /// __init__(self, word_bounds=True)
 ///
@@ -31,7 +31,10 @@ impl UnicodeSegmentTokenizer {
     #[new]
     #[args(word_bounds = true)]
     fn new(obj: &PyRawObject, word_bounds: bool) {
-        let tokenizer = vtext::tokenize::UnicodeSegmentTokenizer::new(word_bounds);
+        let tokenizer = vtext::tokenize::UnicodeSegmentTokenizerParams::default()
+            .word_bounds(word_bounds)
+            .build()
+            .unwrap();
 
         obj.init(UnicodeSegmentTokenizer {
             word_bounds: word_bounds,
@@ -85,7 +88,11 @@ pub struct VTextTokenizer {
 impl VTextTokenizer {
     #[new]
     fn new(obj: &PyRawObject, lang: String) {
-        let tokenizer = vtext::tokenize::VTextTokenizer::new(&lang);
+        let tokenizer = vtext::tokenize::VTextTokenizerParams::default()
+            .lang(&lang)
+            .build()
+            .unwrap();
+
         obj.init(VTextTokenizer {
             lang: lang,
             inner: tokenizer,
@@ -126,7 +133,10 @@ impl RegexpTokenizer {
     #[new]
     #[args(pattern = "\"\\\\b\\\\w\\\\w+\\\\b\"")]
     fn new(obj: &PyRawObject, pattern: &str) {
-        let inner = vtext::tokenize::RegexpTokenizer::new(pattern.to_owned());
+        let inner = vtext::tokenize::RegexpTokenizerParams::default()
+            .pattern(pattern)
+            .build()
+            .unwrap();
 
         obj.init(RegexpTokenizer {
             pattern: pattern.to_string(),
@@ -181,7 +191,10 @@ impl CharacterTokenizer {
     #[new]
     #[args(window_size = 4)]
     fn new(obj: &PyRawObject, window_size: usize) {
-        let inner = vtext::tokenize::CharacterTokenizer::new(window_size);
+        let inner = vtext::tokenize::CharacterTokenizerParams::default()
+            .window_size(window_size)
+            .build()
+            .unwrap();
 
         obj.init(CharacterTokenizer {
             window_size: window_size,

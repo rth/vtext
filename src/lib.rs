@@ -28,9 +28,9 @@ A simple tokenization example can be found below,
 ```rust
 extern crate vtext;
 
-use vtext::tokenize::{VTextTokenizer,Tokenizer};
+use vtext::tokenize::{VTextTokenizerParams,Tokenizer};
 
-let tok = VTextTokenizer::new("en");
+let tok = VTextTokenizerParams::default().lang("en").build().unwrap();
 let tokens = tok.tokenize("Flights can't depart after 2:00 pm.");
 
 // returns &["Flights", "ca", "n't", "depart", "after", "2:00", "pm", "."]
@@ -52,6 +52,7 @@ extern crate sprs;
 extern crate itertools;
 extern crate rayon;
 
+pub mod errors;
 mod math;
 pub mod metrics;
 pub mod tokenize;

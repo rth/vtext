@@ -48,8 +48,12 @@ impl _HashingVectorizerWrapper {
     #[new]
     #[args(n_jobs = 1)]
     fn new(obj: &PyRawObject, n_jobs: usize) {
-        let tokenizer = vtext::tokenize::RegexpTokenizer::new("\\b\\w\\w+\\b".to_string());
-        let estimator = vtext::vectorize::HashingVectorizer::new(tokenizer).n_jobs(n_jobs);
+        let tokenizer = vtext::tokenize::RegexpTokenizer::default();
+        let estimator = vtext::vectorize::HashingVectorizerParams::default()
+            .tokenizer(tokenizer.clone())
+            .n_jobs(n_jobs)
+            .build()
+            .unwrap();
 
         obj.init(_HashingVectorizerWrapper { inner: estimator });
     }
@@ -75,8 +79,12 @@ impl _CountVectorizerWrapper {
     #[new]
     #[args(n_jobs = 1)]
     fn new(obj: &PyRawObject, n_jobs: usize) {
-        let tokenizer = vtext::tokenize::RegexpTokenizer::new("\\b\\w\\w+\\b".to_string());
-        let estimator = vtext::vectorize::CountVectorizer::new(tokenizer).n_jobs(n_jobs);
+        let tokenizer = vtext::tokenize::RegexpTokenizer::default();
+        let estimator = vtext::vectorize::CountVectorizerParams::default()
+            .tokenizer(tokenizer.clone())
+            .n_jobs(n_jobs)
+            .build()
+            .unwrap();
         obj.init(_CountVectorizerWrapper { inner: estimator });
     }
 

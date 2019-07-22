@@ -20,7 +20,7 @@ Using a regular expression tokenizer we would get,
 ```rust
 # let s = "The “brown” fox can't jump 32.3 feet, right?";
 # use vtext::tokenize::*;
-let tokenizer = RegexpTokenizer::new(r"\b\w\w+\b".to_string());
+let tokenizer = RegexpTokenizer::default();
 let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
 assert_eq!(tokens, &["The", "brown", "fox", "can", "jump", "32", "feet", "right"]);
 ```
@@ -29,7 +29,7 @@ which would remove all punctuation. A more general approach is to apply unicode 
 ```rust
 # let s = "The “brown” fox can't jump 32.3 feet, right?";
 # use vtext::tokenize::*;
-let tokenizer = UnicodeSegmentTokenizer::new(true);
+let tokenizer = UnicodeSegmentTokenizer::default();
 let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
 assert_eq!(tokens, &["The", "“", "brown", "”", "fox", "can't", "jump", "32.3", "feet", ",", "right", "?"]);
 ```
@@ -42,7 +42,7 @@ as "ca", "n't" in English. To address such issues, we apply several additional r
 ```rust
 # let s = "The “brown” fox can't jump 32.3 feet, right?";
 # use vtext::tokenize::*;
-let tokenizer = VTextTokenizer::new("en");
+let tokenizer = VTextTokenizerParams::default().lang("en").build().unwrap();
 let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
 assert_eq!(tokens, &["The", "“", "brown", "”", "fox", "ca", "n't", "jump", "32.3", "feet", ",", "right", "?"]);
 
@@ -50,6 +50,7 @@ assert_eq!(tokens, &["The", "“", "brown", "”", "fox", "ca", "n't", "jump", "
 extern crate regex;
 extern crate unicode_segmentation;
 
+use crate::errors::VTextError;
 use regex::Regex;
 use std::fmt;
 use unicode_segmentation::UnicodeSegmentation;
@@ -65,16 +66,44 @@ pub trait Tokenizer: fmt::Debug {
 ///
 #[derive(Clone)]
 pub struct RegexpTokenizer {
-    pub pattern: String,
+    pub params: RegexpTokenizerParams,
     regexp: Regex,
 }
 
-impl RegexpTokenizer {
-    /// Create a new instance
-    pub fn new(pattern: String) -> RegexpTokenizer {
-        let regexp = Regex::new(&pattern).unwrap();
+/// Builder for the regexp tokenizer
+#[derive(Debug, Clone)]
+pub struct RegexpTokenizerParams {
+    pattern: String,
+}
 
-        RegexpTokenizer { pattern, regexp }
+impl RegexpTokenizerParams {
+    pub fn pattern(&mut self, value: &str) -> RegexpTokenizerParams {
+        self.pattern = value.to_string();
+        self.clone()
+    }
+    pub fn build(&mut self) -> Result<RegexpTokenizer, VTextError> {
+        let pattern = &self.pattern;
+        let regexp = Regex::new(pattern).unwrap();
+        Ok(RegexpTokenizer {
+            params: self.clone(),
+            regexp: regexp,
+        })
+    }
+}
+
+impl Default for RegexpTokenizerParams {
+    /// Create a new instance
+    fn default() -> RegexpTokenizerParams {
+        RegexpTokenizerParams {
+            pattern: r"\b\w\w+\b".to_string(),
+        }
+    }
+}
+
+impl Default for RegexpTokenizer {
+    /// Create a new instance
+    fn default() -> RegexpTokenizer {
+        RegexpTokenizerParams::default().build().unwrap()
     }
 }
 
@@ -87,7 +116,7 @@ impl Tokenizer for RegexpTokenizer {
 
 impl fmt::Debug for RegexpTokenizer {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "RegexpTokenizer {{ pattern:  {} }}", self.pattern)
+        write!(f, "RegexpTokenizer {{ pattern:  {} }}", self.params.pattern)
     }
 }
 
@@ -101,20 +130,44 @@ impl fmt::Debug for RegexpTokenizer {
 /// * [Unicode® Standard Annex #29](http://www.unicode.org/reports/tr29/)
 #[derive(Debug, Clone)]
 pub struct UnicodeSegmentTokenizer {
-    pub word_bounds: bool,
+    pub params: UnicodeSegmentTokenizerParams,
 }
 
-impl UnicodeSegmentTokenizer {
+/// Builder for the unicode segmentation tokenizer
+#[derive(Debug, Clone)]
+pub struct UnicodeSegmentTokenizerParams {
+    word_bounds: bool,
+}
+
+impl UnicodeSegmentTokenizerParams {
+    pub fn word_bounds(&mut self, value: bool) -> UnicodeSegmentTokenizerParams {
+        self.word_bounds = value;
+        self.clone()
+    }
+    pub fn build(&mut self) -> Result<UnicodeSegmentTokenizer, VTextError> {
+        Ok(UnicodeSegmentTokenizer {
+            params: self.clone(),
+        })
+    }
+}
+
+impl Default for UnicodeSegmentTokenizerParams {
+    fn default() -> UnicodeSegmentTokenizerParams {
+        UnicodeSegmentTokenizerParams { word_bounds: true }
+    }
+}
+
+impl Default for UnicodeSegmentTokenizer {
     /// Create a new instance
-    pub fn new(word_bounds: bool) -> UnicodeSegmentTokenizer {
-        UnicodeSegmentTokenizer { word_bounds }
+    fn default() -> UnicodeSegmentTokenizer {
+        UnicodeSegmentTokenizerParams::default().build().unwrap()
     }
 }
 
 impl Tokenizer for UnicodeSegmentTokenizer {
     /// Tokenize a string
     fn tokenize<'a>(&self, text: &'a str) -> Box<dyn Iterator<Item = &'a str> + 'a> {
-        if self.word_bounds {
+        if self.params.word_bounds {
             let res = text.split_word_bounds().filter(|x| x != &" ");
             Box::new(res)
         } else {
@@ -138,14 +191,23 @@ impl Tokenizer for UnicodeSegmentTokenizer {
 /// * [Unicode® Standard Annex #29](http://www.unicode.org/reports/tr29/)
 #[derive(Debug, Clone)]
 pub struct VTextTokenizer {
-    pub lang: String,
+    pub params: VTextTokenizerParams,
 }
 
-impl VTextTokenizer {
-    /// Create a new instance
-    pub fn new(lang: &str) -> VTextTokenizer {
-        let lang_valid = match lang {
-            "en" | "fr" => lang,
+/// Builder for the VTextTokenizer
+#[derive(Debug, Clone)]
+pub struct VTextTokenizerParams {
+    lang: String,
+}
+
+impl VTextTokenizerParams {
+    pub fn lang(&mut self, value: &str) -> VTextTokenizerParams {
+        self.lang = value.to_string();
+        self.clone()
+    }
+    pub fn build(&mut self) -> Result<VTextTokenizer, VTextError> {
+        let lang = match &self.lang[..] {
+            "en" | "fr" => &self.lang[..],
             _ => {
                 // TODO: add some warning message here
                 //println!(
@@ -157,9 +219,26 @@ impl VTextTokenizer {
                 "any"
             }
         };
-        VTextTokenizer {
-            lang: lang_valid.to_string(),
+        self.lang = lang.to_string();
+        Ok(VTextTokenizer {
+            params: self.clone(),
+        })
+    }
+}
+
+impl Default for VTextTokenizerParams {
+    /// Create a new instance
+    fn default() -> VTextTokenizerParams {
+        VTextTokenizerParams {
+            lang: "en".to_string(),
         }
+    }
+}
+
+impl Default for VTextTokenizer {
+    /// Create a new instance
+    fn default() -> VTextTokenizer {
+        VTextTokenizerParams::default().build().unwrap()
     }
 }
 
@@ -197,7 +276,7 @@ impl Tokenizer for VTextTokenizer {
                 punct_last = 'X';
             }
 
-            match self.lang.as_ref() {
+            match self.params.lang.as_ref() {
                 "en" => {
                     // Handle contractions
                     if let Some(apostroph_idx) = tok.find(&"'") {
@@ -273,13 +352,36 @@ impl Tokenizer for VTextTokenizer {
 /// Character tokenizer
 #[derive(Debug, Clone)]
 pub struct CharacterTokenizer {
-    pub window_size: usize,
+    pub params: CharacterTokenizerParams,
 }
 
-impl CharacterTokenizer {
+#[derive(Debug, Clone)]
+pub struct CharacterTokenizerParams {
+    window_size: usize,
+}
+
+impl CharacterTokenizerParams {
+    pub fn window_size(&mut self, value: usize) -> CharacterTokenizerParams {
+        self.window_size = value;
+        self.clone()
+    }
+    pub fn build(&mut self) -> Result<CharacterTokenizer, VTextError> {
+        Ok(CharacterTokenizer {
+            params: self.clone(),
+        })
+    }
+}
+
+impl Default for CharacterTokenizerParams {
+    fn default() -> CharacterTokenizerParams {
+        CharacterTokenizerParams { window_size: 4 }
+    }
+}
+
+impl Default for CharacterTokenizer {
     /// Create a new instance
-    pub fn new(window_size: usize) -> CharacterTokenizer {
-        CharacterTokenizer { window_size }
+    fn default() -> CharacterTokenizer {
+        CharacterTokenizerParams::default().build().unwrap()
     }
 }
 
@@ -290,7 +392,7 @@ impl Tokenizer for CharacterTokenizer {
             .char_indices()
             .zip(
                 text.char_indices()
-                    .skip(self.window_size)
+                    .skip(self.params.window_size)
                     .chain(Some((text.len(), ' '))),
             )
             .map(move |((i, _), (j, _))| &text[i..j]);
