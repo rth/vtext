@@ -32,9 +32,9 @@ impl UnicodeSegmentTokenizer {
     #[args(word_bounds = true)]
     fn new(obj: &PyRawObject, word_bounds: bool) {
         let tokenizer = vtext::tokenize::UnicodeSegmentTokenizerParams::default()
-              .word_bounds(word_bounds)
-              .build()
-              .unwrap();
+            .word_bounds(word_bounds)
+            .build()
+            .unwrap();
 
         obj.init(UnicodeSegmentTokenizer {
             word_bounds: word_bounds,
