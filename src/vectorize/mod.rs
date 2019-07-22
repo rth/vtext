@@ -20,9 +20,7 @@ let documents = vec![
     String::from("Another line"),
 ];
 
-let tokenizer = VTextTokenizer::default();
-
-let mut vectorizer = CountVectorizer::new(tokenizer);
+let mut vectorizer = CountVectorizer::<VTextTokenizer>::default();
 let X = vectorizer.fit_transform(&documents);
 // returns a sparse CSR matrix with document-terms counts
 */
