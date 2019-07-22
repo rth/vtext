@@ -49,9 +49,8 @@ fn test_vectorize_empty_countvectorizer() {
 #[test]
 fn test_vectorize_empty_hashingvectorizer() {
     let documents = vec!["some tokens".to_string(), "".to_string()];
-    let tokenizer = RegexpTokenizerParams::default().build().unwrap();
 
-    let vect = HashingVectorizer::new(tokenizer);
+    let vect = HashingVectorizer::<RegexpTokenizer>::default();
     vect.fit_transform(&documents);
 
     vect.transform(&documents);
@@ -89,9 +88,7 @@ fn test_hashing_vectorizer_simple() {
         String::from("The sky is blue"),
     ];
 
-    let tokenizer = VTextTokenizerParams::default().build().unwrap();
-
-    let vect = HashingVectorizer::new(tokenizer);
+    let vect = HashingVectorizer::<VTextTokenizer>::default();
     let vect = vect.fit(&documents);
     let X = vect.transform(&documents);
     assert_eq!(X.indptr(), &[0, 4, 8]);
@@ -131,7 +128,10 @@ fn test_empty_dataset() {
     assert_eq!(X.indices(), &[]);
     assert_eq!(X.indptr(), &[0]);
 
-    let vectorizer = HashingVectorizer::new(tokenizer);
+    let vectorizer = HashingVectorizerParams::default()
+        .tokenizer(tokenizer.clone())
+        .build()
+        .unwrap();
 
     let X = vectorizer.fit_transform(&documents);
     assert_eq!(X.data(), &[]);
@@ -146,7 +146,10 @@ fn test_dispatch_tokenizer() {
         .tokenizer(tokenizer.clone())
         .build()
         .unwrap();
-    HashingVectorizer::new(tokenizer);
+    HashingVectorizerParams::default()
+        .tokenizer(tokenizer.clone())
+        .build()
+        .unwrap();
 
     let tokenizer = UnicodeSegmentTokenizerParams::default()
         .word_bounds(false)
@@ -156,14 +159,20 @@ fn test_dispatch_tokenizer() {
         .tokenizer(tokenizer.clone())
         .build()
         .unwrap();
-    HashingVectorizer::new(tokenizer);
+    HashingVectorizerParams::default()
+        .tokenizer(tokenizer.clone())
+        .build()
+        .unwrap();
 
     let tokenizer = RegexpTokenizerParams::default().build().unwrap();
     CountVectorizerParams::default()
         .tokenizer(tokenizer.clone())
         .build()
         .unwrap();
-    HashingVectorizer::new(tokenizer);
+    HashingVectorizerParams::default()
+        .tokenizer(tokenizer.clone())
+        .build()
+        .unwrap();
 
     let tokenizer = CharacterTokenizerParams::default()
         .window_size(3)
@@ -173,5 +182,8 @@ fn test_dispatch_tokenizer() {
         .tokenizer(tokenizer.clone())
         .build()
         .unwrap();
-    HashingVectorizer::new(tokenizer);
+    HashingVectorizerParams::default()
+        .tokenizer(tokenizer.clone())
+        .build()
+        .unwrap();
 }

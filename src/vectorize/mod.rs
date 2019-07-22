@@ -306,47 +306,63 @@ impl<T: Tokenizer + Sync> CountVectorizer<T> {
     }
 }
 
-#[derive(Debug)]
-pub struct HashingVectorizer<T> {
+#[derive(Debug, Clone)]
+pub struct HashingVectorizerParams<T> {
+    n_features: u64,
     lowercase: bool,
     tokenizer: T,
-    n_features: u64,
-    _n_jobs: usize,
-    thread_pool: Option<rayon::ThreadPool>,
+    n_jobs: usize,
+}
+
+impl<T: Tokenizer + Clone> HashingVectorizerParams<T> {
+    pub fn lowercase(&mut self, value: bool) -> HashingVectorizerParams<T> {
+        self.lowercase = value;
+        self.clone()
+    }
+    pub fn tokenizer(&mut self, value: T) -> HashingVectorizerParams<T> {
+        self.tokenizer = value.clone();
+        self.clone()
+    }
+    pub fn n_jobs(&mut self, value: usize) -> HashingVectorizerParams<T> {
+        self.n_jobs = value;
+        self.clone()
+    }
+    pub fn build(&mut self) -> Result<HashingVectorizer<T>, VTextError> {
+        if self.n_jobs < 1 {
+            panic!("n_jobs={} must be > 0", self.n_jobs);
+        }
+        Ok(HashingVectorizer {
+            params: self.clone(),
+        })
+    }
+}
+
+impl<T: Tokenizer + Clone + Default> Default for HashingVectorizerParams<T> {
+    /// Create a new instance
+    fn default() -> HashingVectorizerParams<T> {
+        let tokenizer = T::default();
+        HashingVectorizerParams {
+            n_features: 1048576,
+            lowercase: true,
+            tokenizer: tokenizer,
+            n_jobs: 1,
+        }
+    }
+}
+
+impl<T: Tokenizer + Clone + Default> Default for HashingVectorizer<T> {
+    /// Create a new instance
+    fn default() -> HashingVectorizer<T> {
+        HashingVectorizerParams::default().build().unwrap()
+    }
+}
+
+#[derive(Debug)]
+pub struct HashingVectorizer<T> {
+    params: HashingVectorizerParams<T>,
 }
 
 impl<T: Tokenizer + Sync> HashingVectorizer<T> {
-    /// Create a new HashingVectorizer estimator
-    pub fn new(tokenizer: T) -> Self {
-        HashingVectorizer {
-            lowercase: true,
-            n_features: 1048576,
-            _n_jobs: 1,
-            thread_pool: None,
-            tokenizer,
-        }
-    }
-
-    /// Set the number of parallel threads to use
-    ///
-    /// Note: currently any value n_jobs > 1 will use all available cores.
-    pub fn n_jobs(mut self, n_jobs: usize) -> Self {
-        self._n_jobs = n_jobs;
-        if n_jobs == 1 {
-            self.thread_pool = None;
-        } else if n_jobs > 1 {
-            self.thread_pool = Some(
-                rayon::ThreadPoolBuilder::new()
-                    .num_threads(n_jobs)
-                    .build()
-                    .unwrap(),
-            );
-        } else {
-            panic!("n_jobs={} must be > 0", n_jobs);
-        }
-        self
-    }
-
     /// Fit method
     ///
     /// The vectorizer is stateless, this has no effect
@@ -371,10 +387,10 @@ impl<T: Tokenizer + Sync> HashingVectorizer<T> {
 
             let mut indices_local: Vec<i32> = Vec::with_capacity(10);
 
-            for token in self.tokenizer.tokenize(doc) {
+            for token in self.params.tokenizer.tokenize(doc) {
                 // set the RNG seeds to get reproducible hashing
                 let hash = seahash::hash_seeded(token.as_bytes(), 1, 1000, 200, 89);
-                let hash = (hash % self.n_features) as i32;
+                let hash = (hash % self.params.n_features) as i32;
 
                 indices_local.push(hash);
             }
@@ -385,7 +401,7 @@ impl<T: Tokenizer + Sync> HashingVectorizer<T> {
 
         let pipe: Box<dyn Iterator<Item = Vec<i32>>>;
 
-        if self._n_jobs == 1 {
+        if self.params.n_jobs == 1 {
             // Sequential (streaming) pipelines
             pipe = Box::new(
                 X.iter()
@@ -397,7 +413,7 @@ impl<T: Tokenizer + Sync> HashingVectorizer<T> {
                     .map(|doc| doc.to_ascii_lowercase())
                     .map(|doc| tokenize_hash(&doc)),
             );
-        } else if self._n_jobs > 1 {
+        } else if self.params.n_jobs > 1 {
             // Parallel pipeline. The scaling is reasonably good, however it uses more
             // memory as all the tokens need to be collected into a Vec
 
@@ -410,7 +426,7 @@ impl<T: Tokenizer + Sync> HashingVectorizer<T> {
                     .into_iter(),
             );
         } else {
-            panic!("n_jobs={} must be > 0", self._n_jobs);
+            panic!("n_jobs={} must be > 0", self.params.n_jobs);
         }
 
         for indices_local in pipe {
@@ -418,7 +434,7 @@ impl<T: Tokenizer + Sync> HashingVectorizer<T> {
         }
 
         CsMat::new(
-            (tf.indptr.len() - 1, self.n_features as usize),
+            (tf.indptr.len() - 1, self.params.n_features as usize),
             tf.indptr,
             tf.indices,
             tf.data,
