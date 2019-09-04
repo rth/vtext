@@ -17,7 +17,8 @@ call activate %VIRTUALENV%
 python --version
 pip --version
 
-pip install numpy>=1.12.0 scipy>=1.0.0 pytest>=4.0.0 wheel>=0.31.1
+@rem Use oldest supported numpy and scipy versions for building wheels
+pip install numpy==1.15.0 scipy==1.0.0 pytest>=4.0.0 wheel>=0.31.1
 
 curl -sSf -o rustup-init.exe https://win.rustup.rs
 rustup-init.exe -y --default-toolchain nightly-2019-06-04
