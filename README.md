@@ -67,9 +67,9 @@ Following benchmarks illustrate the tokenization accuracy (F1 score) on [UD tree
 
 and the English tokenization speed,
 
-|                          |regexp | spacy 2.1 | vtext |
-|--------------------------|-------|-----------|-------|
-| **Speed** (10⁶ tokens/s) | 3.1   | 0.14      | 2.1   |
+|                          | re (py) | re (rust) | spacy 2.1 | vtext |
+|--------------------------|---------|-----------|-----------|-------|
+| **Speed** (10⁶ tokens/s) | 2.3     |  4.4      |   0.14    | 2.5   |
 
 
 #### Text vectorization
