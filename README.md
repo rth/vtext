@@ -58,12 +58,10 @@ Following benchmarks illustrate the tokenization accuracy (F1 score) on [UD tree
 ,
 
                     
-|  lang | dataset   |regexp    | spacy 2.1 | vtext    |         
-|-------|-----------|----------|-----------|----------|
-|  en   | EWT       | 0.812    | 0.972     | 0.966    |
-|  en   | GUM       | 0.881    | 0.989     | 0.996    |
-|  de   | GSD       | 0.896    | 0.944     | 0.964    |
-|  fr   | Sequoia   | 0.844    | 0.968     | 0.971    |
+| F1 score, UD treebank |  regexp    | spacy 2.1 | vtext    |         
+|-----------------------|----------|-----------|----------|
+|  en, EWT              | 0.812    | 0.972     | 0.966    | 
+|  fr, Sequoia          | 0.844    | 0.968     | 0.971    |
 
 and the English tokenization speed,
 
