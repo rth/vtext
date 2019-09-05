@@ -13,7 +13,7 @@ python --version
 pip --version
 
 # Use oldest supported numpy, scipy versins for building wheels
-pip install numpy==1.15.0 scipy==1.0.0 pytest>=4.0.0 wheel>=0.31.1
+pip install numpy==1.15.0 scipy==1.1.0 pytest>=4.0.0 wheel>=0.31.1
 
 python -c "import numpy; print('numpy %s' % numpy.__version__)"
 python -c "import scipy; print('scipy %s' % scipy.__version__)"
