@@ -18,7 +18,7 @@ python --version
 pip --version
 
 @rem Use oldest supported numpy and scipy versions for building wheels
-pip install numpy==1.15.0 scipy==1.1.0 pytest>=4.0.0 wheel>=0.31.1
+pip install numpy==1.15.0 scipy==1.1.0 pytest>=4.0.0 wheel>=0.31.1 hypothesis
 
 curl -sSf -o rustup-init.exe https://win.rustup.rs
 rustup-init.exe -y --default-toolchain nightly-2019-06-04
