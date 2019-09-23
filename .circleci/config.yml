@@ -41,7 +41,7 @@ jobs:
             for PYBIN in python3.{5,6,7}; do
                 "$PYBIN" -m pip install setuptools setuptools-rust>=0.10.2
                 "$PYBIN" -m pip install numpy==1.15.0 scipy==1.1.0
-                "$PYBIN" -m pip install wheel==0.31.1 auditwheel==2.0.0 pytest
+                "$PYBIN" -m pip install wheel==0.31.1 auditwheel==2.0.0 pytest hypothesis
                 "$PYBIN" setup.py bdist_wheel
             done
             for whl in dist/*.whl; do
