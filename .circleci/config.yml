@@ -38,7 +38,7 @@ jobs:
           name: build-wheels
           command: |
             cd python
-            for PYBIN in python3.{5,6,7}; do
+            for PYBIN in python3.{6,7}; do
                 "$PYBIN" -m pip install setuptools setuptools-rust>=0.10.2
                 "$PYBIN" -m pip install numpy==1.15.0 scipy==1.1.0
                 "$PYBIN" -m pip install wheel==0.31.1 auditwheel==2.0.0 pytest hypothesis
@@ -52,7 +52,7 @@ jobs:
           name: test
           command: |
             cd python
-            for PYBIN in python3.{5,6,7}; do
+            for PYBIN in python3.{6,7}; do
                 "$PYBIN" -m pip uninstall -y vtext
                 cd /tmp/
                 "$PYBIN" -m pip install --pre --no-index --find-links /root/repo/python/dist/ vtext

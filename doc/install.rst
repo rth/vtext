@@ -4,7 +4,7 @@ Installing
 Installing for Python
 ---------------------
 
-The lastest vtext release for Python can be installed with,
+The lastest vtext release for Python 3.6+ can be installed with,
 
 .. code::
 
