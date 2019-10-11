@@ -32,7 +32,7 @@ jobs:
           name: dependencies
           command: |
             python3.7 -m pip install tox
-            rustup default nightly-2019-09-22
+            rustup default nightly-2019-09-19
       - run:
           name: build-wheels
           command: |
