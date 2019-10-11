@@ -19,7 +19,7 @@ python -c "import numpy; print('numpy %s' % numpy.__version__)"
 python -c "import scipy; print('scipy %s' % scipy.__version__)"
 pip list
 
-curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain nightly-2019-06-04
+curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain nightly-2019-09-19
 source $HOME/.cargo/env
 
 cd python/
