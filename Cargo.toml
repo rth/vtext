@@ -37,11 +37,11 @@ overflow-checks = false
 
 [dependencies]
 regex = "1"
-lazy_static = "1.3.0"
+lazy_static = "1.4.0"
 seahash = "3.0.6"
 itertools = "0.8"
 ndarray = "0.12.1"
-sprs = "0.6.4"
+sprs = "0.6.5"
 unicode-segmentation = "1.3.0"
-hashbrown = { version = "0.5", features = ["rayon"] }
+hashbrown = { version = "0.6.1", features = ["rayon"] }
 rayon = "1.1"
