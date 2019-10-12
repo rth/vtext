@@ -175,7 +175,7 @@ impl<T: Tokenizer + Sync> CountVectorizer<T> {
             }
             _vocab
         };
-        let mut vocabulary: HashSet<String>;
+        let vocabulary: HashSet<String>;
 
         if self.params.n_jobs == 1 {
             vocabulary = tokenize(X);

@@ -70,7 +70,7 @@ impl SnowballStemmer {
     /// -------
     /// word_stemmed : str
     ///      stemmed word
-    fn stem(&self, py: Python, word: &str) -> PyResult<(String)> {
+    fn stem(&self, word: &str) -> PyResult<(String)> {
         let res = self.inner.stem(word).to_string();
         Ok(res)
     }

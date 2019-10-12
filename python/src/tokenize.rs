@@ -80,7 +80,7 @@ impl UnicodeSegmentTokenizer {
     /// -------
     /// params : mapping of string to any
     ///          Parameter names mapped to their values.
-    fn get_params<'py>(&self, py: Python<'py>) -> PyResult<UnicodeSegmentTokenizerParams> {
+    fn get_params(&self) -> PyResult<UnicodeSegmentTokenizerParams> {
         Ok(self.inner.params.clone())
     }
 }
@@ -150,7 +150,7 @@ impl VTextTokenizer {
     /// -------
     /// params : mapping of string to any
     ///          Parameter names mapped to their values.
-    fn get_params<'py>(&self) -> PyResult<VTextTokenizerParams> {
+    fn get_params(&self) -> PyResult<VTextTokenizerParams> {
         Ok(self.inner.params.clone())
     }
 }
@@ -207,7 +207,7 @@ impl RegexpTokenizer {
     /// -------
     /// params : mapping of string to any
     ///          Parameter names mapped to their values.
-    fn get_params<'py>(&self, py: Python<'py>) -> PyResult<RegexpTokenizerParams> {
+    fn get_params(&self) -> PyResult<RegexpTokenizerParams> {
         Ok(self.inner.params.clone())
     }
 }
@@ -277,7 +277,7 @@ impl CharacterTokenizer {
     /// -------
     /// params : mapping of string to any
     ///          Parameter names mapped to their values.
-    fn get_params<'py>(&self, py: Python<'py>) -> PyResult<CharacterTokenizerParams> {
+    fn get_params(&self) -> PyResult<CharacterTokenizerParams> {
         Ok(self.inner.params.clone())
     }
 }
