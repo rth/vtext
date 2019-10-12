@@ -49,6 +49,7 @@ extern crate ndarray;
 extern crate dict_derive;
 extern crate hashbrown;
 extern crate itertools;
+#[cfg(feature = "rayon")]
 extern crate rayon;
 extern crate sprs;
 #[cfg(feature = "python")]
