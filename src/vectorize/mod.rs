@@ -124,7 +124,7 @@ impl<T: Tokenizer + Clone + Default> Default for CountVectorizerParams<T> {
         let tokenizer = T::default();
         CountVectorizerParams {
             lowercase: true,
-            tokenizer: tokenizer,
+            tokenizer,
             n_jobs: 1,
         }
     }
@@ -159,7 +159,7 @@ impl<T: Tokenizer + Sync> CountVectorizer<T> {
     /// Fit the estimator
     ///
     /// This lists the vocabulary
-    pub fn fit(&mut self, X: &[String]) -> () {
+    pub fn fit(&mut self, X: &[String]) {
         let tokenize = |X: &[String]| -> HashSet<String> {
             let mut _vocab: HashSet<String> = HashSet::with_capacity(1000);
 
@@ -342,9 +342,9 @@ impl<T: Tokenizer + Clone + Default> Default for HashingVectorizerParams<T> {
     fn default() -> HashingVectorizerParams<T> {
         let tokenizer = T::default();
         HashingVectorizerParams {
-            n_features: 1048576,
+            n_features: 1_048_576,
             lowercase: true,
-            tokenizer: tokenizer,
+            tokenizer,
             n_jobs: 1,
         }
     }

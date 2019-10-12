@@ -26,6 +26,7 @@ use std::cmp::{max, min};
 ///  let res = edit_distance("yesterday", "today", 1, false);
 ///  // returns 5.0
 ///  ```
+#[allow(clippy::many_single_char_names)]
 pub fn edit_distance(x: &str, y: &str, substitution_cost: usize, transpositions: bool) -> f64 {
     // implementation adapted from NLTK
 
@@ -58,13 +59,13 @@ pub fn edit_distance(x: &str, y: &str, substitution_cost: usize, transpositions:
             // pick the cheapest
             c = min(min(a, b), c);
 
-            if transpositions {
-                if (x_idx > 1) & (y_idx > 1) {
-                    if (x.chars().nth(x_idx - 1).unwrap() == c2)
-                        & (y.chars().nth(y_idx - 1).unwrap() == c1)
-                    {
-                        c = min(c, lev[[x_idx - 1, y_idx - 1]] + 1);
-                    }
+            if transpositions & (x_idx > 1) & (y_idx > 1) {
+                // we explicitly don't collapse the second loop
+                // check to avoid compiler optimizations
+                if (x.chars().nth(x_idx - 1).unwrap() == c2)
+                    & (y.chars().nth(y_idx - 1).unwrap() == c1)
+                {
+                    c = min(c, lev[[x_idx - 1, y_idx - 1]] + 1);
                 }
             }
             lev[[x_idx + 1, y_idx + 1]] = c;

@@ -89,7 +89,7 @@ impl RegexpTokenizerParams {
         let regexp = Regex::new(pattern).unwrap();
         Ok(RegexpTokenizer {
             params: self.clone(),
-            regexp: regexp,
+            regexp,
         })
     }
 }
