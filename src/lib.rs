@@ -50,8 +50,8 @@ extern crate hashbrown;
 extern crate sprs;
 #[macro_use]
 extern crate itertools;
-extern crate rayon;
 extern crate dict_derive;
+extern crate rayon;
 #[macro_use]
 extern crate pyo3;
 

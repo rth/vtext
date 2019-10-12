@@ -10,8 +10,7 @@ use pyo3::types::PyList;
 use vtext::tokenize::*;
 
 #[pyclass]
-pub struct BaseTokenizer {
-}
+pub struct BaseTokenizer {}
 
 #[pymethods]
 impl BaseTokenizer {
@@ -72,7 +71,6 @@ impl UnicodeSegmentTokenizer {
         let list = PyList::new(py, res);
         Ok(list)
     }
-
 
     /// get_params(self, x)
     ///
@@ -200,7 +198,6 @@ impl RegexpTokenizer {
         let list = PyList::new(py, res);
         Ok(list)
     }
-
 
     /// get_params(self, x)
     ///

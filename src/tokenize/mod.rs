@@ -51,10 +51,10 @@ extern crate regex;
 extern crate unicode_segmentation;
 
 use crate::errors::VTextError;
+use dict_derive::{FromPyObject, IntoPyObject};
 use regex::Regex;
 use std::fmt;
 use unicode_segmentation::UnicodeSegmentation;
-use dict_derive::{FromPyObject, IntoPyObject};
 
 #[cfg(test)]
 mod tests;

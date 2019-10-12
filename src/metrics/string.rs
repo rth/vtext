@@ -285,5 +285,4 @@ mod tests {
         let res = edit_distance("yesterday", "today", 1, false);
         assert_eq!(res, 5.0);
     }
-
 }
