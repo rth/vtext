@@ -34,9 +34,9 @@ use itertools::sorted;
 use ndarray::Array;
 #[cfg(feature = "rayon")]
 use rayon::prelude::*;
+use sprs::CsMat;
 #[cfg(feature = "rayon")]
 use std::cmp;
-use sprs::CsMat;
 
 #[cfg(test)]
 mod tests;
@@ -182,11 +182,13 @@ impl<T: Tokenizer + Sync> CountVectorizer<T> {
         if self.params.n_jobs == 1 {
             vocabulary = tokenize(X);
         } else if self.params.n_jobs > 1 {
-            #[cfg(not(feature = "rayon"))] {
+            #[cfg(not(feature = "rayon"))]
+            {
                 panic!("vtext not built with rayon support; got n_jobs > 1");
             }
 
-            #[cfg(feature = "rayon")] {
+            #[cfg(feature = "rayon")]
+            {
                 let chunk_size = cmp::max(X.len() / (self.params.n_jobs * 4), 1);
                 let pipe = X.par_chunks(chunk_size).flat_map(tokenize);
                 vocabulary = pipe.collect();
@@ -240,11 +242,13 @@ impl<T: Tokenizer + Sync> CountVectorizer<T> {
                     .map(|doc| tokenize_map(&doc)),
             );
         } else if self.params.n_jobs > 1 {
-            #[cfg(not(feature = "rayon"))] {
+            #[cfg(not(feature = "rayon"))]
+            {
                 panic!("vtext not built with rayon support; got n_jobs > 1");
             }
 
-            #[cfg(feature = "rayon")] {
+            #[cfg(feature = "rayon")]
+            {
                 pipe = Box::new(
                     X.par_iter()
                         .map(|doc| doc.to_ascii_lowercase())
@@ -427,11 +431,13 @@ impl<T: Tokenizer + Sync> HashingVectorizer<T> {
                     .map(|doc| tokenize_hash(&doc)),
             );
         } else if self.params.n_jobs > 1 {
-            #[cfg(not(feature = "rayon"))] {
+            #[cfg(not(feature = "rayon"))]
+            {
                 panic!("vtext not built with rayon support; got n_jobs > 1");
             }
 
-            #[cfg(feature = "rayon")] {
+            #[cfg(feature = "rayon")]
+            {
                 // Parallel pipeline. The scaling is reasonably good, however it uses more
                 // memory as all the tokens need to be collected into a Vec
 
