@@ -13,6 +13,13 @@ use vtext::tokenize::*;
 pub struct BaseTokenizer {
 }
 
+#[pymethods]
+impl BaseTokenizer {
+    #[new]
+    fn new(obj: &PyRawObject) {
+        obj.init(BaseTokenizer {});
+    }
+}
 
 /// __init__(self, word_bounds=True)
 ///
@@ -80,7 +87,7 @@ impl UnicodeSegmentTokenizer {
     }
 }
 
-/// __init__(self, lang)
+/// __init__(self, lang="en")
 ///
 /// VText tokenizer
 ///
@@ -145,7 +152,7 @@ impl VTextTokenizer {
     /// -------
     /// params : mapping of string to any
     ///          Parameter names mapped to their values.
-    fn get_params<'py>(&self, py: Python<'py>) -> PyResult<VTextTokenizerParams> {
+    fn get_params<'py>(&self) -> PyResult<VTextTokenizerParams> {
         Ok(self.inner.params.clone())
     }
 }

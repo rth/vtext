@@ -18,6 +18,10 @@ from vtext.tokenize import (
 
 TOKENIZERS = [RegexpTokenizer, CharacterTokenizer, UnicodeSegmentTokenizer, VTextTokenizer]
 
+def _pytest_ids(x):
+    if isinstance(x, BaseTokenizer):
+        return x.__class__.__name__
+
 def test_unicode_segment_tokenize():
 
     tokenizer = UnicodeSegmentTokenizer(word_bounds=False)
@@ -65,6 +69,7 @@ def test_character_tokenizer():
         VTextTokenizer("en"),
         VTextTokenizer("fr"),
     ],
+    ids=_pytest_ids
 )
 def test_tokenize_edge_cases(tokenizer, txt):
     tokenizer.tokenize(txt)
@@ -78,24 +83,11 @@ def test_tokenize_edge_cases(tokenizer, txt):
         (VTextTokenizer("en"), {'lang': 'en'}),
         (VTextTokenizer("fr"), {'lang': 'fr'}),
     ],
+    ids=_pytest_ids
 )
 def test_tokenize_get_params(tokenizer, expected):
     params = tokenizer.get_params()
     assert params == expected
-
-
-@pytest.mark.parametrize(
-    "tokenizer, expected",
-    [
-#        (RegexpTokenizer(),
-        #(CharacterTokenizer(), ""),
-        #(UnicodeSegmentTokenizer(), ""),
-        #(VTextTokenizer("en"), ""),
-        #(VTextTokenizer("fr"), ""),
-    ],
-)
-def test_tokenize_str_repr(tokenizer, expected):
-    assert str(tokenizer) == expected
 
 
 @pytest.mark.parametrize('Tokenizer', TOKENIZERS)
