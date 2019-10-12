@@ -12,7 +12,8 @@ from ._lib import CharacterTokenizer
 
 
 __all__ = [
-    "BaseTokenizer" "UnicodeSegmentTokenizer",
+    "BaseTokenizer",
+    "UnicodeSegmentTokenizer",
     "RegexpTokenizer",
     "VTextTokenizer",
     "CharacterTokenizer",
