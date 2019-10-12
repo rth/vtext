@@ -21,6 +21,24 @@ jobs:
           name: test
           command: |
             cargo test
+  wasm32:
+    working_directory: ~/repo
+    docker:
+      - image: rust:1.34.0-slim-stretch
+    steps:
+      - run:
+          name: dependencies
+          command: |
+            apt-get update
+            apt-get install -y build-essential git
+            rustup target add wasm32-unknown-unknown
+
+      - checkout
+
+      - run:
+          name: test
+          command: |
+            cargo test --target wasm32-unknown-unknown
 
   python:
     working_directory: ~/repo
