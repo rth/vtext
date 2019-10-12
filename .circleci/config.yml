@@ -164,6 +164,7 @@ workflows:
   build:
     jobs:
       - rust-stable
+      - wasm32
       - python
       - lint
       - upload-wheels:
