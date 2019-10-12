@@ -60,6 +60,19 @@ impl UnicodeSegmentTokenizer {
         let list = PyList::new(py, res);
         Ok(list)
     }
+
+
+    /// get_params(self, x)
+    ///
+    /// Get parameters for this estimator.
+    ///
+    /// Returns
+    /// -------
+    /// params : mapping of string to any
+    ///          Parameter names mapped to their values.
+    fn get_params<'py>(&self, py: Python<'py>) -> PyResult<UnicodeSegmentTokenizerParams> {
+        Ok(self.inner.params.clone())
+    }
 }
 
 /// __init__(self, lang)
@@ -117,6 +130,18 @@ impl VTextTokenizer {
         let list = PyList::new(py, res);
         Ok(list)
     }
+
+    /// get_params(self, x)
+    ///
+    /// Get parameters for this estimator.
+    ///
+    /// Returns
+    /// -------
+    /// params : mapping of string to any
+    ///          Parameter names mapped to their values.
+    fn get_params<'py>(&self, py: Python<'py>) -> PyResult<VTextTokenizerParams> {
+        Ok(self.inner.params.clone())
+    }
 }
 
 /// __init__(self, pattern=r'\\b\\w\\w+\\b')
@@ -161,6 +186,19 @@ impl RegexpTokenizer {
         let res: Vec<&str> = self.inner.tokenize(x).collect();
         let list = PyList::new(py, res);
         Ok(list)
+    }
+
+
+    /// get_params(self, x)
+    ///
+    /// Get parameters for this estimator.
+    ///
+    /// Returns
+    /// -------
+    /// params : mapping of string to any
+    ///          Parameter names mapped to their values.
+    fn get_params<'py>(&self, py: Python<'py>) -> PyResult<RegexpTokenizerParams> {
+        Ok(self.inner.params.clone())
     }
 }
 
@@ -219,5 +257,17 @@ impl CharacterTokenizer {
         let res: Vec<&str> = self.inner.tokenize(x).collect();
         let list = PyList::new(py, res);
         Ok(list)
+    }
+
+    /// get_params(self, x)
+    ///
+    /// Get parameters for this estimator.
+    ///
+    /// Returns
+    /// -------
+    /// params : mapping of string to any
+    ///          Parameter names mapped to their values.
+    fn get_params<'py>(&self, py: Python<'py>) -> PyResult<CharacterTokenizerParams> {
+        Ok(self.inner.params.clone())
     }
 }

@@ -51,6 +51,9 @@ extern crate sprs;
 #[macro_use]
 extern crate itertools;
 extern crate rayon;
+extern crate dict_derive;
+#[macro_use]
+extern crate pyo3;
 
 pub mod errors;
 mod math;
