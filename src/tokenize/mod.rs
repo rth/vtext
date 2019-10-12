@@ -51,6 +51,7 @@ extern crate regex;
 extern crate unicode_segmentation;
 
 use crate::errors::VTextError;
+#[cfg(feature = "python")]
 use dict_derive::{FromPyObject, IntoPyObject};
 use regex::Regex;
 use std::fmt;
@@ -72,7 +73,8 @@ pub struct RegexpTokenizer {
 }
 
 /// Builder for the regexp tokenizer
-#[derive(Debug, Clone, FromPyObject, IntoPyObject)]
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "python", derive(FromPyObject, IntoPyObject))]
 pub struct RegexpTokenizerParams {
     pattern: String,
 }
@@ -135,7 +137,8 @@ pub struct UnicodeSegmentTokenizer {
 }
 
 /// Builder for the unicode segmentation tokenizer
-#[derive(Debug, Clone, FromPyObject, IntoPyObject)]
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "python", derive(FromPyObject, IntoPyObject))]
 pub struct UnicodeSegmentTokenizerParams {
     word_bounds: bool,
 }
@@ -196,7 +199,8 @@ pub struct VTextTokenizer {
 }
 
 /// Builder for the VTextTokenizer
-#[derive(Debug, Clone, FromPyObject, IntoPyObject)]
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "python", derive(FromPyObject, IntoPyObject))]
 pub struct VTextTokenizerParams {
     lang: String,
 }
@@ -356,7 +360,8 @@ pub struct CharacterTokenizer {
     pub params: CharacterTokenizerParams,
 }
 
-#[derive(Debug, Clone, FromPyObject, IntoPyObject)]
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "python", derive(FromPyObject, IntoPyObject))]
 pub struct CharacterTokenizerParams {
     window_size: usize,
 }

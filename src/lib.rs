@@ -50,10 +50,13 @@ extern crate hashbrown;
 extern crate sprs;
 #[macro_use]
 extern crate itertools;
-extern crate dict_derive;
 extern crate rayon;
+#[cfg(feature = "python")]
+extern crate dict_derive;
+#[cfg(feature = "python")]
 #[macro_use]
 extern crate pyo3;
+
 
 pub mod errors;
 mod math;

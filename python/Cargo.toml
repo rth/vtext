@@ -10,7 +10,7 @@ crate-type = ["cdylib"]
 [dependencies]
 ndarray = "0.12"
 sprs = "0.6"
-vtext = {"path" = "../"}
+vtext = {"path" = "../", features=["python"]}
 rust-stemmers = "1.1"
 
 [dependencies.numpy]
