@@ -183,6 +183,7 @@ pub fn edit_distance(
 fn _lib(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<vectorize::_HashingVectorizerWrapper>()?;
     m.add_class::<vectorize::_CountVectorizerWrapper>()?;
+    m.add_class::<tokenize::BaseTokenizer>()?;
     m.add_class::<tokenize::UnicodeSegmentTokenizer>()?;
     m.add_class::<tokenize::RegexpTokenizer>()?;
     m.add_class::<tokenize::VTextTokenizer>()?;

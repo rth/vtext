@@ -13,7 +13,20 @@ from vtext.tokenize import (
     RegexpTokenizer,
     CharacterTokenizer,
     VTextTokenizer,
+    BaseTokenizer,
 )
+
+TOKENIZERS = [
+    RegexpTokenizer,
+    CharacterTokenizer,
+    UnicodeSegmentTokenizer,
+    VTextTokenizer,
+]
+
+
+def _pytest_ids(x):
+    if isinstance(x, BaseTokenizer):
+        return x.__class__.__name__
 
 
 def test_unicode_segment_tokenize():
@@ -54,24 +67,39 @@ def test_character_tokenizer():
 
 
 @hypothesis.given(st.text())
-def test_regex_tokenize_any(txt):
-    tokenizer = RegexpTokenizer()
+@pytest.mark.parametrize(
+    "tokenizer",
+    [
+        RegexpTokenizer(),
+        CharacterTokenizer(),
+        UnicodeSegmentTokenizer(),
+        VTextTokenizer("en"),
+        VTextTokenizer("fr"),
+    ],
+    ids=_pytest_ids,
+)
+def test_tokenize_edge_cases(tokenizer, txt):
     tokenizer.tokenize(txt)
 
 
-@hypothesis.given(st.text())
-def test_character_tokenize_any(txt):
-    tokenizer = CharacterTokenizer()
-    tokenizer.tokenize(txt)
+@pytest.mark.parametrize(
+    "tokenizer, expected",
+    [
+        (RegexpTokenizer(), {"pattern": r"\b\w\w+\b"}),
+        (CharacterTokenizer(), {"window_size": 4}),
+        (UnicodeSegmentTokenizer(), {"word_bounds": True}),
+        (VTextTokenizer("en"), {"lang": "en"}),
+        (VTextTokenizer("fr"), {"lang": "fr"}),
+    ],
+    ids=_pytest_ids,
+)
+def test_tokenize_get_params(tokenizer, expected):
+    params = tokenizer.get_params()
+    assert params == expected
 
 
-@hypothesis.given(st.text())
-def test_unicode_segment_tokenize_any(txt):
-    tokenizer = UnicodeSegmentTokenizer()
-    tokenizer.tokenize(txt)
-
-
-@hypothesis.given(st.text())
-def test_vtext_tokenize_any(txt):
-    tokenizer = VTextTokenizer("en")
-    tokenizer.tokenize(txt)
+@pytest.mark.parametrize("Tokenizer", TOKENIZERS)
+def test_tokenize_api(Tokenizer):
+    assert issubclass(Tokenizer, BaseTokenizer)
+    # check that we can initialize it without positional args
+    Tokenizer()

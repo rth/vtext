@@ -45,3 +45,9 @@ sprs = "0.6.5"
 unicode-segmentation = "1.3.0"
 hashbrown = { version = "0.6.1", features = ["rayon"] }
 rayon = "1.1"
+dict_derive = {version = "0.1.1", optional = true}
+pyo3 = {version = "0.7", optional = true}
+
+[features]
+# Additional bindings used from the python wrapper.
+python = ["pyo3", "dict_derive"]
