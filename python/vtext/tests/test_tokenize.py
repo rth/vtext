@@ -13,8 +13,10 @@ from vtext.tokenize import (
     RegexpTokenizer,
     CharacterTokenizer,
     VTextTokenizer,
+    BaseTokenizer
 )
 
+TOKENIZERS = [RegexpTokenizer, CharacterTokenizer, UnicodeSegmentTokenizer, VTextTokenizer]
 
 def test_unicode_segment_tokenize():
 
@@ -94,3 +96,10 @@ def test_tokenize_get_params(tokenizer, expected):
 )
 def test_tokenize_str_repr(tokenizer, expected):
     assert str(tokenizer) == expected
+
+
+@pytest.mark.parametrize('Tokenizer', TOKENIZERS)
+def test_tokenize_api(Tokenizer):
+    assert issubclass(Tokenizer, BaseTokenizer)
+    # check that we can initialize it without positional args
+    Tokenizer()

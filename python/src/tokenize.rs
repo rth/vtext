@@ -9,6 +9,11 @@ use pyo3::types::PyList;
 
 use vtext::tokenize::*;
 
+#[pyclass]
+pub struct BaseTokenizer {
+}
+
+
 /// __init__(self, word_bounds=True)
 ///
 /// Unicode Segmentation tokenizer
@@ -20,7 +25,7 @@ use vtext::tokenize::*;
 /// References
 /// ----------
 /// - `Unicode® Standard Annex #29 <http://www.unicode.org/reports/tr29/>`_
-#[pyclass]
+#[pyclass(extends=BaseTokenizer)]
 pub struct UnicodeSegmentTokenizer {
     pub word_bounds: bool,
     inner: vtext::tokenize::UnicodeSegmentTokenizer,
@@ -91,7 +96,7 @@ impl UnicodeSegmentTokenizer {
 /// ----------
 ///
 /// - `Unicode® Standard Annex #29 <http://www.unicode.org/reports/tr29/>`_
-#[pyclass]
+#[pyclass(extends=BaseTokenizer)]
 pub struct VTextTokenizer {
     pub lang: String,
     inner: vtext::tokenize::VTextTokenizer,
@@ -100,14 +105,15 @@ pub struct VTextTokenizer {
 #[pymethods]
 impl VTextTokenizer {
     #[new]
-    fn new(obj: &PyRawObject, lang: String) {
+    #[args(lang = "\"en\"")]
+    fn new(obj: &PyRawObject, lang: &str) {
         let tokenizer = vtext::tokenize::VTextTokenizerParams::default()
-            .lang(&lang)
+            .lang(lang)
             .build()
             .unwrap();
 
         obj.init(VTextTokenizer {
-            lang: lang,
+            lang: lang.to_string(),
             inner: tokenizer,
         });
     }
@@ -147,7 +153,7 @@ impl VTextTokenizer {
 /// __init__(self, pattern=r'\\b\\w\\w+\\b')
 ///
 /// Tokenize a document using regular expressions
-#[pyclass]
+#[pyclass(extends=BaseTokenizer)]
 pub struct RegexpTokenizer {
     pub pattern: String,
     inner: vtext::tokenize::RegexpTokenizer,
@@ -218,7 +224,7 @@ impl RegexpTokenizer {
 /// >>> tokenizer.tokenize('fox can\'t')
 /// ['fox ', 'ox c', 'x ca', ' can', 'can\'', 'an\'t']
 ///
-#[pyclass]
+#[pyclass(extends=BaseTokenizer)]
 pub struct CharacterTokenizer {
     pub window_size: usize,
     inner: vtext::tokenize::CharacterTokenizer,
