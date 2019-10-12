@@ -187,3 +187,21 @@ fn test_dispatch_tokenizer() {
         .build()
         .unwrap();
 }
+
+#[test]
+#[cfg(feature = "rayon")]
+fn test_vectorizers_n_jobs() {
+    let documents = vec![
+        String::from("the moon in the sky"),
+        String::from("the sky is blue"),
+        String::from("some other text"),
+        String::from("other words"),
+    ];
+
+    let mut vect = CountVectorizerParams::<RegexpTokenizer>::default()
+        .n_jobs(2)
+        .build()
+        .unwrap();
+    assert_eq!(vect.params.n_jobs, 2);
+    let X = vect.fit(&documents);
+}
