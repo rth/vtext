@@ -4,7 +4,7 @@ jobs:
   rust-stable:
     working_directory: ~/repo
     docker:
-      - image: rust:1.31.0-slim-stretch
+      - image: rust:1.38.0-slim-stretch
     steps:
       - run:
           name: dependencies
@@ -21,6 +21,24 @@ jobs:
           name: test
           command: |
             cargo test
+  wasm32:
+    working_directory: ~/repo
+    docker:
+      - image: rust:1.38.0-slim-stretch
+    steps:
+      - run:
+          name: dependencies
+          command: |
+            apt-get update
+            apt-get install -y build-essential git
+            rustup target add wasm32-unknown-unknown
+
+      - checkout
+
+      - run:
+          name: test
+          command: |
+            cargo build --target wasm32-unknown-unknown
 
   python:
     working_directory: ~/repo
@@ -32,15 +50,15 @@ jobs:
           name: dependencies
           command: |
             python3.7 -m pip install tox
-            rustup default nightly-2019-02-28
-            rustup target add x86_64-unknown-linux-musl
+            rustup default nightly-2019-11-01
       - run:
           name: build-wheels
           command: |
             cd python
-            for PYBIN in python3.{5,6,7}; do
-                "$PYBIN" -m pip install -r requirements.txt
-                "$PYBIN" -m pip install wheel==0.31.1 auditwheel==2.0.0 pytest
+            for PYBIN in python3.{6,7}; do
+                "$PYBIN" -m pip install setuptools setuptools-rust>=0.10.2
+                "$PYBIN" -m pip install numpy==1.15.0 scipy==1.1.0
+                "$PYBIN" -m pip install wheel==0.31.1 auditwheel==2.0.0 pytest hypothesis
                 "$PYBIN" setup.py bdist_wheel
             done
             for whl in dist/*.whl; do
@@ -51,11 +69,12 @@ jobs:
           name: test
           command: |
             cd python
-            for PYBIN in python3.{5,6,7}; do
+            for PYBIN in python3.{6,7}; do
                 "$PYBIN" -m pip uninstall -y vtext
                 cd /tmp/
                 "$PYBIN" -m pip install --pre --no-index --find-links /root/repo/python/dist/ vtext
-                "$PYBIN" -m pytest --pyargs vtext
+                "$PYBIN" -m pip install pytest-faulthandler
+                "$PYBIN" -m pytest -sv --pyargs vtext
                 cd -
             done
       - persist_to_workspace:
@@ -145,6 +164,7 @@ workflows:
   build:
     jobs:
       - rust-stable
+      - wasm32
       - python
       - lint
       - upload-wheels:

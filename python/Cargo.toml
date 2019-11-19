@@ -1,6 +1,6 @@
 [package]
 name = "vtextpy"
-version = "0.1.0-alpha.2"
+version = "0.1.0-alpha.3"
 authors = ["Roman Yurchak <rth.yurchak@pm.me>"]
 edition = "2018"
 
@@ -8,17 +8,18 @@ edition = "2018"
 crate-type = ["cdylib"]
 
 [dependencies]
-ndarray = "~0.12.0"
-sprs = "0.6.2"
-vtext = {"path" = "../"}
-rust-stemmers = "1.1.0"
+ndarray = "0.13"
+sprs = {version  = "0.7.1", default-features = false}
+vtext = {"path" = "../", features=["python", "rayon"]}
+rust-stemmers = "1.1"
+rayon = "1.2"
 
 [dependencies.numpy]
-version = "0.5.0"
+version = "0.7"
 features = ["python3"]
 
 [dependencies.pyo3]
-version = "0.6.0"
+version = "0.8"
 
 [features]
 extension-module = ["pyo3/extension-module"]

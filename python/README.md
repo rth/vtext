@@ -19,7 +19,7 @@ The API is currently unstable.
 
 ### Installation
 
-vtext requires Python 3.5+ and can be installed with,
+vtext requires Python 3.5+, numpy 1.15+ and can be installed with,
 
 ```
 pip install --pre vtext

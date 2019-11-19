@@ -10,7 +10,7 @@ use crate::tokenize::*;
 fn test_regexp_tokenizer() {
     let s = "fox can't jump 32.3 feet, right?";
 
-    let tokenizer = RegexpTokenizer::new(r"\b\w\w+\b".to_string());
+    let tokenizer = RegexpTokenizer::default();
     let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
     let b: &[_] = &["fox", "can", "jump", "32", "feet", "right"];
     assert_eq!(tokens, b);
@@ -20,14 +20,17 @@ fn test_regexp_tokenizer() {
 fn test_unicode_tokenizer() {
     let s = "The quick (\"brown\") fox can't jump 32.3 feet, right?";
 
-    let tokenizer = UnicodeSegmentTokenizer { word_bounds: false };
+    let tokenizer = UnicodeSegmentTokenizerParams::default()
+        .word_bounds(false)
+        .build()
+        .unwrap();
     let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
     let b: &[_] = &[
         "The", "quick", "brown", "fox", "can't", "jump", "32.3", "feet", "right",
     ];
     assert_eq!(tokens, b);
 
-    let tokenizer = UnicodeSegmentTokenizer { word_bounds: true };
+    let tokenizer = UnicodeSegmentTokenizer::default();
     let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
     let b: &[_] = &[
         "The", "quick", "(", "\"", "brown", "\"", ")", "fox", "can't", "jump", "32.3", "feet", ",",
@@ -38,7 +41,7 @@ fn test_unicode_tokenizer() {
 
 #[test]
 fn test_vtext_tokenizer_all_lang() {
-    let tokenizer = VTextTokenizer::new("en");
+    let tokenizer = VTextTokenizer::default();
 
     for (s, tokens_ref) in [
         // float numbers
@@ -72,7 +75,7 @@ fn test_vtext_tokenizer_all_lang() {
 
 #[test]
 fn test_vtext_tokenizer_en() {
-    let tokenizer = VTextTokenizer::new("en");
+    let tokenizer = VTextTokenizer::default();
 
     for (s, tokens_ref) in [
         ("We can't", vec!["We", "ca", "n't"]),
@@ -89,7 +92,7 @@ fn test_vtext_tokenizer_en() {
 
 #[test]
 fn test_vtext_tokenizer_fr() {
-    let tokenizer = VTextTokenizer::new("fr");
+    let tokenizer = VTextTokenizerParams::default().lang("fr").build().unwrap();
 
     for (s, tokens_ref) in [("l'image", vec!["l'", "image"])].iter() {
         let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
@@ -99,16 +102,25 @@ fn test_vtext_tokenizer_fr() {
 
 #[test]
 fn test_vtext_tokenizer_invalid_lang() {
-    let tokenizer = VTextTokenizer::new("unknown");
-    assert_eq!(tokenizer.lang, "any");
+    let tokenizer = VTextTokenizerParams::default()
+        .lang("unknown")
+        .build()
+        .unwrap();
+    assert_eq!(tokenizer.params.lang, "any");
 }
 
 #[test]
 fn test_character_tokenizer() {
     let s = "fox can't";
 
-    let tokenizer = CharacterTokenizer::new(4);
+    let tokenizer = CharacterTokenizer::default();
     let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
     let b: &[_] = &["fox ", "ox c", "x ca", " can", "can'", "an't"];
     assert_eq!(tokens, b);
+}
+
+#[test]
+fn test_tokenizer_defaults() {
+    let tokenizer = UnicodeSegmentTokenizer::default();
+    assert_eq!(tokenizer.params.word_bounds, true);
 }

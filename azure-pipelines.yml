@@ -10,8 +10,6 @@ jobs:
         PYTHON_VERSION: '3.7'
       py36:
         PYTHON_VERSION: '3.6'
-      py35:
-        PYTHON_VERSION: '3.5'
 
 
 - template: ci/azure/windows.yml
@@ -23,5 +21,3 @@ jobs:
         PYTHON_VERSION: '3.7'
       py36_64:
         PYTHON_VERSION: '3.6'
-      py35_64:
-        PYTHON_VERSION: '3.5'

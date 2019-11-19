@@ -45,3 +45,16 @@ def test_pickle_vectorizers(Estimator):
     out = pickle.dumps(vect)
 
     pickle.loads(out)
+
+
+@pytest.mark.parametrize("Estimator", [HashingVectorizer, CountVectorizer])
+def test_vectorizers_n_jobs(Estimator):
+    """Check that parallel feature ingestion works"""
+    text = ["Εν οίδα ότι ουδέν οίδα"]
+
+    vect = Estimator(n_jobs=2)
+    vect.fit(text)
+    vect.transform(text)
+
+    with pytest.raises(ValueError, match="n_jobs=0 must be a integer >= 1"):
+        Estimator(n_jobs=0).fit(text)

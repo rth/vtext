@@ -12,7 +12,7 @@ with open("./requirements.txt", "rt") as fh:
     install_requires = fh.read().splitlines()
 
 setup(
-    version="0.1.0a2",
+    version="0.1.0a3",
     rust_extensions=[
         RustExtension(
             "vtext._lib",
@@ -24,6 +24,7 @@ setup(
     ],
     long_description_content_type="text/markdown",
     url="https://github.com/rth/vtext",
+    python_requires=">=3.6",
     install_requires=install_requires,
     packages=find_packages(),
 )

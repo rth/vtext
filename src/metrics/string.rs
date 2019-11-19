@@ -26,6 +26,7 @@ use std::cmp::{max, min};
 ///  let res = edit_distance("yesterday", "today", 1, false);
 ///  // returns 5.0
 ///  ```
+#[allow(clippy::many_single_char_names)]
 pub fn edit_distance(x: &str, y: &str, substitution_cost: usize, transpositions: bool) -> f64 {
     // implementation adapted from NLTK
 
@@ -35,10 +36,10 @@ pub fn edit_distance(x: &str, y: &str, substitution_cost: usize, transpositions:
     // initialize the 2D array
     // TODO: there is likely a way to avoid allocating this array
     let mut lev = Array::<i32, _>::zeros((x_len + 1, y_len + 1).f());
-    for idx in 1..x_len + 1 {
+    for idx in 1..=x_len {
         lev[[idx, 0]] = idx as i32
     }
-    for idx in 1..y_len + 1 {
+    for idx in 1..=y_len {
         lev[[0, idx]] = idx as i32
     }
 
@@ -58,19 +59,19 @@ pub fn edit_distance(x: &str, y: &str, substitution_cost: usize, transpositions:
             // pick the cheapest
             c = min(min(a, b), c);
 
-            if transpositions {
-                if (x_idx > 1) & (y_idx > 1) {
-                    if (x.chars().nth(x_idx - 1).unwrap() == c2)
-                        & (y.chars().nth(y_idx - 1).unwrap() == c1)
-                    {
-                        c = min(c, lev[[x_idx - 1, y_idx - 1]] + 1);
-                    }
+            if transpositions & (x_idx > 1) & (y_idx > 1) {
+                // we explicitly don't collapse the second loop
+                // check to avoid compiler optimizations
+                if (x.chars().nth(x_idx - 1).unwrap() == c2)
+                    & (y.chars().nth(y_idx - 1).unwrap() == c1)
+                {
+                    c = min(c, lev[[x_idx - 1, y_idx - 1]] + 1);
                 }
             }
             lev[[x_idx + 1, y_idx + 1]] = c;
         }
     }
-    lev[[x_len, y_len]] as f64
+    f64::from(lev[[x_len, y_len]])
 }
 
 ///  Sørensen–Dice similarity coefficient
@@ -153,8 +154,13 @@ pub fn jaro_similarity(x: &str, y: &str) -> f64 {
     for (x_idx, x_char) in x_chars.iter().enumerate() {
         let upperbound = min(x_idx + match_bound, y_len - 1);
         let lowerbound = max(0, x_idx as i32 - match_bound as i32) as usize;
-        for j in lowerbound..upperbound + 1 {
-            if (x_char == &y_chars[j]) & !flagged_2.contains(&j) {
+        for (j, y_char_el) in y_chars
+            .iter()
+            .enumerate()
+            .take(upperbound + 1)
+            .skip(lowerbound)
+        {
+            if (x_char == y_char_el) & !flagged_2.contains(&j) {
                 flagged_1.push(x_idx);
                 flagged_2.push(j);
                 break;
@@ -175,7 +181,7 @@ pub fn jaro_similarity(x: &str, y: &str) -> f64 {
     }
     (matches as f64 / x_len as f64
         + matches as f64 / y_len as f64
-        + (matches as f64 - (transpositions / 2) as f64) / matches as f64)
+        + (matches as f64 - f64::from(transpositions / 2)) / matches as f64)
         / 3.0
 }
 
@@ -281,5 +287,4 @@ mod tests {
         let res = edit_distance("yesterday", "today", 1, false);
         assert!(res.approx_eq_ulps(&5.0, 2));
     }
-
 }

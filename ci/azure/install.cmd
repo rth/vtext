@@ -17,17 +17,22 @@ call activate %VIRTUALENV%
 python --version
 pip --version
 
-pip install numpy>=1.12.0 scipy>=1.0.0 pytest>=4.0.0 wheel>=0.31.1
+@rem Use oldest supported numpy and scipy versions for building wheels
+pip install numpy==1.15.0 scipy==1.1.0 pytest>=4.0.0 wheel>=0.31.1 hypothesis
 
 curl -sSf -o rustup-init.exe https://win.rustup.rs
-rustup-init.exe -y --default-toolchain nightly-2019-02-28
+rustup-init.exe -y --default-toolchain nightly-2019-11-01
 set PATH=%PATH%;%USERPROFILE%\.cargo\bin
 echo "##vso[task.setvariable variable=PATH;]%PATH%;%USERPROFILE%\.cargo\bin"
+
+rustup default nightly-2019-11-01
 
 @rem Install the build and runtime dependencies of the project.
 cd python/
 pip install -r requirements.txt
 python setup.py bdist_wheel
+
+pip install pytest-faulthandler
 
 @rem Install the generated wheel package to test it
 pip install --pre --no-index --find-links dist\ vtext
