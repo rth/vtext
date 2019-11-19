@@ -8,18 +8,18 @@ edition = "2018"
 crate-type = ["cdylib"]
 
 [dependencies]
-ndarray = "0.12"
-sprs = "0.6"
+ndarray = "0.13"
+sprs = {version  = "0.7.1", default-features = false}
 vtext = {"path" = "../", features=["python", "rayon"]}
 rust-stemmers = "1.1"
 rayon = "1.2"
 
 [dependencies.numpy]
-version = "0.6"
+version = "0.7"
 features = ["python3"]
 
 [dependencies.pyo3]
-version = "0.7"
+version = "0.8"
 
 [features]
 extension-module = ["pyo3/extension-module"]
