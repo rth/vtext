@@ -9,7 +9,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 ndarray = "0.13"
-sprs = {git = "https://github.com/rth/sprs", branch = "ndarray-013", default-features = false}
+sprs = {version  = "0.7.1", default-features = false}
 vtext = {"path" = "../", features=["python"]}
 rust-stemmers = "1.1"
 

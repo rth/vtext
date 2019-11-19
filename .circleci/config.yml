@@ -4,7 +4,7 @@ jobs:
   rust-stable:
     working_directory: ~/repo
     docker:
-      - image: rust:1.34.0-slim-stretch
+      - image: rust:1.38.0-slim-stretch
     steps:
       - run:
           name: dependencies
@@ -24,7 +24,7 @@ jobs:
   wasm32:
     working_directory: ~/repo
     docker:
-      - image: rust:1.34.0-slim-stretch
+      - image: rust:1.38.0-slim-stretch
     steps:
       - run:
           name: dependencies
@@ -50,7 +50,7 @@ jobs:
           name: dependencies
           command: |
             python3.7 -m pip install tox
-            rustup default nightly-2019-09-19
+            rustup default nightly-2019-11-01
       - run:
           name: build-wheels
           command: |
