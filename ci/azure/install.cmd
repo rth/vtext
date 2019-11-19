@@ -25,6 +25,8 @@ rustup-init.exe -y --default-toolchain nightly-2019-11-01
 set PATH=%PATH%;%USERPROFILE%\.cargo\bin
 echo "##vso[task.setvariable variable=PATH;]%PATH%;%USERPROFILE%\.cargo\bin"
 
+rustup default nightly-2019-11-01
+
 @rem Install the build and runtime dependencies of the project.
 cd python/
 pip install -r requirements.txt
