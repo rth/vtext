@@ -21,8 +21,6 @@ jobs:
     name: Windows
     vmImage: vs2017-win2016
     matrix:
-      py38_64:
-        PYTHON_VERSION: '3.8'
       py37_64:
         PYTHON_VERSION: '3.7'
       py36_64:
