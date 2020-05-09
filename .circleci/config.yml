@@ -60,7 +60,7 @@ jobs:
             for PYBIN in python3.{6,7,8}; do
                 "$PYBIN" -m pip install wheel==0.31.1 auditwheel==2.0.0 pytest hypothesis
                 "$PYBIN" -m pip install -r ../ci/requirements-build.txt
-                "$PYBIN" -m python setup.py bdist_wheel
+                "$PYBIN" setup.py bdist_wheel
             done
             for whl in dist/*.whl; do
                 auditwheel repair "$whl" -w dist/

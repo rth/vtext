@@ -31,7 +31,7 @@ call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Enterprise\\VC\\Au
 @rem Install the build and runtime dependencies of the project.
 cd python/
 python -m pip install -r ..\ci\requirements-build.txt
-python -m python setup.py bdist_wheel
+python setup.py bdist_wheel
 
 pip install pytest-faulthandler
 
