@@ -60,7 +60,7 @@ jobs:
             for PYBIN in python3.{6,7,8}; do
                 "$PYBIN" -m pip install scipy==1.4.1
                 "$PYBIN" -m pip install wheel==0.31.1 auditwheel==2.0.0 pytest hypothesis
-                "$PYBIN" -m pip wheel bdist_wheel -w dist/
+                "$PYBIN" -m pip wheel . -w dist/
             done
             for whl in dist/*.whl; do
                 auditwheel repair "$whl" -w dist/
