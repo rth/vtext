@@ -20,6 +20,8 @@ jobs:
   steps:
     - bash: echo "##vso[task.prependpath]$CONDA/bin"
       displayName: Add conda to PATH
+    # fix permissions on MacOS
+    - script: sudo chown -R 501:20 /usr/local/miniconda/envs/
     - script: |
         ci/azure/install.sh
       displayName: 'Install'
