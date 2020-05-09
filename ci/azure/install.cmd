@@ -24,9 +24,8 @@ rustup-init.exe -y --default-toolchain nightly-2019-11-01
 set PATH=%PATH%;%USERPROFILE%\.cargo\bin
 echo "##vso[task.setvariable variable=PATH;]%PATH%;%USERPROFILE%\.cargo\bin"
 
+rustup set default-host x86_64-pc-windows-gnu
 rustup default nightly-2019-11-01
-
-call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Enterprise\\VC\\Auxiliary\\Build\\vcvars64.bat"
 
 @rem Install the build and runtime dependencies of the project.
 cd python/
