@@ -23,6 +23,7 @@ source $HOME/.cargo/env
 rustup default nightly-2019-11-01
 
 cd python/
-python -m pip wheel . -w dist/
+python -m pip install -r ../ci/requirements-build.txt
+python -m python setup.py bdist_wheel
 
 pip install --pre --no-index --find-links dist/ vtext
