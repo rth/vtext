@@ -17,8 +17,7 @@ call activate %VIRTUALENV%
 python --version
 pip --version
 
-@rem Use oldest supported numpy and scipy versions for building wheels
-pip install numpy==1.15.0 scipy==1.1.0 pytest>=4.0.0 wheel>=0.31.1 hypothesis
+pip install scipy==1.4.1 pytest>=4.0.0 wheel>=0.31.1 hypothesis
 
 curl -sSf -o rustup-init.exe https://win.rustup.rs
 rustup-init.exe -y --default-toolchain nightly-2019-11-01
@@ -31,8 +30,7 @@ call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Enterprise\\VC\\Au
 
 @rem Install the build and runtime dependencies of the project.
 cd python/
-pip install -r requirements.txt
-python setup.py bdist_wheel
+python -m pip wheel bdist_wheel -w dist/
 
 pip install pytest-faulthandler
 

@@ -58,10 +58,9 @@ jobs:
             cd python
             export PATH="$PATH:/opt/python/cp38-cp38m/bin/"
             for PYBIN in python3.{6,7,8}; do
-                "$PYBIN" -m pip install setuptools setuptools-rust>=0.10.2
-                "$PYBIN" -m pip install numpy==1.15.0 scipy==1.1.0
+                "$PYBIN" -m pip install scipy==1.4.1
                 "$PYBIN" -m pip install wheel==0.31.1 auditwheel==2.0.0 pytest hypothesis
-                "$PYBIN" setup.py bdist_wheel
+                "$PYBIN" -m pip wheel bdist_wheel -w dist/
             done
             for whl in dist/*.whl; do
                 auditwheel repair "$whl" -w dist/
