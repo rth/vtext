@@ -8,11 +8,13 @@ jobs:
     matrix:
       py38:
         PYTHON_VERSION: '3.8'
+        PYTHON_ARCH: '64'
       py37:
         PYTHON_VERSION: '3.7'
+        PYTHON_ARCH: '64'
       py36:
         PYTHON_VERSION: '3.6'
-
+        PYTHON_ARCH: '64'
 
 - template: ci/azure/windows.yml
   parameters:
