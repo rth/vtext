@@ -21,6 +21,7 @@ pip list
 
 curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain nightly-2019-11-01
 source $HOME/.cargo/env
+rustup default nightly-2019-11-01
 
 cd python/
 pip install -r requirements.txt
