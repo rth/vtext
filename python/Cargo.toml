@@ -12,7 +12,7 @@ ndarray = "0.13"
 sprs = {version  = "0.7.1", default-features = false}
 vtext = {"path" = "../", features=["python", "rayon"]}
 rust-stemmers = "1.1"
-rayon = "1.2"
+rayon = "1.3"
 
 [dependencies.numpy]
 version = "0.7"
