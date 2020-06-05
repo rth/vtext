@@ -43,7 +43,7 @@ jobs:
   python:
     working_directory: ~/repo
     docker:
-      - image: konstin2/pyo3-pack:0.5.0
+      - image: konstin2/maturin:v0.8.2-alpha.1
     steps:
       - checkout
       - run:
@@ -54,11 +54,12 @@ jobs:
       - run:
           name: build-wheels
           command: |
+            set -ex
             cd python
-            for PYBIN in python3.{6,7}; do
-                "$PYBIN" -m pip install setuptools setuptools-rust>=0.10.2
-                "$PYBIN" -m pip install numpy==1.15.0 scipy==1.1.0
+            export PATH="$PATH:/opt/python/cp38-cp38m/bin/"
+            for PYBIN in python3.{6,7,8}; do
                 "$PYBIN" -m pip install wheel==0.31.1 auditwheel==2.0.0 pytest hypothesis
+                "$PYBIN" -m pip install -r ../ci/requirements-build.txt
                 "$PYBIN" setup.py bdist_wheel
             done
             for whl in dist/*.whl; do
@@ -68,8 +69,10 @@ jobs:
       - run:
           name: test
           command: |
+            set -ex
             cd python
-            for PYBIN in python3.{6,7}; do
+            export PATH="$PATH:/opt/python/cp38-cp38m/bin/"
+            for PYBIN in python3.{6,7,8}; do
                 "$PYBIN" -m pip uninstall -y vtext
                 cd /tmp/
                 "$PYBIN" -m pip install --pre --no-index --find-links /root/repo/python/dist/ vtext

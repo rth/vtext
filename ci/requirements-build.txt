@@ -1,0 +1,5 @@
+setuptools
+wheel
+setuptools-rust
+numpy==1.17.3
+scipy==1.4.1

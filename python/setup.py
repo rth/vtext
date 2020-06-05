@@ -16,7 +16,6 @@ setup(
     rust_extensions=[
         RustExtension(
             "vtext._lib",
-            "./Cargo.toml",
             rustc_flags=["--cfg=Py_3"],
             features=["numpy/python3"],
             args=["--no-default-features"],
