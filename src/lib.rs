@@ -60,4 +60,5 @@ pub mod errors;
 mod math;
 pub mod metrics;
 pub mod tokenize;
+pub mod tokenize_sentence;
 pub mod vectorize;
