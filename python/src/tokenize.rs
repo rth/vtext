@@ -41,16 +41,19 @@ pub struct UnicodeSegmentTokenizer {
 impl UnicodeSegmentTokenizer {
     #[new]
     #[args(word_bounds = true)]
-    fn new(word_bounds: bool) -> Self {
+    fn new(word_bounds: bool) -> (Self, BaseTokenizer) {
         let tokenizer = vtext::tokenize::UnicodeSegmentTokenizerParams::default()
             .word_bounds(word_bounds)
             .build()
             .unwrap();
 
-        UnicodeSegmentTokenizer {
-            word_bounds: word_bounds,
-            inner: tokenizer,
-        }
+        (
+            UnicodeSegmentTokenizer {
+                word_bounds: word_bounds,
+                inner: tokenizer,
+            },
+            BaseTokenizer::new(),
+        )
     }
 
     /// tokenize(self, x)
@@ -111,16 +114,19 @@ pub struct VTextTokenizer {
 impl VTextTokenizer {
     #[new]
     #[args(lang = "\"en\"")]
-    fn new(lang: &str) -> Self {
+    fn new(lang: &str) -> (Self, BaseTokenizer) {
         let tokenizer = vtext::tokenize::VTextTokenizerParams::default()
             .lang(lang)
             .build()
             .unwrap();
 
-        VTextTokenizer {
-            lang: lang.to_string(),
-            inner: tokenizer,
-        }
+        (
+            VTextTokenizer {
+                lang: lang.to_string(),
+                inner: tokenizer,
+            },
+            BaseTokenizer::new(),
+        )
     }
 
     /// tokenize(self, x)
@@ -168,16 +174,19 @@ pub struct RegexpTokenizer {
 impl RegexpTokenizer {
     #[new]
     #[args(pattern = "\"\\\\b\\\\w\\\\w+\\\\b\"")]
-    fn new(pattern: &str) -> Self {
+    fn new(pattern: &str) -> (Self, BaseTokenizer) {
         let inner = vtext::tokenize::RegexpTokenizerParams::default()
             .pattern(pattern)
             .build()
             .unwrap();
 
-        RegexpTokenizer {
-            pattern: pattern.to_string(),
-            inner: inner,
-        }
+        (
+            RegexpTokenizer {
+                pattern: pattern.to_string(),
+                inner: inner,
+            },
+            BaseTokenizer::new(),
+        )
     }
 
     /// tokenize(self, x)
@@ -238,16 +247,19 @@ pub struct CharacterTokenizer {
 impl CharacterTokenizer {
     #[new]
     #[args(window_size = 4)]
-    fn new(window_size: usize) -> Self {
+    fn new(window_size: usize) -> (Self, BaseTokenizer) {
         let inner = vtext::tokenize::CharacterTokenizerParams::default()
             .window_size(window_size)
             .build()
             .unwrap();
 
-        CharacterTokenizer {
-            window_size: window_size,
-            inner: inner,
-        }
+        (
+            CharacterTokenizer {
+                window_size: window_size,
+                inner: inner,
+            },
+            BaseTokenizer::new(),
+        )
     }
 
     /// tokenize(self, x)
