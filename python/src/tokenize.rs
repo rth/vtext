@@ -15,8 +15,8 @@ pub struct BaseTokenizer {}
 #[pymethods]
 impl BaseTokenizer {
     #[new]
-    fn new(obj: &PyRawObject) {
-        obj.init(BaseTokenizer {});
+    fn new() -> Self {
+        BaseTokenizer {}
     }
 }
 
@@ -41,16 +41,19 @@ pub struct UnicodeSegmentTokenizer {
 impl UnicodeSegmentTokenizer {
     #[new]
     #[args(word_bounds = true)]
-    fn new(obj: &PyRawObject, word_bounds: bool) {
+    fn new(word_bounds: bool) -> (Self, BaseTokenizer) {
         let tokenizer = vtext::tokenize::UnicodeSegmentTokenizerParams::default()
             .word_bounds(word_bounds)
             .build()
             .unwrap();
 
-        obj.init(UnicodeSegmentTokenizer {
-            word_bounds: word_bounds,
-            inner: tokenizer,
-        });
+        (
+            UnicodeSegmentTokenizer {
+                word_bounds: word_bounds,
+                inner: tokenizer,
+            },
+            BaseTokenizer::new(),
+        )
     }
 
     /// tokenize(self, x)
@@ -66,7 +69,7 @@ impl UnicodeSegmentTokenizer {
     /// -------
     /// tokens : List[str]
     ///    computed tokens
-    fn tokenize<'py>(&self, py: Python<'py>, x: &str) -> PyResult<(&'py PyList)> {
+    fn tokenize<'py>(&self, py: Python<'py>, x: &str) -> PyResult<&'py PyList> {
         let res: Vec<&str> = self.inner.tokenize(x).collect();
         let list = PyList::new(py, res);
         Ok(list)
@@ -111,16 +114,19 @@ pub struct VTextTokenizer {
 impl VTextTokenizer {
     #[new]
     #[args(lang = "\"en\"")]
-    fn new(obj: &PyRawObject, lang: &str) {
+    fn new(lang: &str) -> (Self, BaseTokenizer) {
         let tokenizer = vtext::tokenize::VTextTokenizerParams::default()
             .lang(lang)
             .build()
             .unwrap();
 
-        obj.init(VTextTokenizer {
-            lang: lang.to_string(),
-            inner: tokenizer,
-        });
+        (
+            VTextTokenizer {
+                lang: lang.to_string(),
+                inner: tokenizer,
+            },
+            BaseTokenizer::new(),
+        )
     }
 
     /// tokenize(self, x)
@@ -136,7 +142,7 @@ impl VTextTokenizer {
     /// -------
     /// tokens : List[str]
     ///    computed tokens
-    fn tokenize<'py>(&self, py: Python<'py>, x: &str) -> PyResult<(&'py PyList)> {
+    fn tokenize<'py>(&self, py: Python<'py>, x: &str) -> PyResult<&'py PyList> {
         let res: Vec<&str> = self.inner.tokenize(x).collect();
         let list = PyList::new(py, res);
         Ok(list)
@@ -168,16 +174,19 @@ pub struct RegexpTokenizer {
 impl RegexpTokenizer {
     #[new]
     #[args(pattern = "\"\\\\b\\\\w\\\\w+\\\\b\"")]
-    fn new(obj: &PyRawObject, pattern: &str) {
+    fn new(pattern: &str) -> (Self, BaseTokenizer) {
         let inner = vtext::tokenize::RegexpTokenizerParams::default()
             .pattern(pattern)
             .build()
             .unwrap();
 
-        obj.init(RegexpTokenizer {
-            pattern: pattern.to_string(),
-            inner: inner,
-        });
+        (
+            RegexpTokenizer {
+                pattern: pattern.to_string(),
+                inner: inner,
+            },
+            BaseTokenizer::new(),
+        )
     }
 
     /// tokenize(self, x)
@@ -193,7 +202,7 @@ impl RegexpTokenizer {
     /// -------
     /// tokens : List[str]
     ///    computed tokens
-    fn tokenize<'py>(&self, py: Python<'py>, x: &str) -> PyResult<(&'py PyList)> {
+    fn tokenize<'py>(&self, py: Python<'py>, x: &str) -> PyResult<&'py PyList> {
         let res: Vec<&str> = self.inner.tokenize(x).collect();
         let list = PyList::new(py, res);
         Ok(list)
@@ -238,16 +247,19 @@ pub struct CharacterTokenizer {
 impl CharacterTokenizer {
     #[new]
     #[args(window_size = 4)]
-    fn new(obj: &PyRawObject, window_size: usize) {
+    fn new(window_size: usize) -> (Self, BaseTokenizer) {
         let inner = vtext::tokenize::CharacterTokenizerParams::default()
             .window_size(window_size)
             .build()
             .unwrap();
 
-        obj.init(CharacterTokenizer {
-            window_size: window_size,
-            inner: inner,
-        });
+        (
+            CharacterTokenizer {
+                window_size: window_size,
+                inner: inner,
+            },
+            BaseTokenizer::new(),
+        )
     }
 
     /// tokenize(self, x)
@@ -263,7 +275,7 @@ impl CharacterTokenizer {
     /// -------
     /// tokens : List[str]
     ///    computed tokens
-    fn tokenize<'py>(&self, py: Python<'py>, x: &str) -> PyResult<(&'py PyList)> {
+    fn tokenize<'py>(&self, py: Python<'py>, x: &str) -> PyResult<&'py PyList> {
         let res: Vec<&str> = self.inner.tokenize(x).collect();
         let list = PyList::new(py, res);
         Ok(list)

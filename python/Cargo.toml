@@ -15,11 +15,11 @@ rust-stemmers = "1.1"
 rayon = "1.3"
 
 [dependencies.numpy]
-version = "0.7"
+version = "0.9.0"
 features = ["python3"]
 
 [dependencies.pyo3]
-version = "0.8"
+version = "0.10.1"
 
 [features]
 extension-module = ["pyo3/extension-module"]
