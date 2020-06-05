@@ -4,8 +4,8 @@
 // <http://apache.org/licenses/LICENSE-2.0>. This file may not be copied,
 // modified, or distributed except according to those terms.
 
-use crate::tokenize::{Tokenizer, RegexpTokenizerParams};
-use crate::tokenize_sentence::UnicodeSentenceTokenizerParams;
+use crate::tokenize::Tokenizer;
+use crate::tokenize_sentence::{UnicodeSentenceTokenizerParams, UnicodeSentenceTokenizer};
 
 #[test]
 fn test_unicode_sentence_tokenizer() {
@@ -14,6 +14,15 @@ fn test_unicode_sentence_tokenizer() {
     let tokenizer = UnicodeSentenceTokenizerParams::default()
         .build()
         .unwrap();
+    let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
+    let b: &[_] = &[
+        "Here is one. ",
+        "Here is another! ",
+        "This trailing text is one more"
+    ];
+    assert_eq!(tokens, b);
+
+    let tokenizer = UnicodeSentenceTokenizer::default();
     let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
     let b: &[_] = &[
         "Here is one. ",
