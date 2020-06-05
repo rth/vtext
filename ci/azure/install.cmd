@@ -25,7 +25,7 @@ set PATH=%PATH%;%USERPROFILE%\.cargo\bin
 echo "##vso[task.setvariable variable=PATH;]%PATH%;%USERPROFILE%\.cargo\bin"
 
 rustup set default-host x86_64-pc-windows-gnu
-rustup default nightly-2019-11-01
+rustup default nightly-2020-06-01
 
 @rem Install the build and runtime dependencies of the project.
 cd python/

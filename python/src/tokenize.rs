@@ -15,8 +15,8 @@ pub struct BaseTokenizer {}
 #[pymethods]
 impl BaseTokenizer {
     #[new]
-    fn new(obj: &PyRawObject) {
-        obj.init(BaseTokenizer {});
+    fn new() -> Self {
+        BaseTokenizer {}
     }
 }
 
@@ -41,16 +41,16 @@ pub struct UnicodeSegmentTokenizer {
 impl UnicodeSegmentTokenizer {
     #[new]
     #[args(word_bounds = true)]
-    fn new(obj: &PyRawObject, word_bounds: bool) {
+    fn new(word_bounds: bool) -> Self {
         let tokenizer = vtext::tokenize::UnicodeSegmentTokenizerParams::default()
             .word_bounds(word_bounds)
             .build()
             .unwrap();
 
-        obj.init(UnicodeSegmentTokenizer {
+        UnicodeSegmentTokenizer {
             word_bounds: word_bounds,
             inner: tokenizer,
-        });
+        }
     }
 
     /// tokenize(self, x)
@@ -66,7 +66,7 @@ impl UnicodeSegmentTokenizer {
     /// -------
     /// tokens : List[str]
     ///    computed tokens
-    fn tokenize<'py>(&self, py: Python<'py>, x: &str) -> PyResult<(&'py PyList)> {
+    fn tokenize<'py>(&self, py: Python<'py>, x: &str) -> PyResult<&'py PyList> {
         let res: Vec<&str> = self.inner.tokenize(x).collect();
         let list = PyList::new(py, res);
         Ok(list)
@@ -111,16 +111,16 @@ pub struct VTextTokenizer {
 impl VTextTokenizer {
     #[new]
     #[args(lang = "\"en\"")]
-    fn new(obj: &PyRawObject, lang: &str) {
+    fn new(lang: &str) -> Self {
         let tokenizer = vtext::tokenize::VTextTokenizerParams::default()
             .lang(lang)
             .build()
             .unwrap();
 
-        obj.init(VTextTokenizer {
+        VTextTokenizer {
             lang: lang.to_string(),
             inner: tokenizer,
-        });
+        }
     }
 
     /// tokenize(self, x)
@@ -136,7 +136,7 @@ impl VTextTokenizer {
     /// -------
     /// tokens : List[str]
     ///    computed tokens
-    fn tokenize<'py>(&self, py: Python<'py>, x: &str) -> PyResult<(&'py PyList)> {
+    fn tokenize<'py>(&self, py: Python<'py>, x: &str) -> PyResult<&'py PyList> {
         let res: Vec<&str> = self.inner.tokenize(x).collect();
         let list = PyList::new(py, res);
         Ok(list)
@@ -168,16 +168,16 @@ pub struct RegexpTokenizer {
 impl RegexpTokenizer {
     #[new]
     #[args(pattern = "\"\\\\b\\\\w\\\\w+\\\\b\"")]
-    fn new(obj: &PyRawObject, pattern: &str) {
+    fn new(pattern: &str) -> Self {
         let inner = vtext::tokenize::RegexpTokenizerParams::default()
             .pattern(pattern)
             .build()
             .unwrap();
 
-        obj.init(RegexpTokenizer {
+        RegexpTokenizer {
             pattern: pattern.to_string(),
             inner: inner,
-        });
+        }
     }
 
     /// tokenize(self, x)
@@ -193,7 +193,7 @@ impl RegexpTokenizer {
     /// -------
     /// tokens : List[str]
     ///    computed tokens
-    fn tokenize<'py>(&self, py: Python<'py>, x: &str) -> PyResult<(&'py PyList)> {
+    fn tokenize<'py>(&self, py: Python<'py>, x: &str) -> PyResult<&'py PyList> {
         let res: Vec<&str> = self.inner.tokenize(x).collect();
         let list = PyList::new(py, res);
         Ok(list)
@@ -238,16 +238,16 @@ pub struct CharacterTokenizer {
 impl CharacterTokenizer {
     #[new]
     #[args(window_size = 4)]
-    fn new(obj: &PyRawObject, window_size: usize) {
+    fn new(window_size: usize) -> Self {
         let inner = vtext::tokenize::CharacterTokenizerParams::default()
             .window_size(window_size)
             .build()
             .unwrap();
 
-        obj.init(CharacterTokenizer {
+        CharacterTokenizer {
             window_size: window_size,
             inner: inner,
-        });
+        }
     }
 
     /// tokenize(self, x)
@@ -263,7 +263,7 @@ impl CharacterTokenizer {
     /// -------
     /// tokens : List[str]
     ///    computed tokens
-    fn tokenize<'py>(&self, py: Python<'py>, x: &str) -> PyResult<(&'py PyList)> {
+    fn tokenize<'py>(&self, py: Python<'py>, x: &str) -> PyResult<&'py PyList> {
         let res: Vec<&str> = self.inner.tokenize(x).collect();
         let list = PyList::new(py, res);
         Ok(list)

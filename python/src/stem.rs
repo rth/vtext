@@ -24,7 +24,7 @@ pub struct SnowballStemmer {
 impl SnowballStemmer {
     #[new]
     #[args(lang = "\"english\"")]
-    fn new(obj: &PyRawObject, lang: &str) -> PyResult<()> {
+    fn new(lang: &str) -> Self {
         let algorithm = match lang {
             "arabic" => Ok(rust_stemmers::Algorithm::Arabic),
             "danish" => Ok(rust_stemmers::Algorithm::Danish),
@@ -46,15 +46,14 @@ impl SnowballStemmer {
                 "lang={} is unsupported!",
                 lang
             ))),
-        }?;
+        }.unwrap();
 
         let stemmer = rust_stemmers::Stemmer::create(algorithm);
 
-        obj.init(SnowballStemmer {
+        SnowballStemmer {
             lang: lang.to_string(),
             inner: stemmer,
-        });
-        Ok(())
+        }
     }
 
     /// stem(self, word)
@@ -70,7 +69,7 @@ impl SnowballStemmer {
     /// -------
     /// word_stemmed : str
     ///      stemmed word
-    fn stem(&self, word: &str) -> PyResult<(String)> {
+    fn stem(&self, word: &str) -> PyResult<String> {
         let res = self.inner.stem(word).to_string();
         Ok(res)
     }
