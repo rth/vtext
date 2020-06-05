@@ -46,7 +46,8 @@ impl SnowballStemmer {
                 "lang={} is unsupported!",
                 lang
             ))),
-        }.unwrap();
+        }
+        .unwrap();
 
         let stemmer = rust_stemmers::Stemmer::create(algorithm);
 
