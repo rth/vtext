@@ -75,7 +75,7 @@ impl Default for UnicodeSentenceTokenizer {
 
 impl Tokenizer for UnicodeSentenceTokenizer {
     /// Tokenize a string
-    fn tokenize<'a>(&self, text: &'a str) -> Box<dyn Iterator<Item=&'a str> + 'a> {
+    fn tokenize<'a>(&self, text: &'a str) -> Box<dyn Iterator<Item = &'a str> + 'a> {
         Box::new(text.split_sentence_bounds())
     }
 }
