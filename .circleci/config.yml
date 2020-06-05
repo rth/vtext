@@ -4,7 +4,7 @@ jobs:
   rust-stable:
     working_directory: ~/repo
     docker:
-      - image: rust:1.38.0-slim-stretch
+      - image: rust:1.44.0-slim-buster
     steps:
       - run:
           name: dependencies
@@ -24,7 +24,7 @@ jobs:
   wasm32:
     working_directory: ~/repo
     docker:
-      - image: rust:1.38.0-slim-stretch
+      - image: rust:1.44.0-slim-buster
     steps:
       - run:
           name: dependencies
@@ -142,7 +142,7 @@ jobs:
   lint:
     working_directory: ~/repo
     docker:
-      - image: rthz/rust-nightly-python37
+      - image: rust:1.44.0-buster
     steps:
       - checkout
 
@@ -150,8 +150,9 @@ jobs:
           name: dependencies
           command: |
             apt-get update
+            apt-get install -y python3-pip
             rustup component add rustfmt-preview
-            python -m pip install flake8 black
+            python3 -m pip install flake8 black
 
       - run:
           name: lint
