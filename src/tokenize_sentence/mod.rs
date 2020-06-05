@@ -14,22 +14,22 @@ use vtext::tokenize::*;
 use vtext::tokenize_sentence::*;
 let tokenizer = UnicodeSentenceTokenizer::default();
 let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
-assert_eq!(tokens, &["Here is one. ", "Here is another! ", "This trailing text is one more"];);
+assert_eq!(tokens, &["Here is one. ", "Here is another! ", "This trailing text is one more"]);
 ```
 Here `UnicodeSentenceTokenizerParams` object is a thin wrapper around the
 [unicode-segmentation](https://github.com/unicode-rs/unicode-segmentation) crate.
 
 */
 
-
 extern crate regex;
 extern crate unicode_segmentation;
 
-use crate::errors::VTextError;
 #[cfg(feature = "python")]
 use dict_derive::{FromPyObject, IntoPyObject};
-use crate::tokenize::Tokenizer;
 use unicode_segmentation::UnicodeSegmentation;
+
+use crate::errors::VTextError;
+use crate::tokenize::Tokenizer;
 
 #[cfg(test)]
 mod tests;
@@ -79,6 +79,3 @@ impl Tokenizer for UnicodeSentenceTokenizer {
         Box::new(text.split_sentence_bounds())
     }
 }
-
-
-

@@ -5,20 +5,18 @@
 // modified, or distributed except according to those terms.
 
 use crate::tokenize::Tokenizer;
-use crate::tokenize_sentence::{UnicodeSentenceTokenizerParams, UnicodeSentenceTokenizer};
+use crate::tokenize_sentence::{UnicodeSentenceTokenizer, UnicodeSentenceTokenizerParams};
 
 #[test]
 fn test_unicode_sentence_tokenizer() {
     let s = "Here is one. Here is another! This trailing text is one more";
 
-    let tokenizer = UnicodeSentenceTokenizerParams::default()
-        .build()
-        .unwrap();
+    let tokenizer = UnicodeSentenceTokenizerParams::default().build().unwrap();
     let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
     let b: &[_] = &[
         "Here is one. ",
         "Here is another! ",
-        "This trailing text is one more"
+        "This trailing text is one more",
     ];
     assert_eq!(tokens, b);
 
@@ -27,8 +25,7 @@ fn test_unicode_sentence_tokenizer() {
     let b: &[_] = &[
         "Here is one. ",
         "Here is another! ",
-        "This trailing text is one more"
+        "This trailing text is one more",
     ];
     assert_eq!(tokens, b);
 }
-
