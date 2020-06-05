@@ -151,6 +151,7 @@ jobs:
           command: |
             apt-get update
             apt-get install -y python3-pip
+            rustup component add rustfmt-preview
             python3 -m pip install flake8 black
 
       - run:
