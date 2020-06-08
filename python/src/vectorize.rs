@@ -5,6 +5,7 @@
 // modified, or distributed except according to those terms.
 
 use pyo3::prelude::*;
+use pyo3::types::PyAny;
 use pyo3::types::PyIterator;
 
 use ndarray::arr1;
@@ -18,7 +19,7 @@ fn iterable_to_collection(text: PyIterator) -> PyResult<Vec<String>> {
     // to a Rust iterator
 
     let collection: Result<Vec<_>, _> = text
-        .map(|doc| doc.and_then(ObjectProtocol::extract::<String>))
+        .map(|doc| doc.and_then(PyAny::extract::<String>))
         .collect();
     Ok(collection?)
 }
@@ -47,7 +48,7 @@ pub struct _HashingVectorizerWrapper {
 impl _HashingVectorizerWrapper {
     #[new]
     #[args(n_jobs = 1)]
-    fn new(obj: &PyRawObject, n_jobs: usize) {
+    fn new(n_jobs: usize) -> Self {
         let tokenizer = vtext::tokenize::RegexpTokenizer::default();
         let estimator = vtext::vectorize::HashingVectorizerParams::default()
             .tokenizer(tokenizer.clone())
@@ -55,7 +56,7 @@ impl _HashingVectorizerWrapper {
             .build()
             .unwrap();
 
-        obj.init(_HashingVectorizerWrapper { inner: estimator });
+        _HashingVectorizerWrapper { inner: estimator }
     }
 
     fn transform(&mut self, py: Python, x: PyObject) -> PyResult<PyCsrArray> {
@@ -78,14 +79,14 @@ pub struct _CountVectorizerWrapper {
 impl _CountVectorizerWrapper {
     #[new]
     #[args(n_jobs = 1)]
-    fn new(obj: &PyRawObject, n_jobs: usize) {
+    fn new(n_jobs: usize) -> Self {
         let tokenizer = vtext::tokenize::RegexpTokenizer::default();
         let estimator = vtext::vectorize::CountVectorizerParams::default()
             .tokenizer(tokenizer.clone())
             .n_jobs(n_jobs)
             .build()
             .unwrap();
-        obj.init(_CountVectorizerWrapper { inner: estimator });
+        _CountVectorizerWrapper { inner: estimator }
     }
 
     fn fit(&mut self, py: Python, x: PyObject) -> PyResult<()> {
@@ -97,7 +98,7 @@ impl _CountVectorizerWrapper {
         Ok(())
     }
 
-    fn get_n_features(&self) -> PyResult<(usize)> {
+    fn get_n_features(&self) -> PyResult<usize> {
         let n_features = self.inner.vocabulary.len();
         Ok(n_features)
     }
