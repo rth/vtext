@@ -24,30 +24,21 @@ def _pytest_ids(x):
 def test_unicode_sentence_tokenize():
 
     tokenizer = UnicodeSentenceTokenizer()
-    assert tokenizer.tokenize("Here is one. Here is another! This trailing text is one more") == [
-        "Here is one. ",
-        "Here is another! ",
-        "This trailing text is one more"
-    ]
+    assert tokenizer.tokenize(
+        "Here is one. Here is another! This trailing text is one more"
+    ) == ["Here is one. ", "Here is another! ", "This trailing text is one more"]
+
 
 @hypothesis.given(st.text())
 @pytest.mark.parametrize(
-    "tokenizer",
-    [
-        UnicodeSentenceTokenizer()
-    ],
-    ids=_pytest_ids,
+    "tokenizer", [UnicodeSentenceTokenizer()], ids=_pytest_ids,
 )
 def test_tokenize_edge_cases(tokenizer, txt):
     tokenizer.tokenize(txt)
 
 
 @pytest.mark.parametrize(
-    "tokenizer, expected",
-    [
-        (UnicodeSentenceTokenizer(), {}),
-    ],
-    ids=_pytest_ids,
+    "tokenizer, expected", [(UnicodeSentenceTokenizer(), {}),], ids=_pytest_ids,
 )
 def test_tokenize_get_params(tokenizer, expected):
     params = tokenizer.get_params()
