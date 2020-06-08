@@ -12,7 +12,6 @@ use vtext::tokenize_sentence::*;
 
 use crate::tokenize::BaseTokenizer;
 
-
 /// __init__(self, word_bounds=True)
 ///
 /// Unicode Segmentation tokenizer
@@ -38,9 +37,7 @@ impl UnicodeSentenceTokenizer {
             .unwrap();
 
         (
-            UnicodeSentenceTokenizer {
-                inner: tokenizer
-            },
+            UnicodeSentenceTokenizer { inner: tokenizer },
             BaseTokenizer::new(),
         )
     }
