@@ -7,23 +7,15 @@
 use pyo3::prelude::*;
 use pyo3::types::PyList;
 
-use vtext::tokenize::*;
+use vtext::tokenize::Tokenizer;
 use vtext::tokenize_sentence::*;
 
-#[pyclass]
-pub struct BaseTokenizer2 {}
+use crate::tokenize::BaseTokenizer;
 
-#[pymethods]
-impl BaseTokenizer2 {
-    #[new]
-    fn new(obj: &PyRawObject) {
-        obj.init(BaseTokenizer2 {});
-    }
-}
 
-/// __init__(self)
+/// __init__(self, word_bounds=True)
 ///
-/// Unicode Sentence tokenizer
+/// Unicode Segmentation tokenizer
 ///
 /// This implementation is a thin wrapper around the
 /// `unicode-segmentation <https://github.com/unicode-rs/unicode-segmentation>`_
@@ -32,7 +24,7 @@ impl BaseTokenizer2 {
 /// References
 /// ----------
 /// - `Unicode® Standard Annex #29 <http://www.unicode.org/reports/tr29/>`_
-#[pyclass(extends=BaseTokenizer2)]
+#[pyclass(extends=BaseTokenizer)]
 pub struct UnicodeSentenceTokenizer {
     inner: vtext::tokenize_sentence::UnicodeSentenceTokenizer,
 }
@@ -40,30 +32,33 @@ pub struct UnicodeSentenceTokenizer {
 #[pymethods]
 impl UnicodeSentenceTokenizer {
     #[new]
-    fn new(obj: &PyRawObject) {
+    fn new() -> (Self, BaseTokenizer) {
         let tokenizer = vtext::tokenize_sentence::UnicodeSentenceTokenizerParams::default()
             .build()
             .unwrap();
 
-        obj.init(UnicodeSentenceTokenizer {
-            inner: tokenizer,
-        });
+        (
+            UnicodeSentenceTokenizer {
+                inner: tokenizer
+            },
+            BaseTokenizer::new(),
+        )
     }
 
     /// tokenize(self, x)
     ///
-    /// Tokenize a string of sentences
+    /// Tokenize a string
     ///
     /// Parameters
     /// ----------
-    /// x : str
+    /// x : bool
     ///   the string to tokenize
     ///
     /// Returns
     /// -------
     /// tokens : List[str]
     ///    computed tokens
-    fn tokenize<'py>(&self, py: Python<'py>, x: &str) -> PyResult<(&'py PyList)> {
+    fn tokenize<'py>(&self, py: Python<'py>, x: &str) -> PyResult<&'py PyList> {
         let res: Vec<&str> = self.inner.tokenize(x).collect();
         let list = PyList::new(py, res);
         Ok(list)

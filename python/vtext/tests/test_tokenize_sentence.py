@@ -8,6 +8,7 @@ import pytest
 import hypothesis
 import hypothesis.strategies as st
 
+from vtext.tokenize import BaseTokenizer
 from vtext.tokenize_sentence import UnicodeSentenceTokenizer
 
 TOKENIZERS = [
@@ -33,7 +34,7 @@ def test_unicode_sentence_tokenize():
 @pytest.mark.parametrize(
     "tokenizer",
     [
-        UnicodeSentenceTokenizer
+        UnicodeSentenceTokenizer()
     ],
     ids=_pytest_ids,
 )
@@ -41,24 +42,20 @@ def test_tokenize_edge_cases(tokenizer, txt):
     tokenizer.tokenize(txt)
 
 
-# @pytest.mark.parametrize(
-#     "tokenizer, expected",
-#     [
-#         (RegexpTokenizer(), {"pattern": r"\b\w\w+\b"}),
-#         (CharacterTokenizer(), {"window_size": 4}),
-#         (UnicodeSegmentTokenizer(), {"word_bounds": True}),
-#         (VTextTokenizer("en"), {"lang": "en"}),
-#         (VTextTokenizer("fr"), {"lang": "fr"}),
-#     ],
-#     ids=_pytest_ids,
-# )
-# def test_tokenize_get_params(tokenizer, expected):
-#     params = tokenizer.get_params()
-#     assert params == expected
+@pytest.mark.parametrize(
+    "tokenizer, expected",
+    [
+        (UnicodeSentenceTokenizer(), {}),
+    ],
+    ids=_pytest_ids,
+)
+def test_tokenize_get_params(tokenizer, expected):
+    params = tokenizer.get_params()
+    assert params == expected
 
 
-# @pytest.mark.parametrize("Tokenizer", TOKENIZERS)
-# def test_tokenize_api(Tokenizer):
-#     assert issubclass(Tokenizer, BaseTokenizer)
-#     # check that we can initialize it without positional args
-#     Tokenizer()
+@pytest.mark.parametrize("Tokenizer", TOKENIZERS)
+def test_tokenize_api(Tokenizer):
+    assert issubclass(Tokenizer, BaseTokenizer)
+    # check that we can initialize it without positional args
+    Tokenizer()
