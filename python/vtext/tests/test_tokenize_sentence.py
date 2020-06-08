@@ -38,7 +38,7 @@ def test_tokenize_edge_cases(tokenizer, txt):
 
 
 @pytest.mark.parametrize(
-    "tokenizer, expected", [(UnicodeSentenceTokenizer(), {}),], ids=_pytest_ids,
+    "tokenizer, expected", [(UnicodeSentenceTokenizer(), {})], ids=_pytest_ids,
 )
 def test_tokenize_get_params(tokenizer, expected):
     params = tokenizer.get_params()
