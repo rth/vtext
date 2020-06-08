@@ -17,6 +17,7 @@ use pyo3::wrap_pyfunction;
 
 mod stem;
 mod tokenize;
+mod tokenize_sentence;
 mod vectorize;
 
 use vtext::metrics;
@@ -183,6 +184,7 @@ fn _lib(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<vectorize::_CountVectorizerWrapper>()?;
     m.add_class::<tokenize::BaseTokenizer>()?;
     m.add_class::<tokenize::UnicodeSegmentTokenizer>()?;
+    m.add_class::<tokenize_sentence::UnicodeSentenceTokenizer>()?;
     m.add_class::<tokenize::RegexpTokenizer>()?;
     m.add_class::<tokenize::VTextTokenizer>()?;
     m.add_class::<tokenize::CharacterTokenizer>()?;

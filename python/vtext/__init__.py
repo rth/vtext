@@ -7,9 +7,10 @@
 from . import _lib  # noqa
 from . import stem
 from . import tokenize
+from . import tokenize_sentence
 from . import vectorize
 from . import metrics
 
 __version__ = "0.1.0a3"
 
-__all__ = ["stem", "tokenize", "vectorize", "metrics"]
+__all__ = ["stem", "tokenize", "tokenize_sentence", "vectorize", "metrics"]

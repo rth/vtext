@@ -15,7 +15,7 @@ pub struct BaseTokenizer {}
 #[pymethods]
 impl BaseTokenizer {
     #[new]
-    fn new() -> Self {
+    pub fn new() -> Self {
         BaseTokenizer {}
     }
 }
