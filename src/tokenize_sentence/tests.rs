@@ -33,7 +33,7 @@ fn test_unicode_sentence_tokenizer() {
 }
 
 #[test]
-fn test_punct_sentence_tokenizer() {
+fn test_punctuation_sentence_tokenizer() {
     let s = "Here is one. Here is another? Bang!! This trailing text is one more";
 
     let tokenizer = PunctuationTokenizerParams::default().build().unwrap();

@@ -17,9 +17,10 @@ let s = "Here is one. Here is another? Bang!! This trailing text is one more";
 
 Using the Unicode sentence tokenizer we would get,
 ```rust
-#use vtext::tokenize::Tokenizer;
-#use vtext::tokenize_sentence::*;
-#let s = "Here is one. Here is another? Bang!! This trailing text is one more";
+# use vtext::tokenize::Tokenizer;
+# use vtext::tokenize_sentence::*;
+# let s = "Here is one. Here is another? Bang!! This trailing text is one more";
+
 let tokenizer = UnicodeSentenceTokenizer::default();
 let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
 assert_eq!(tokens, &["Here is one. ", "Here is another? ", "Bang!! ", "This trailing text is one more"]);
@@ -29,12 +30,13 @@ Here `UnicodeSentenceTokenizerParams` object is a thin wrapper around the
 
 Using the Punctuation sentence tokenizer we would get,
 ```rust
-#use vtext::tokenize::Tokenizer;
-#use vtext::tokenize_sentence::*;
-#let s = "Here is one. Here is another? Bang!! This trailing text is one more";
+# use vtext::tokenize::Tokenizer;
+# use vtext::tokenize_sentence::*;
+# let s = "Here is one. Here is another? Bang!! This trailing text is one more";
+
 let tokenizer = PunctuationTokenizer::default();
 let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
-assert_eq!(tokens, &["Here is one. ", "Here is another? ", "Bang!", "! " "This trailing text is one more"]);
+assert_eq!(tokens, &["Here is one. ", "Here is another? ", "Bang!", "! ", "This trailing text is one more"]);
 ```
 
 Notice the "Bang!!" is treated differently.
@@ -51,9 +53,7 @@ use unicode_segmentation::UnicodeSegmentation;
 use crate::errors::VTextError;
 use crate::tokenize::Tokenizer;
 
-use regex::Regex;
 use std::fmt;
-use std::str::CharIndices;
 
 #[cfg(test)]
 mod tests;
@@ -109,6 +109,12 @@ impl Tokenizer for UnicodeSentenceTokenizer {
 /// This simple tokenizer uses punctuation (default ".", "?", "!") to determine sentence boundaries.
 /// Trailing whitespace is also captured in the preceding sentence.
 ///
+/// # Arguments (PunctuationTokenizerParams)
+///
+/// * `punctuation` - a vector of punctuation tokens used to determine boundaries. Only the first "character" using the `chars` method is used.
+///
+/// * `whitespace` - a vector of whitespace tokens used to determine trailing sentence whitespace. Only the first "character" using the `chars` method is used.
+///
 #[derive(Clone)]
 pub struct PunctuationTokenizer {
     pub params: PunctuationTokenizerParams,
@@ -118,17 +124,17 @@ pub struct PunctuationTokenizer {
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "python", derive(FromPyObject, IntoPyObject))]
 pub struct PunctuationTokenizerParams {
-    punctuation: Vec<char>,
-    whitespace: Vec<char>,
+    punctuation: Vec<String>,
+    whitespace: Vec<String>,
 }
 
 impl PunctuationTokenizerParams {
-    pub fn punctuation(&mut self, punctuation: Vec<char>) -> PunctuationTokenizerParams {
-        self.punctuation = punctuation;
+    pub fn punctuation(&mut self, punctuation: Vec<String>) -> PunctuationTokenizerParams {
+        self.punctuation = punctuation.clone();
         self.clone()
     }
-    pub fn whitespace(&mut self, whitespace: Vec<char>) -> PunctuationTokenizerParams {
-        self.whitespace = whitespace;
+    pub fn whitespace(&mut self, whitespace: Vec<String>) -> PunctuationTokenizerParams {
+        self.whitespace = whitespace.clone();
         self.clone()
     }
     pub fn build(&mut self) -> Result<PunctuationTokenizer, VTextError> {
@@ -138,10 +144,10 @@ impl PunctuationTokenizerParams {
     }
 }
 
-macro_rules! vecChar {
+macro_rules! vecString {
     ($( $char:expr ),*) => {{
         vec![
-            $( $char.chars().next().unwrap(), )*
+            $( $char.to_string(), )*
         ]
     }}
 }
@@ -150,9 +156,9 @@ impl Default for PunctuationTokenizerParams {
     /// Create a new instance
     fn default() -> PunctuationTokenizerParams {
         PunctuationTokenizerParams {
-            punctuation: vecChar![".", "!", "?"],
+            punctuation: vecString![".", "!", "?"],
             // Whitespace: Space, Tab, Line feed, Carriage return, Line tabulation and Form feed
-            whitespace: vecChar![" ", "\t", "\n", "\r", "\u{000B}", "\u{000C}"],
+            whitespace: vecString![" ", "\t", "\n", "\r", "\u{000B}", "\u{000C}"],
         }
     }
 }
@@ -188,13 +194,17 @@ impl Tokenizer for PunctuationTokenizer {
 // Builder for PunctuationTokenizerIterator
 fn punctuation_sentence_iterator<'a>(
     text: &'a str,
-    punctuation: Vec<char>,
-    whitespace: Vec<char>,
+    punctuation: Vec<String>,
+    whitespace: Vec<String>,
 ) -> PunctuationTokenizerIterator<'a> {
+
+    let punctuation_chars: Vec<char> = punctuation.iter().map(|x| x.chars().next().unwrap()).collect();
+    let whitespace_chars: Vec<char> = whitespace.iter().map(|x| x.chars().next().unwrap()).collect();
+
     PunctuationTokenizerIterator {
         text: text,
-        punctuation: punctuation,
-        whitespace: whitespace,
+        punctuation: punctuation_chars,
+        whitespace: whitespace_chars,
         seen_punct: false,
         i: 0,
         span_end: 0,

@@ -14,7 +14,7 @@ use crate::tokenize::BaseTokenizer;
 
 /// __init__(self, word_bounds=True)
 ///
-/// Unicode Segmentation tokenizer
+/// Unicode sentence tokenizer
 ///
 /// This implementation is a thin wrapper around the
 /// `unicode-segmentation <https://github.com/unicode-rs/unicode-segmentation>`_
@@ -33,6 +33,65 @@ impl UnicodeSentenceTokenizer {
     #[new]
     fn new() -> (Self, BaseTokenizer) {
         let tokenizer = vtext::tokenize_sentence::UnicodeSentenceTokenizerParams::default()
+            .build()
+            .unwrap();
+
+        (
+            UnicodeSentenceTokenizer { inner: tokenizer },
+            BaseTokenizer::new(),
+        )
+    }
+
+    /// tokenize(self, x)
+    ///
+    /// Tokenize a string
+    ///
+    /// Parameters
+    /// ----------
+    /// x : bool
+    ///   the string to tokenize
+    ///
+    /// Returns
+    /// -------
+    /// tokens : List[str]
+    ///    computed tokens
+    fn tokenize<'py>(&self, py: Python<'py>, x: &str) -> PyResult<&'py PyList> {
+        let res: Vec<&str> = self.inner.tokenize(x).collect();
+        let list = PyList::new(py, res);
+        Ok(list)
+    }
+
+    /// get_params(self, x)
+    ///
+    /// Get parameters for this estimator.
+    ///
+    /// Returns
+    /// -------
+    /// params : mapping of string to any
+    ///          Parameter names mapped to their values.
+    fn get_params(&self) -> PyResult<UnicodeSentenceTokenizerParams> {
+        Ok(self.inner.params.clone())
+    }
+}
+
+/// __init__(self, word_bounds=True)
+///
+/// Punctuation sentence tokenizer
+///
+/// This simple tokenizer uses punctuation (default ".", "?", "!") to determine sentence boundaries.
+/// Trailing whitespace is also captured in the preceding sentence.
+///
+#[pyclass(extends=BaseTokenizer)]
+pub struct PunctuationTokenizer {
+    inner: vtext::tokenize_sentence::PunctuationTokenizer,
+}
+
+#[pymethods]
+impl PunctuationTokenizer {
+    #[new]
+    #[args(punctuation = [".", "!", "?"], whitespace = [" ", "\t", "\n", "\r", "\u{000B}", "\u{000C}"])]
+    fn new(punctuation: Vec<char>, whitespace: Vec<char>) -> (Self, BaseTokenizer) {
+        let tokenizer = vtext::tokenize_sentence::PunctuationTokenizerParams::default()
             .build()
             .unwrap();
 
