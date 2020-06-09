@@ -8,6 +8,7 @@ use pyo3::prelude::*;
 use pyo3::types::PyList;
 
 use vtext::tokenize::Tokenizer;
+
 use vtext::tokenize_sentence::*;
 
 use crate::tokenize::BaseTokenizer;
@@ -44,7 +45,7 @@ impl UnicodeSentenceTokenizer {
 
     /// tokenize(self, x)
     ///
-    /// Tokenize a string
+    /// Tokenize a string of sentences
     ///
     /// Parameters
     /// ----------
@@ -74,12 +75,30 @@ impl UnicodeSentenceTokenizer {
     }
 }
 
-/// __init__(self, word_bounds=True)
+// TODO: unsure how to import from `vtext::tokenize_sentence::vecString`
+#[macro_export]
+macro_rules! vecString {
+    ($( $char:expr ),*) => {{
+        vec![
+            $( $char.to_string(), )*
+        ]
+    }}
+}
+
+/// __init__(self, punctuation=[".", "?", "!"], whitespace=[" ", "\t", "\n", "\r", "\u000B", "\u000C"])
 ///
 /// Punctuation sentence tokenizer
 ///
 /// This simple tokenizer uses punctuation (default ".", "?", "!") to determine sentence boundaries.
 /// Trailing whitespace is also captured in the preceding sentence.
+///
+/// Parameters
+/// ----------
+/// punctuation : List[str]
+///   Punctuation tokens used to determine boundaries. Only the first unicode "character" is used.
+///
+/// whitespace : List[str]
+///   Whitespace tokens used to determine trailing sentence whitespace. Only the first unicode "character" is used.
 ///
 #[pyclass(extends=BaseTokenizer)]
 pub struct PunctuationTokenizer {
@@ -89,21 +108,23 @@ pub struct PunctuationTokenizer {
 #[pymethods]
 impl PunctuationTokenizer {
     #[new]
-    #[args(punctuation = [".", "!", "?"], whitespace = [" ", "\t", "\n", "\r", "\u{000B}", "\u{000C}"])]
-    fn new(punctuation: Vec<char>, whitespace: Vec<char>) -> (Self, BaseTokenizer) {
+    #[args(punctuation = "vecString![\".\", \"!\", \"?\"]", whitespace = "vecString![\" \", \"\\t\", \"\\n\", \"\\r\", \"\\u{000B}\", \"\\u{000C}\"]")]
+    fn new(punctuation: Vec<String>, whitespace: Vec<String>) -> (Self, BaseTokenizer) {
         let tokenizer = vtext::tokenize_sentence::PunctuationTokenizerParams::default()
+            .punctuation(punctuation)
+            .whitespace(whitespace)
             .build()
             .unwrap();
 
         (
-            UnicodeSentenceTokenizer { inner: tokenizer },
+            PunctuationTokenizer { inner: tokenizer },
             BaseTokenizer::new(),
         )
     }
 
     /// tokenize(self, x)
     ///
-    /// Tokenize a string
+    /// Tokenize a string of sentences
     ///
     /// Parameters
     /// ----------
@@ -128,7 +149,7 @@ impl PunctuationTokenizer {
     /// -------
     /// params : mapping of string to any
     ///          Parameter names mapped to their values.
-    fn get_params(&self) -> PyResult<UnicodeSentenceTokenizerParams> {
+    fn get_params(&self) -> PyResult<PunctuationTokenizerParams> {
         Ok(self.inner.params.clone())
     }
 }

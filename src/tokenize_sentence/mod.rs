@@ -111,9 +111,9 @@ impl Tokenizer for UnicodeSentenceTokenizer {
 ///
 /// # Arguments (PunctuationTokenizerParams)
 ///
-/// * `punctuation` - a vector of punctuation tokens used to determine boundaries. Only the first "character" using the `chars` method is used.
+/// * `punctuation` - Punctuation tokens used to determine boundaries. Only the first "character" using the `chars` method is used.
 ///
-/// * `whitespace` - a vector of whitespace tokens used to determine trailing sentence whitespace. Only the first "character" using the `chars` method is used.
+/// * `whitespace` - Whitespace tokens used to determine trailing sentence whitespace. Only the first "character" using the `chars` method is used.
 ///
 #[derive(Clone)]
 pub struct PunctuationTokenizer {
@@ -144,6 +144,7 @@ impl PunctuationTokenizerParams {
     }
 }
 
+#[macro_export]
 macro_rules! vecString {
     ($( $char:expr ),*) => {{
         vec![
