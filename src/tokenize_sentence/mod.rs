@@ -7,17 +7,37 @@
 /*!
 # Sentence tokenization module
 
-For instance let's tokenize the following text using the Unicode segmentation
+For instance let's tokenize the following text
 ```rust
-let s = "Here is one. Here is another! This trailing text is one more";
-use vtext::tokenize::*;
+use vtext::tokenize::Tokenizer;
 use vtext::tokenize_sentence::*;
+
+let s = "Here is one. Here is another? Bang!! This trailing text is one more";
+```
+
+Using the Unicode sentence tokenizer we would get,
+```rust
+#use vtext::tokenize::Tokenizer;
+#use vtext::tokenize_sentence::*;
+#let s = "Here is one. Here is another? Bang!! This trailing text is one more";
 let tokenizer = UnicodeSentenceTokenizer::default();
 let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
-assert_eq!(tokens, &["Here is one. ", "Here is another! ", "This trailing text is one more"]);
+assert_eq!(tokens, &["Here is one. ", "Here is another? ", "Bang!! ", "This trailing text is one more"]);
 ```
 Here `UnicodeSentenceTokenizerParams` object is a thin wrapper around the
 [unicode-segmentation](https://github.com/unicode-rs/unicode-segmentation) crate.
+
+Using the Punctuation sentence tokenizer we would get,
+```rust
+#use vtext::tokenize::Tokenizer;
+#use vtext::tokenize_sentence::*;
+#let s = "Here is one. Here is another? Bang!! This trailing text is one more";
+let tokenizer = PunctuationTokenizer::default();
+let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
+assert_eq!(tokens, &["Here is one. ", "Here is another? ", "Bang!", "! " "This trailing text is one more"]);
+```
+
+Notice the "Bang!!" is treated differently.
 
 */
 
@@ -31,10 +51,14 @@ use unicode_segmentation::UnicodeSegmentation;
 use crate::errors::VTextError;
 use crate::tokenize::Tokenizer;
 
+use regex::Regex;
+use std::fmt;
+use std::str::CharIndices;
+
 #[cfg(test)]
 mod tests;
 
-/// Unicode Sentence tokenizer
+/// Unicode sentence tokenizer
 ///
 /// This implementation is a thin wrapper around the
 /// `unicode-segmentation` crate
@@ -77,5 +101,167 @@ impl Tokenizer for UnicodeSentenceTokenizer {
     /// Tokenize a string
     fn tokenize<'a>(&self, text: &'a str) -> Box<dyn Iterator<Item = &'a str> + 'a> {
         Box::new(text.split_sentence_bounds())
+    }
+}
+
+/// Punctuation sentence tokenizer
+///
+/// This simple tokenizer uses punctuation (default ".", "?", "!") to determine sentence boundaries.
+/// Trailing whitespace is also captured in the preceding sentence.
+///
+#[derive(Clone)]
+pub struct PunctuationTokenizer {
+    pub params: PunctuationTokenizerParams,
+}
+
+/// Builder for the punctuation sentence tokenizer
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "python", derive(FromPyObject, IntoPyObject))]
+pub struct PunctuationTokenizerParams {
+    punctuation: Vec<char>,
+    whitespace: Vec<char>,
+}
+
+impl PunctuationTokenizerParams {
+    pub fn punctuation(&mut self, punctuation: Vec<char>) -> PunctuationTokenizerParams {
+        self.punctuation = punctuation;
+        self.clone()
+    }
+    pub fn whitespace(&mut self, whitespace: Vec<char>) -> PunctuationTokenizerParams {
+        self.whitespace = whitespace;
+        self.clone()
+    }
+    pub fn build(&mut self) -> Result<PunctuationTokenizer, VTextError> {
+        Ok(PunctuationTokenizer {
+            params: self.clone(),
+        })
+    }
+}
+
+macro_rules! vecChar {
+    ($( $char:expr ),*) => {{
+        vec![
+            $( $char.chars().next().unwrap(), )*
+        ]
+    }}
+}
+
+impl Default for PunctuationTokenizerParams {
+    /// Create a new instance
+    fn default() -> PunctuationTokenizerParams {
+        PunctuationTokenizerParams {
+            punctuation: vecChar![".", "!", "?"],
+            // Whitespace: Space, Tab, Line feed, Carriage return, Line tabulation and Form feed
+            whitespace: vecChar![" ", "\t", "\n", "\r", "\u{000B}", "\u{000C}"],
+        }
+    }
+}
+
+impl Default for PunctuationTokenizer {
+    /// Create a new instance
+    fn default() -> PunctuationTokenizer {
+        PunctuationTokenizerParams::default().build().unwrap()
+    }
+}
+
+impl fmt::Debug for PunctuationTokenizer {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "PunctuationTokenizer {{ punctuation: {:#?}, whitespace {:#?} }}",
+            self.params.punctuation, self.params.whitespace
+        )
+    }
+}
+
+impl Tokenizer for PunctuationTokenizer {
+    /// Tokenize a string
+    fn tokenize<'a>(&'a self, text: &'a str) -> Box<dyn Iterator<Item = &'a str> + 'a> {
+        Box::new(punctuation_sentence_iterator(
+            text,
+            self.params.punctuation.clone(),
+            self.params.whitespace.clone(),
+        ))
+    }
+}
+
+// Builder for PunctuationTokenizerIterator
+fn punctuation_sentence_iterator<'a>(
+    text: &'a str,
+    punctuation: Vec<char>,
+    whitespace: Vec<char>,
+) -> PunctuationTokenizerIterator<'a> {
+    PunctuationTokenizerIterator {
+        text: text,
+        punctuation: punctuation,
+        whitespace: whitespace,
+        seen_punct: false,
+        i: 0,
+        span_end: 0,
+    }
+}
+
+// PunctuationTokenizerIterator internal state
+struct PunctuationTokenizerIterator<'a> {
+    text: &'a str,
+    punctuation: Vec<char>,
+    whitespace: Vec<char>,
+    seen_punct: bool,
+    i: usize,
+    span_end: usize,
+}
+
+impl<'a> PunctuationTokenizerIterator<'a> {
+    // Slice `self.text` using byte start and end indices. Returns a string slice.
+    fn bytes_slice(&self, start: Option<usize>, end: Option<usize>) -> &'a str {
+        let bytes_array: &[u8];
+        if start.is_none() {
+            bytes_array = &self.text.as_bytes()[..end.unwrap()];
+        } else if end.is_none() {
+            bytes_array = &self.text.as_bytes()[start.unwrap()..];
+        } else if !end.is_none() & !start.is_none() {
+            bytes_array = &self.text.as_bytes()[start.unwrap()..end.unwrap()];
+        } else {
+            return self.text;
+        }
+        std::str::from_utf8(bytes_array).unwrap()
+    }
+}
+
+impl<'a> Iterator for PunctuationTokenizerIterator<'a> {
+    type Item = &'a str;
+
+    fn next(&mut self) -> Option<&'a str> {
+        let remaining_text = self.bytes_slice(Some(self.span_end), None);
+        let idx_offset = self.span_end;
+
+        // Process until a punctuation is encountered and trailing whitespace has finished
+        for (i, char) in remaining_text.char_indices() {
+            // idx_offset+i: bytes index of character
+            self.i = i + idx_offset;
+            let is_punct = self.punctuation.contains(&char);
+
+            if self.seen_punct {
+                let is_whitespace = self.whitespace.contains(&char);
+
+                if !is_whitespace {
+                    let span_start = self.span_end;
+                    self.span_end = idx_offset + i;
+                    self.seen_punct = false;
+                    return Some(self.bytes_slice(Some(span_start), Some(self.span_end)));
+                }
+            } else if is_punct {
+                self.seen_punct = true;
+            }
+        }
+
+        // Trailing text
+        if self.span_end < self.i {
+            let span_start = self.span_end;
+            self.span_end = self.i;
+            return Some(self.bytes_slice(Some(span_start), None));
+        }
+
+        None
     }
 }
