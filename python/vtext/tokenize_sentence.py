@@ -7,7 +7,4 @@
 from ._lib import UnicodeSentenceTokenizer, PunctuationTokenizer
 
 
-__all__ = [
-    "UnicodeSentenceTokenizer",
-    "PunctuationTokenizer"
-]
+__all__ = ["UnicodeSentenceTokenizer", "PunctuationTokenizer"]

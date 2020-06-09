@@ -11,10 +11,7 @@ import hypothesis.strategies as st
 from vtext.tokenize import BaseTokenizer
 from vtext.tokenize_sentence import UnicodeSentenceTokenizer, PunctuationTokenizer
 
-TOKENIZERS = [
-    UnicodeSentenceTokenizer,
-    PunctuationTokenizer
-]
+TOKENIZERS = [UnicodeSentenceTokenizer, PunctuationTokenizer]
 
 
 def _pytest_ids(x):
@@ -27,32 +24,49 @@ def test_unicode_sentence_tokenize():
     tokenizer = UnicodeSentenceTokenizer()
     assert tokenizer.tokenize(
         "Here is one. Here is another? Bang!! This trailing text is one more"
-    ) == ["Here is one. ", "Here is another? ", "Bang!! ", "This trailing text is one more"]
+    ) == [
+        "Here is one. ",
+        "Here is another? ",
+        "Bang!! ",
+        "This trailing text is one more",
+    ]
+
 
 def test_punctuation_sentence_tokenizer():
 
     tokenizer = PunctuationTokenizer()
     assert tokenizer.tokenize(
         "Here is one. Here is another? Bang!! This trailing text is one more"
-    ) == ["Here is one. ", "Here is another? ", "Bang!", "! ", "This trailing text is one more"]
+    ) == [
+        "Here is one. ",
+        "Here is another? ",
+        "Bang!",
+        "! ",
+        "This trailing text is one more",
+    ]
 
 
 @hypothesis.given(st.text())
 @pytest.mark.parametrize(
-    "tokenizer", [
-        UnicodeSentenceTokenizer(),
-        PunctuationTokenizer()
-    ], ids=_pytest_ids,
+    "tokenizer", [UnicodeSentenceTokenizer(), PunctuationTokenizer()], ids=_pytest_ids,
 )
 def test_tokenize_edge_cases(tokenizer, txt):
     tokenizer.tokenize(txt)
 
 
 @pytest.mark.parametrize(
-    "tokenizer, expected", [
+    "tokenizer, expected",
+    [
         (UnicodeSentenceTokenizer(), {}),
-        (PunctuationTokenizer(), {'punctuation': ['.', '!', '?'], 'whitespace': [" ", "\t", "\n", "\r", "\u000B", "\u000C"]})
-    ], ids=_pytest_ids,
+        (
+            PunctuationTokenizer(),
+            {
+                "punctuation": [".", "!", "?"],
+                "whitespace": [" ", "\t", "\n", "\r", "\u000B", "\u000C"],
+            },
+        ),
+    ],
+    ids=_pytest_ids,
 )
 def test_tokenize_get_params(tokenizer, expected):
     params = tokenizer.get_params()

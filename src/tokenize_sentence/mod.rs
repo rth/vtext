@@ -198,9 +198,14 @@ fn punctuation_sentence_iterator<'a>(
     punctuation: Vec<String>,
     whitespace: Vec<String>,
 ) -> PunctuationTokenizerIterator<'a> {
-
-    let punctuation_chars: Vec<char> = punctuation.iter().map(|x| x.chars().next().unwrap()).collect();
-    let whitespace_chars: Vec<char> = whitespace.iter().map(|x| x.chars().next().unwrap()).collect();
+    let punctuation_chars: Vec<char> = punctuation
+        .iter()
+        .map(|x| x.chars().next().unwrap())
+        .collect();
+    let whitespace_chars: Vec<char> = whitespace
+        .iter()
+        .map(|x| x.chars().next().unwrap())
+        .collect();
 
     PunctuationTokenizerIterator {
         text: text,

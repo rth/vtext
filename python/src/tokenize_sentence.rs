@@ -4,14 +4,11 @@
 // <http://apache.org/licenses/LICENSE-2.0>. This file may not be copied,
 // modified, or distributed except according to those terms.
 
+use crate::tokenize::BaseTokenizer;
 use pyo3::prelude::*;
 use pyo3::types::PyList;
-
 use vtext::tokenize::Tokenizer;
-
 use vtext::tokenize_sentence::*;
-
-use crate::tokenize::BaseTokenizer;
 
 /// __init__(self, word_bounds=True)
 ///
@@ -108,7 +105,10 @@ pub struct PunctuationTokenizer {
 #[pymethods]
 impl PunctuationTokenizer {
     #[new]
-    #[args(punctuation = "vecString![\".\", \"!\", \"?\"]", whitespace = "vecString![\" \", \"\\t\", \"\\n\", \"\\r\", \"\\u{000B}\", \"\\u{000C}\"]")]
+    #[args(
+        punctuation = "vecString![\".\", \"!\", \"?\"]",
+        whitespace = "vecString![\" \", \"\\t\", \"\\n\", \"\\r\", \"\\u{000B}\", \"\\u{000C}\"]"
+    )]
     fn new(punctuation: Vec<String>, whitespace: Vec<String>) -> (Self, BaseTokenizer) {
         let tokenizer = vtext::tokenize_sentence::PunctuationTokenizerParams::default()
             .punctuation(punctuation)
