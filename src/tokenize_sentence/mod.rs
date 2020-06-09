@@ -230,17 +230,23 @@ struct PunctuationTokenizerIterator<'a> {
 impl<'a> PunctuationTokenizerIterator<'a> {
     // Slice `self.text` using byte start and end indices. Returns a string slice.
     fn bytes_slice(&self, start: Option<usize>, end: Option<usize>) -> &'a str {
-        let bytes_array: &[u8];
+        // View string as bytes array
+        let bytes = self.text.as_bytes();
+        let bytes_span: &[u8];
+
+        // Slice array
         if start.is_none() {
-            bytes_array = &self.text.as_bytes()[..end.unwrap()];
+            bytes_span = &bytes[..end.unwrap()];
         } else if end.is_none() {
-            bytes_array = &self.text.as_bytes()[start.unwrap()..];
+            bytes_span = &bytes[start.unwrap()..];
         } else if !end.is_none() & !start.is_none() {
-            bytes_array = &self.text.as_bytes()[start.unwrap()..end.unwrap()];
+            bytes_span = &bytes[start.unwrap()..end.unwrap()];
         } else {
             return self.text;
         }
-        std::str::from_utf8(bytes_array).unwrap()
+
+        // View slice as str
+        std::str::from_utf8(bytes_span).unwrap()
     }
 }
 
@@ -264,7 +270,11 @@ impl<'a> Iterator for PunctuationTokenizerIterator<'a> {
                     let span_start = self.span_end;
                     self.span_end = idx_offset + i;
                     self.seen_punct = false;
-                    return Some(self.bytes_slice(Some(span_start), Some(self.span_end)));
+                    let span = self.bytes_slice(Some(span_start), Some(self.span_end));
+                    if span.len() > 0 {
+                        // Dont output if bytes represent 0 characters
+                        return Some(span);
+                    }
                 }
             } else if is_punct {
                 self.seen_punct = true;
@@ -275,7 +285,11 @@ impl<'a> Iterator for PunctuationTokenizerIterator<'a> {
         if self.span_end < self.i {
             let span_start = self.span_end;
             self.span_end = self.i;
-            return Some(self.bytes_slice(Some(span_start), None));
+            let span = self.bytes_slice(Some(span_start), None);
+            if span.len() > 0 {
+                // Dont output if bytes represent 0 characters
+                return Some(span);
+            }
         }
 
         None
