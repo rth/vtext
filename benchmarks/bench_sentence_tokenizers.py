@@ -24,14 +24,8 @@ if __name__ == "__main__":
 
     db = [
         (r"Python re.split('(?<=[!.?])', ...)", regexp_tokenizer),
-        (
-            "UnicodeSentenceTokenizer()",
-            UnicodeSentenceTokenizer().tokenize,
-        ),
-        (
-            "PunctuationTokenizer()",
-            PunctuationTokenizer().tokenize,
-        ),
+        ("UnicodeSentenceTokenizer()", UnicodeSentenceTokenizer().tokenize,),
+        ("PunctuationTokenizer()", PunctuationTokenizer().tokenize,),
     ]
 
     for label, func in db:
