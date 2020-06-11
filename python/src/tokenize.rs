@@ -6,6 +6,8 @@
 
 use pyo3::prelude::*;
 use pyo3::types::PyList;
+use pyo3::types::{PyBytes, PyTuple};
+use bincode::{deserialize, serialize};
 
 use vtext::tokenize::*;
 
@@ -31,8 +33,9 @@ impl BaseTokenizer {
 /// References
 /// ----------
 /// - `Unicode® Standard Annex #29 <http://www.unicode.org/reports/tr29/>`_
-#[pyclass(extends=BaseTokenizer)]
+#[pyclass(extends=BaseTokenizer, module="vtext.tokenize")]
 pub struct UnicodeSegmentTokenizer {
+    #[pyo3(get, set)]
     pub word_bounds: bool,
     inner: vtext::tokenize::UnicodeSegmentTokenizer,
 }
@@ -85,6 +88,20 @@ impl UnicodeSegmentTokenizer {
     ///          Parameter names mapped to their values.
     fn get_params(&self) -> PyResult<UnicodeSegmentTokenizerParams> {
         Ok(self.inner.params.clone())
+    }
+
+    pub fn __getstate__(&self, py: Python) -> PyResult<PyObject> {
+        Ok(PyBytes::new(py, &serialize(&self.word_bounds).unwrap()).to_object(py))
+    }
+
+    pub fn __setstate__(&mut self, py: Python, state: PyObject) -> PyResult<()> {
+        match state.extract::<&PyBytes>(py) {
+            Ok(s) => {
+                self.word_bounds = deserialize(s.as_bytes()).unwrap();
+                Ok(())
+            }
+            Err(e) => Err(e),
+        }
     }
 }
 
