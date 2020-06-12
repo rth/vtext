@@ -13,6 +13,7 @@ from vtext.tokenize import (
     VTextTokenizer,
 )
 from vtext.tokenize_sentence import UnicodeSentenceTokenizer, PunctuationTokenizer
+from vtext.stem import SnowballStemmer
 
 
 TOKENIZERS = [
@@ -23,9 +24,10 @@ TOKENIZERS = [
 ]
 
 SENTENCE_TOKENIZERS = [UnicodeSentenceTokenizer, PunctuationTokenizer]
+STEMMERS = [SnowballStemmer]
 
 
-@pytest.mark.parametrize("Estimator", TOKENIZERS + SENTENCE_TOKENIZERS)
+@pytest.mark.parametrize("Estimator", TOKENIZERS + SENTENCE_TOKENIZERS + STEMMERS)
 def test_pickle(Estimator):
     est = Estimator()
     params_ref = est.get_params()
