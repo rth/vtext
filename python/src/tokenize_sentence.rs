@@ -11,6 +11,7 @@ use vtext::tokenize::Tokenizer;
 use vtext::tokenize_sentence::*;
 
 use crate::tokenize::BaseTokenizer;
+use crate::utils::{deserialize_params, serialize_params};
 
 /// __init__(self, word_bounds=True)
 ///
@@ -23,7 +24,7 @@ use crate::tokenize::BaseTokenizer;
 /// References
 /// ----------
 /// - `Unicode® Standard Annex #29 <http://www.unicode.org/reports/tr29/>`_
-#[pyclass(extends=BaseTokenizer)]
+#[pyclass(extends=BaseTokenizer, module="vtext.tokenize_sentence")]
 pub struct UnicodeSentenceTokenizer {
     inner: vtext::tokenize_sentence::UnicodeSentenceTokenizer,
 }
@@ -71,5 +72,15 @@ impl UnicodeSentenceTokenizer {
     ///          Parameter names mapped to their values.
     fn get_params(&self) -> PyResult<UnicodeSentenceTokenizerParams> {
         Ok(self.inner.params.clone())
+    }
+
+    pub fn __getstate__(&self, py: Python) -> PyResult<PyObject> {
+        serialize_params(&self.inner.params, py)
+    }
+
+    pub fn __setstate__(&mut self, py: Python, state: PyObject) -> PyResult<()> {
+        let mut params: UnicodeSentenceTokenizerParams = deserialize_params(py, state)?;
+        self.inner = params.build().unwrap();
+        Ok(())
     }
 }

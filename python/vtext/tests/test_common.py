@@ -1,12 +1,16 @@
 import pickle
 import pytest
 from vtext.tokenize import CharacterTokenizer, RegexpTokenizer, UnicodeSegmentTokenizer, VTextTokenizer
+from vtext.tokenize_sentence import UnicodeSentenceTokenizer 
 
 
-@pytest.mark.parametrize('Estimator', [
-    UnicodeSegmentTokenizer,
-    #CharacterTokenizer, #RegexpTokenizer, UnicodeSegmentTokenizer, VTextTokenizer
-])
+TOKENIZERS = [
+    CharacterTokenizer, RegexpTokenizer, UnicodeSegmentTokenizer, VTextTokenizer
+    ]
+
+SENTENCE_TOKENIZERS = [UnicodeSentenceTokenizer]
+
+@pytest.mark.parametrize('Estimator', TOKENIZERS + SENTENCE_TOKENIZERS)
 def test_pickle(Estimator):
     est = Estimator()
 

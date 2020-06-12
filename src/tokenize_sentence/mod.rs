@@ -26,6 +26,7 @@ extern crate unicode_segmentation;
 
 #[cfg(feature = "python")]
 use dict_derive::{FromPyObject, IntoPyObject};
+use serde::{Deserialize, Serialize};
 use unicode_segmentation::UnicodeSegmentation;
 
 use crate::errors::VTextError;
@@ -48,7 +49,7 @@ pub struct UnicodeSentenceTokenizer {
 }
 
 /// Builder for the unicode segmentation tokenizer
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "python", derive(FromPyObject, IntoPyObject))]
 pub struct UnicodeSentenceTokenizerParams {}
 
