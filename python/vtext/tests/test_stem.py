@@ -14,7 +14,7 @@ def test_snowball_stemmer():
 
 def test_snowball_stemmer_get_params():
     est = SnowballStemmer()
-    assert est.get_params() == {'lang': 'english'}
+    assert est.get_params() == {"lang": "english"}
 
 
 def test_snowball_stemmer_input_validation():

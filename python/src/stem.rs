@@ -4,10 +4,10 @@
 // <http://apache.org/licenses/LICENSE-2.0>. This file may not be copied,
 // modified, or distributed except according to those terms.
 
+use crate::utils::{deserialize_params, serialize_params};
 use pyo3::exceptions;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
-use crate::utils::{deserialize_params, serialize_params};
 
 /// __init__(self, lang='english')
 ///
@@ -16,7 +16,7 @@ use crate::utils::{deserialize_params, serialize_params};
 /// Wraps the rust-stemmers crate that uses an implementation generated
 /// by the `Snowball compiler <https://github.com/snowballstem/snowball>`_
 /// for Rust.
-#[pyclass(module="vtext.stem")]
+#[pyclass(module = "vtext.stem")]
 pub struct SnowballStemmer {
     pub lang: String,
     inner: rust_stemmers::Stemmer,
@@ -52,7 +52,6 @@ impl SnowballStemmer {
     #[new]
     #[args(lang = "\"english\"")]
     fn new(lang: &str) -> PyResult<Self> {
-
         let algorithm = get_algorithm(lang)?;
         let stemmer = rust_stemmers::Stemmer::create(algorithm);
 
