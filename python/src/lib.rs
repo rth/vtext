@@ -186,6 +186,7 @@ fn _lib(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<tokenize::BaseTokenizer>()?;
     m.add_class::<tokenize::UnicodeSegmentTokenizer>()?;
     m.add_class::<tokenize_sentence::UnicodeSentenceTokenizer>()?;
+    m.add_class::<tokenize_sentence::PunctuationTokenizer>()?;
     m.add_class::<tokenize::RegexpTokenizer>()?;
     m.add_class::<tokenize::VTextTokenizer>()?;
     m.add_class::<tokenize::CharacterTokenizer>()?;
