@@ -41,6 +41,23 @@ assert_eq!(tokens, &["Here is one. ", "Here is another? ", "Bang!", "! ", "This 
 
 Notice the "Bang!!" is treated differently.
 
+You can easily customise the `PunctuationTokenizer` to work with other languages. For example,
+```rust
+# use vtext::tokenize::Tokenizer;
+# use vtext::tokenize_sentence::*;
+use vtext::vecString;
+
+let s = "বৃহত্তম ভাষা। বাংলা";
+let punctuation = vecString!['।'];
+
+let tokenizer = PunctuationTokenizerParams::default().punctuation(punctuation).build().unwrap();
+let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
+assert_eq!(tokens, &["বৃহত্তম ভাষা। ", "বাংলা"]);
+```
+
+Refer to the [test cases](https://github.com/rth/vtext/blob/master/src/tokenize_sentence/tests.rs)
+for further langauge examples.
+
 */
 
 extern crate regex;
