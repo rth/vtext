@@ -10,6 +10,9 @@ use pyo3::types::PyList;
 use vtext::tokenize::Tokenizer;
 use vtext::tokenize_sentence::*;
 
+// macro located `vtext::tokenize_sentence::vecString`
+use vtext::vecString;
+
 /// __init__(self, word_bounds=True)
 ///
 /// Unicode sentence tokenizer
@@ -72,17 +75,7 @@ impl UnicodeSentenceTokenizer {
     }
 }
 
-// TODO: unsure how to import from `vtext::tokenize_sentence::vecString`
-#[macro_export]
-macro_rules! vecString {
-    ($( $char:expr ),*) => {{
-        vec![
-            $( $char.to_string(), )*
-        ]
-    }}
-}
-
-/// __init__(self, punctuation=[".", "?", "!"], whitespace=[" ", "\t", "\n", "\r", "\u000B", "\u000C"])
+/// __init__(self, punctuation=[".", "?", "!"])
 ///
 /// Punctuation sentence tokenizer
 ///
@@ -94,8 +87,6 @@ macro_rules! vecString {
 /// punctuation : List[str]
 ///   Punctuation tokens used to determine boundaries. Only the first unicode "character" is used.
 ///
-/// whitespace : List[str]
-///   Whitespace tokens used to determine trailing sentence whitespace. Only the first unicode "character" is used.
 ///
 #[pyclass(extends=BaseTokenizer)]
 pub struct PunctuationTokenizer {
@@ -106,13 +97,12 @@ pub struct PunctuationTokenizer {
 impl PunctuationTokenizer {
     #[new]
     #[args(
-        punctuation = "vecString![\".\", \"!\", \"?\"]",
-        whitespace = "vecString![\" \", \"\\t\", \"\\n\", \"\\r\", \"\\u{000B}\", \"\\u{000C}\"]"
+        punctuation = "vecString![\".\", \"!\", \"?\"]"
     )]
-    fn new(punctuation: Vec<String>, whitespace: Vec<String>) -> (Self, BaseTokenizer) {
+    fn new(punctuation: Vec<String>) -> (Self, BaseTokenizer) {
+        let a = vecString!["."];
         let tokenizer = vtext::tokenize_sentence::PunctuationTokenizerParams::default()
             .punctuation(punctuation)
-            .whitespace(whitespace)
             .build()
             .unwrap();
 

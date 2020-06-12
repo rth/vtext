@@ -111,9 +111,9 @@ impl Tokenizer for UnicodeSentenceTokenizer {
 ///
 /// # Arguments (PunctuationTokenizerParams)
 ///
-/// * `punctuation` - Punctuation tokens used to determine boundaries. Only the first "character" using the `chars` method is used.
+/// * `punctuation` - Punctuation tokens used to determine boundaries. Only the first "character"
+///                   using the `chars` method is used.
 ///
-/// * `whitespace` - Whitespace tokens used to determine trailing sentence whitespace. Only the first "character" using the `chars` method is used.
 ///
 #[derive(Clone)]
 pub struct PunctuationTokenizer {
@@ -125,16 +125,11 @@ pub struct PunctuationTokenizer {
 #[cfg_attr(feature = "python", derive(FromPyObject, IntoPyObject))]
 pub struct PunctuationTokenizerParams {
     punctuation: Vec<String>,
-    whitespace: Vec<String>,
 }
 
 impl PunctuationTokenizerParams {
     pub fn punctuation(&mut self, punctuation: Vec<String>) -> PunctuationTokenizerParams {
         self.punctuation = punctuation.clone();
-        self.clone()
-    }
-    pub fn whitespace(&mut self, whitespace: Vec<String>) -> PunctuationTokenizerParams {
-        self.whitespace = whitespace.clone();
         self.clone()
     }
     pub fn build(&mut self) -> Result<PunctuationTokenizer, VTextError> {
@@ -158,8 +153,6 @@ impl Default for PunctuationTokenizerParams {
     fn default() -> PunctuationTokenizerParams {
         PunctuationTokenizerParams {
             punctuation: vecString![".", "!", "?"],
-            // Whitespace: Space, Tab, Line feed, Carriage return, Line tabulation and Form feed
-            whitespace: vecString![" ", "\t", "\n", "\r", "\u{000B}", "\u{000C}"],
         }
     }
 }
@@ -175,8 +168,8 @@ impl fmt::Debug for PunctuationTokenizer {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
-            "PunctuationTokenizer {{ punctuation: {:#?}, whitespace {:#?} }}",
-            self.params.punctuation, self.params.whitespace
+            "PunctuationTokenizer {{ punctuation: {:#?} }}",
+            self.params.punctuation
         )
     }
 }
@@ -187,7 +180,6 @@ impl Tokenizer for PunctuationTokenizer {
         Box::new(punctuation_sentence_iterator(
             text,
             self.params.punctuation.clone(),
-            self.params.whitespace.clone(),
         ))
     }
 }
@@ -196,13 +188,8 @@ impl Tokenizer for PunctuationTokenizer {
 fn punctuation_sentence_iterator<'a>(
     text: &'a str,
     punctuation: Vec<String>,
-    whitespace: Vec<String>,
 ) -> PunctuationTokenizerIterator<'a> {
     let punctuation_chars: Vec<char> = punctuation
-        .iter()
-        .map(|x| x.chars().next().unwrap())
-        .collect();
-    let whitespace_chars: Vec<char> = whitespace
         .iter()
         .map(|x| x.chars().next().unwrap())
         .collect();
@@ -210,7 +197,6 @@ fn punctuation_sentence_iterator<'a>(
     PunctuationTokenizerIterator {
         text: text,
         punctuation: punctuation_chars,
-        whitespace: whitespace_chars,
         seen_punct: false,
         i: 0,
         span_end: 0,
@@ -221,7 +207,6 @@ fn punctuation_sentence_iterator<'a>(
 struct PunctuationTokenizerIterator<'a> {
     text: &'a str,
     punctuation: Vec<char>,
-    whitespace: Vec<char>,
     seen_punct: bool,
     i: usize,
     span_end: usize,
@@ -258,13 +243,13 @@ impl<'a> Iterator for PunctuationTokenizerIterator<'a> {
         let idx_offset = self.span_end;
 
         // Process until a punctuation is encountered and trailing whitespace has finished
-        for (i, char) in remaining_text.char_indices() {
+        for (i, character) in remaining_text.char_indices() {
             // idx_offset+i: bytes index of character
             self.i = i + idx_offset;
-            let is_punct = self.punctuation.contains(&char);
+            let is_punct = self.punctuation.contains(&character);
 
             if self.seen_punct {
-                let is_whitespace = self.whitespace.contains(&char);
+                let is_whitespace = character.is_whitespace();
 
                 if !is_whitespace {
                     let span_start = self.span_end;
