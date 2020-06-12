@@ -5,7 +5,7 @@
 // modified, or distributed except according to those terms.
 
 use pyo3::prelude::*;
-use pyo3::types::{PyList, PyTuple};
+use pyo3::types::PyList;
 
 use crate::utils::{deserialize_params, serialize_params};
 use vtext::tokenize::*;
