@@ -18,6 +18,7 @@ use pyo3::wrap_pyfunction;
 mod stem;
 mod tokenize;
 mod tokenize_sentence;
+mod utils;
 mod vectorize;
 
 use vtext::metrics;

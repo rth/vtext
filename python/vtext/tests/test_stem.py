@@ -12,9 +12,9 @@ def test_snowball_stemmer():
     assert stemmer.stem("continuité") == "continu"
 
 
-def test_snowball_stemmer_api():
-    # check that not providing init parameters works
-    SnowballStemmer()
+def test_snowball_stemmer_get_params():
+    est = SnowballStemmer()
+    assert est.get_params() == {"lang": "english"}
 
 
 def test_snowball_stemmer_input_validation():

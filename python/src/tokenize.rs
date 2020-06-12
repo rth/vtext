@@ -7,9 +7,10 @@
 use pyo3::prelude::*;
 use pyo3::types::PyList;
 
+use crate::utils::{deserialize_params, serialize_params};
 use vtext::tokenize::*;
 
-#[pyclass]
+#[pyclass(module = "vtext.tokenize")]
 pub struct BaseTokenizer {}
 
 #[pymethods]
@@ -31,9 +32,8 @@ impl BaseTokenizer {
 /// References
 /// ----------
 /// - `Unicode® Standard Annex #29 <http://www.unicode.org/reports/tr29/>`_
-#[pyclass(extends=BaseTokenizer)]
+#[pyclass(extends=BaseTokenizer, module="vtext.tokenize")]
 pub struct UnicodeSegmentTokenizer {
-    pub word_bounds: bool,
     inner: vtext::tokenize::UnicodeSegmentTokenizer,
 }
 
@@ -48,10 +48,7 @@ impl UnicodeSegmentTokenizer {
             .unwrap();
 
         (
-            UnicodeSegmentTokenizer {
-                word_bounds: word_bounds,
-                inner: tokenizer,
-            },
+            UnicodeSegmentTokenizer { inner: tokenizer },
             BaseTokenizer::new(),
         )
     }
@@ -86,6 +83,16 @@ impl UnicodeSegmentTokenizer {
     fn get_params(&self) -> PyResult<UnicodeSegmentTokenizerParams> {
         Ok(self.inner.params.clone())
     }
+
+    pub fn __getstate__(&self, py: Python) -> PyResult<PyObject> {
+        serialize_params(&self.inner.params, py)
+    }
+
+    pub fn __setstate__(&mut self, py: Python, state: PyObject) -> PyResult<()> {
+        let mut params: UnicodeSegmentTokenizerParams = deserialize_params(py, state)?;
+        self.inner = params.build().unwrap();
+        Ok(())
+    }
 }
 
 /// __init__(self, lang="en")
@@ -104,9 +111,8 @@ impl UnicodeSegmentTokenizer {
 /// ----------
 ///
 /// - `Unicode® Standard Annex #29 <http://www.unicode.org/reports/tr29/>`_
-#[pyclass(extends=BaseTokenizer)]
+#[pyclass(extends=BaseTokenizer, module="vtext.tokenize")]
 pub struct VTextTokenizer {
-    pub lang: String,
     inner: vtext::tokenize::VTextTokenizer,
 }
 
@@ -120,13 +126,7 @@ impl VTextTokenizer {
             .build()
             .unwrap();
 
-        (
-            VTextTokenizer {
-                lang: lang.to_string(),
-                inner: tokenizer,
-            },
-            BaseTokenizer::new(),
-        )
+        (VTextTokenizer { inner: tokenizer }, BaseTokenizer::new())
     }
 
     /// tokenize(self, x)
@@ -159,14 +159,23 @@ impl VTextTokenizer {
     fn get_params(&self) -> PyResult<VTextTokenizerParams> {
         Ok(self.inner.params.clone())
     }
+
+    pub fn __getstate__(&self, py: Python) -> PyResult<PyObject> {
+        serialize_params(&self.inner.params, py)
+    }
+
+    pub fn __setstate__(&mut self, py: Python, state: PyObject) -> PyResult<()> {
+        let mut params: VTextTokenizerParams = deserialize_params(py, state)?;
+        self.inner = params.build().unwrap();
+        Ok(())
+    }
 }
 
 /// __init__(self, pattern=r'\\b\\w\\w+\\b')
 ///
 /// Tokenize a document using regular expressions
-#[pyclass(extends=BaseTokenizer)]
+#[pyclass(extends=BaseTokenizer, module="vtext.tokenize")]
 pub struct RegexpTokenizer {
-    pub pattern: String,
     inner: vtext::tokenize::RegexpTokenizer,
 }
 
@@ -180,13 +189,7 @@ impl RegexpTokenizer {
             .build()
             .unwrap();
 
-        (
-            RegexpTokenizer {
-                pattern: pattern.to_string(),
-                inner: inner,
-            },
-            BaseTokenizer::new(),
-        )
+        (RegexpTokenizer { inner: inner }, BaseTokenizer::new())
     }
 
     /// tokenize(self, x)
@@ -219,6 +222,16 @@ impl RegexpTokenizer {
     fn get_params(&self) -> PyResult<RegexpTokenizerParams> {
         Ok(self.inner.params.clone())
     }
+
+    pub fn __getstate__(&self, py: Python) -> PyResult<PyObject> {
+        serialize_params(&self.inner.params, py)
+    }
+
+    pub fn __setstate__(&mut self, py: Python, state: PyObject) -> PyResult<()> {
+        let mut params: RegexpTokenizerParams = deserialize_params(py, state)?;
+        self.inner = params.build().unwrap();
+        Ok(())
+    }
 }
 
 /// __init__(self, window_size=4)
@@ -237,9 +250,8 @@ impl RegexpTokenizer {
 /// >>> tokenizer.tokenize('fox can\'t')
 /// ['fox ', 'ox c', 'x ca', ' can', 'can\'', 'an\'t']
 ///
-#[pyclass(extends=BaseTokenizer)]
+#[pyclass(extends=BaseTokenizer, module="vtext.tokenize")]
 pub struct CharacterTokenizer {
-    pub window_size: usize,
     inner: vtext::tokenize::CharacterTokenizer,
 }
 
@@ -253,13 +265,7 @@ impl CharacterTokenizer {
             .build()
             .unwrap();
 
-        (
-            CharacterTokenizer {
-                window_size: window_size,
-                inner: inner,
-            },
-            BaseTokenizer::new(),
-        )
+        (CharacterTokenizer { inner: inner }, BaseTokenizer::new())
     }
 
     /// tokenize(self, x)
@@ -291,5 +297,15 @@ impl CharacterTokenizer {
     ///          Parameter names mapped to their values.
     fn get_params(&self) -> PyResult<CharacterTokenizerParams> {
         Ok(self.inner.params.clone())
+    }
+
+    pub fn __getstate__(&self, py: Python) -> PyResult<PyObject> {
+        serialize_params(&self.inner.params, py)
+    }
+
+    pub fn __setstate__(&mut self, py: Python, state: PyObject) -> PyResult<()> {
+        let mut params: CharacterTokenizerParams = deserialize_params(py, state)?;
+        self.inner = params.build().unwrap();
+        Ok(())
     }
 }
