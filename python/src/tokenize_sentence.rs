@@ -99,7 +99,7 @@ impl UnicodeSentenceTokenizer {
 ///   Punctuation tokens used to determine boundaries. Only the first unicode "character" is used.
 ///
 ///
-#[pyclass(extends=BaseTokenizer)]
+#[pyclass(extends=BaseTokenizer, module="vtext.tokenize_sentence")]
 pub struct PunctuationTokenizer {
     inner: vtext::tokenize_sentence::PunctuationTokenizer,
 }

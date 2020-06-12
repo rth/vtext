@@ -12,7 +12,7 @@ from vtext.tokenize import (
     UnicodeSegmentTokenizer,
     VTextTokenizer,
 )
-from vtext.tokenize_sentence import UnicodeSentenceTokenizer
+from vtext.tokenize_sentence import UnicodeSentenceTokenizer, PunctuationTokenizer
 
 
 TOKENIZERS = [
@@ -22,7 +22,7 @@ TOKENIZERS = [
     VTextTokenizer,
 ]
 
-SENTENCE_TOKENIZERS = [UnicodeSentenceTokenizer]
+SENTENCE_TOKENIZERS = [UnicodeSentenceTokenizer, PunctuationTokenizer]
 
 
 @pytest.mark.parametrize("Estimator", TOKENIZERS + SENTENCE_TOKENIZERS)
