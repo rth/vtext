@@ -37,6 +37,11 @@ fn test_punctuation_sentence_tokenizer() {
     ];
     assert_eq!(tokens, b);
 
+    let s = "Trailing punctuation!!";
+    let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
+    let b: &[_] = &["Trailing punctuation!", "!"];
+    assert_eq!(tokens, b);
+
     // String with characters longer than one byte and multi-code points
     let s2 = "y̆es? 这是另一个! 후행 텍스트";
 
@@ -68,6 +73,11 @@ fn test_unicode_sentence_tokenizer() {
         "Bang!! ",
         "This trailing text is one more",
     ];
+    assert_eq!(tokens, b);
+
+    let s = "Trailing punctuation!!";
+    let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
+    let b: &[_] = &["Trailing punctuation!!"];
     assert_eq!(tokens, b);
 }
 
@@ -235,7 +245,6 @@ fn test_punctuation_sentence_tokenizer_multi_lang() {
     assert_eq!(tokens, expected);
 }
 
-
 #[test]
 fn test_unicode_sentence_tokenizer_multi_lang() {
     // More complex unicode languages
@@ -372,4 +381,3 @@ fn test_unicode_sentence_tokenizer_multi_lang() {
     let tokens: Vec<&str> = tokenizer.tokenize(&s).collect();
     assert_eq!(tokens, expected);
 }
-

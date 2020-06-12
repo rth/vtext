@@ -200,6 +200,7 @@ fn punctuation_sentence_iterator<'a>(
         seen_punct: false,
         i: 0,
         span_end: 0,
+        bytes_len: text.as_bytes().len(),
     }
 }
 
@@ -210,6 +211,7 @@ struct PunctuationTokenizerIterator<'a> {
     seen_punct: bool,
     i: usize,
     span_end: usize,
+    bytes_len: usize,
 }
 
 impl<'a> PunctuationTokenizerIterator<'a> {
@@ -239,6 +241,10 @@ impl<'a> Iterator for PunctuationTokenizerIterator<'a> {
     type Item = &'a str;
 
     fn next(&mut self) -> Option<&'a str> {
+        if self.span_end >= self.bytes_len {
+            return None;
+        }
+
         let remaining_text = self.bytes_slice(Some(self.span_end), None);
         let idx_offset = self.span_end;
 
@@ -267,9 +273,9 @@ impl<'a> Iterator for PunctuationTokenizerIterator<'a> {
         }
 
         // Trailing text
-        if self.span_end < self.i {
+        if self.span_end < self.bytes_len {
             let span_start = self.span_end;
-            self.span_end = self.i;
+            self.span_end = self.bytes_len;
             let span = self.bytes_slice(Some(span_start), None);
             if span.len() > 0 {
                 // Dont output if bytes represent 0 characters

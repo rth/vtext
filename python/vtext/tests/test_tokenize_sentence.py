@@ -51,20 +51,15 @@ def test_punctuation_sentence_tokenizer():
     "tokenizer", [UnicodeSentenceTokenizer(), PunctuationTokenizer()], ids=_pytest_ids,
 )
 def test_tokenize_edge_cases(tokenizer, txt):
-    tokenizer.tokenize(txt)
+    tokens = tokenizer.tokenize(txt)
+    assert len("".join(tokens)) == len(txt)
 
 
 @pytest.mark.parametrize(
     "tokenizer, expected",
     [
         (UnicodeSentenceTokenizer(), {}),
-        (
-            PunctuationTokenizer(),
-            {
-                "punctuation": [".", "!", "?"],
-                "whitespace": [" ", "\t", "\n", "\r", "\u000B", "\u000C"],
-            },
-        ),
+        (PunctuationTokenizer(), {"punctuation": [".", "!", "?"]}),
     ],
     ids=_pytest_ids,
 )

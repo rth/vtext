@@ -96,11 +96,8 @@ pub struct PunctuationTokenizer {
 #[pymethods]
 impl PunctuationTokenizer {
     #[new]
-    #[args(
-        punctuation = "vecString![\".\", \"!\", \"?\"]"
-    )]
+    #[args(punctuation = "vecString![\".\", \"!\", \"?\"]")]
     fn new(punctuation: Vec<String>) -> (Self, BaseTokenizer) {
-        let a = vecString!["."];
         let tokenizer = vtext::tokenize_sentence::PunctuationTokenizerParams::default()
             .punctuation(punctuation)
             .build()
