@@ -25,6 +25,16 @@ vtext.tokenize
    tokenize.VTextTokenizer
    tokenize.CharacterTokenizer
 
+vtext.tokenize_sentence
+--------------
+
+.. currentmodule:: vtext
+
+.. autosummary::
+   :toctree: generated/
+
+   tokenize.UnicodeSentenceTokenizer
+   tokenize.PunctuationTokenizer
 
 vtext.vectorize
 ---------------
