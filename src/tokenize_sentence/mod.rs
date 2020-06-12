@@ -139,7 +139,7 @@ pub struct PunctuationTokenizer {
 }
 
 /// Builder for the punctuation sentence tokenizer
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "python", derive(FromPyObject, IntoPyObject))]
 pub struct PunctuationTokenizerParams {
     punctuation: Vec<String>,

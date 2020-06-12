@@ -10,7 +10,6 @@ use pyo3::types::PyList;
 use vtext::tokenize::Tokenizer;
 use vtext::tokenize_sentence::*;
 
-use crate::tokenize::BaseTokenizer;
 use crate::utils::{deserialize_params, serialize_params};
 // macro located `vtext::tokenize_sentence::vecString`
 use vtext::vecString;
@@ -150,5 +149,15 @@ impl PunctuationTokenizer {
     ///          Parameter names mapped to their values.
     fn get_params(&self) -> PyResult<PunctuationTokenizerParams> {
         Ok(self.inner.params.clone())
+    }
+
+    pub fn __getstate__(&self, py: Python) -> PyResult<PyObject> {
+        serialize_params(&self.inner.params, py)
+    }
+
+    pub fn __setstate__(&mut self, py: Python, state: PyObject) -> PyResult<()> {
+        let mut params: PunctuationTokenizerParams = deserialize_params(py, state)?;
+        self.inner = params.build().unwrap();
+        Ok(())
     }
 }
