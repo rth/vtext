@@ -68,7 +68,7 @@ use dict_derive::{FromPyObject, IntoPyObject};
 use serde::{Deserialize, Serialize};
 use unicode_segmentation::UnicodeSegmentation;
 
-use crate::errors::VTextError;
+use crate::errors::EstimatorErr;
 use crate::tokenize::Tokenizer;
 
 use std::fmt;
@@ -95,7 +95,7 @@ pub struct UnicodeSentenceTokenizer {
 pub struct UnicodeSentenceTokenizerParams {}
 
 impl UnicodeSentenceTokenizerParams {
-    pub fn build(&mut self) -> Result<UnicodeSentenceTokenizer, VTextError> {
+    pub fn build(&mut self) -> Result<UnicodeSentenceTokenizer, EstimatorErr> {
         Ok(UnicodeSentenceTokenizer {
             params: self.clone(),
         })
@@ -150,7 +150,7 @@ impl PunctuationTokenizerParams {
         self.punctuation = punctuation.clone();
         self.clone()
     }
-    pub fn build(&mut self) -> Result<PunctuationTokenizer, VTextError> {
+    pub fn build(&mut self) -> Result<PunctuationTokenizer, EstimatorErr> {
         Ok(PunctuationTokenizer {
             params: self.clone(),
         })

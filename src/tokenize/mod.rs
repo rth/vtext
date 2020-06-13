@@ -50,7 +50,7 @@ assert_eq!(tokens, &["The", "“", "brown", "”", "fox", "ca", "n't", "jump", "
 extern crate regex;
 extern crate unicode_segmentation;
 
-use crate::errors::VTextError;
+use crate::errors::EstimatorErr;
 #[cfg(feature = "python")]
 use dict_derive::{FromPyObject, IntoPyObject};
 use regex::Regex;
@@ -85,9 +85,9 @@ impl RegexpTokenizerParams {
         self.pattern = value.to_string();
         self.clone()
     }
-    pub fn build(&mut self) -> Result<RegexpTokenizer, VTextError> {
+    pub fn build(&mut self) -> Result<RegexpTokenizer, EstimatorErr> {
         let pattern = &self.pattern;
-        let regexp = Regex::new(pattern).unwrap();
+        let regexp = Regex::new(pattern)?;
         Ok(RegexpTokenizer {
             params: self.clone(),
             regexp,
@@ -149,7 +149,7 @@ impl UnicodeSegmentTokenizerParams {
         self.word_bounds = value;
         self.clone()
     }
-    pub fn build(&mut self) -> Result<UnicodeSegmentTokenizer, VTextError> {
+    pub fn build(&mut self) -> Result<UnicodeSegmentTokenizer, EstimatorErr> {
         Ok(UnicodeSegmentTokenizer {
             params: self.clone(),
         })
@@ -211,7 +211,7 @@ impl VTextTokenizerParams {
         self.lang = value.to_string();
         self.clone()
     }
-    pub fn build(&mut self) -> Result<VTextTokenizer, VTextError> {
+    pub fn build(&mut self) -> Result<VTextTokenizer, EstimatorErr> {
         let lang = match &self.lang[..] {
             "en" | "fr" => &self.lang[..],
             _ => {
@@ -372,7 +372,7 @@ impl CharacterTokenizerParams {
         self.window_size = value;
         self.clone()
     }
-    pub fn build(&mut self) -> Result<CharacterTokenizer, VTextError> {
+    pub fn build(&mut self) -> Result<CharacterTokenizer, EstimatorErr> {
         Ok(CharacterTokenizer {
             params: self.clone(),
         })

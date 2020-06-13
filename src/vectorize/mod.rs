@@ -25,7 +25,7 @@ let X = vectorizer.fit_transform(&documents);
 // returns a sparse CSR matrix with document-terms counts
 */
 
-use crate::errors::VTextError;
+use crate::errors::EstimatorErr;
 use crate::math::CSRArray;
 use crate::tokenize::Tokenizer;
 
@@ -109,7 +109,7 @@ impl<T: Tokenizer + Clone> CountVectorizerParams<T> {
         self.n_jobs = value;
         self.clone()
     }
-    pub fn build(&mut self) -> Result<CountVectorizer<T>, VTextError> {
+    pub fn build(&mut self) -> Result<CountVectorizer<T>, EstimatorErr> {
         if self.n_jobs < 1 {
             panic!("n_jobs={} must be > 0", self.n_jobs);
         }
@@ -344,7 +344,7 @@ impl<T: Tokenizer + Clone> HashingVectorizerParams<T> {
         self.n_jobs = value;
         self.clone()
     }
-    pub fn build(&mut self) -> Result<HashingVectorizer<T>, VTextError> {
+    pub fn build(&mut self) -> Result<HashingVectorizer<T>, EstimatorErr> {
         if self.n_jobs < 1 {
             panic!("n_jobs={} must be > 0", self.n_jobs);
         }
