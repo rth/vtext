@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Added Python 3.8 wheel generation [#65](https://github.com/rth/vtext/pull/65)
 - Tokenizers can now be pickled in Python [#73](https://github.com/rth/vtext/pull/73)
 - Only Python 3.6+ is now supported in the Python package.
+- Renamed `UnicodeSegmentTokenizer` to `UnicodeWordTokenizer`.
 
 ### Contributors
 

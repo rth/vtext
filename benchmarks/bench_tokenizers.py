@@ -4,7 +4,7 @@ from pathlib import Path
 import re
 
 from vtext.tokenize import RegexpTokenizer
-from vtext.tokenize import UnicodeSegmentTokenizer
+from vtext.tokenize import UnicodeWordTokenizer
 from vtext.tokenize import VTextTokenizer
 from vtext.tokenize import CharacterTokenizer
 
@@ -50,12 +50,12 @@ if __name__ == "__main__":
             RegexpTokenizer(pattern=token_regexp).tokenize,
         ),
         (
-            "UnicodeSegmentTokenizer(word_bounds=False)",
-            UnicodeSegmentTokenizer(word_bounds=False).tokenize,
+            "UnicodeWordTokenizer(word_bounds=False)",
+            UnicodeWordTokenizer(word_bounds=False).tokenize,
         ),
         (
-            "UnicodeSegmentTokenizer(word_bounds=True)",
-            UnicodeSegmentTokenizer(word_bounds=True).tokenize,
+            "UnicodeWordTokenizer(word_bounds=True)",
+            UnicodeWordTokenizer(word_bounds=True).tokenize,
         ),
         ("VTextTokenizer('en')", VTextTokenizer("en").tokenize),
         ("CharacterTokenizer(4)", CharacterTokenizer(4).tokenize),

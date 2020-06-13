@@ -7,7 +7,7 @@ import conllu
 import pandas as pd
 import numpy as np
 
-from vtext.tokenize import UnicodeSegmentTokenizer, VTextTokenizer
+from vtext.tokenize import UnicodeWordTokenizer, VTextTokenizer
 
 try:
     import sacremoses
@@ -70,7 +70,7 @@ tok_db = [
     ("regexp", lambda lang: re.compile(r"\b\w\w+\b").findall),
     (
         "unicode-segmentation",
-        lambda lang: UnicodeSegmentTokenizer(word_bounds=True).tokenize,
+        lambda lang: UnicodeWordTokenizer(word_bounds=True).tokenize,
     ),
     ("vtext", lambda lang: VTextTokenizer(lang).tokenize),
 ]

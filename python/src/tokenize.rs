@@ -33,21 +33,21 @@ impl BaseTokenizer {
 /// ----------
 /// - `Unicode® Standard Annex #29 <http://www.unicode.org/reports/tr29/>`_
 #[pyclass(extends=BaseTokenizer, module="vtext.tokenize")]
-pub struct UnicodeSegmentTokenizer {
-    inner: vtext::tokenize::UnicodeSegmentTokenizer,
+pub struct UnicodeWordTokenizer {
+    inner: vtext::tokenize::UnicodeWordTokenizer,
 }
 
 #[pymethods]
-impl UnicodeSegmentTokenizer {
+impl UnicodeWordTokenizer {
     #[new]
     #[args(word_bounds = true)]
     fn new(word_bounds: bool) -> PyResult<(Self, BaseTokenizer)> {
-        let tokenizer = vtext::tokenize::UnicodeSegmentTokenizerParams::default()
+        let tokenizer = vtext::tokenize::UnicodeWordTokenizerParams::default()
             .word_bounds(word_bounds)
             .build()?;
 
         Ok((
-            UnicodeSegmentTokenizer { inner: tokenizer },
+            UnicodeWordTokenizer { inner: tokenizer },
             BaseTokenizer::new(),
         ))
     }
@@ -79,7 +79,7 @@ impl UnicodeSegmentTokenizer {
     /// -------
     /// params : mapping of string to any
     ///          Parameter names mapped to their values.
-    fn get_params(&self) -> PyResult<UnicodeSegmentTokenizerParams> {
+    fn get_params(&self) -> PyResult<UnicodeWordTokenizerParams> {
         Ok(self.inner.params.clone())
     }
 
@@ -88,7 +88,7 @@ impl UnicodeSegmentTokenizer {
     }
 
     pub fn __setstate__(&mut self, py: Python, state: PyObject) -> PyResult<()> {
-        let mut params: UnicodeSegmentTokenizerParams = deserialize_params(py, state)?;
+        let mut params: UnicodeWordTokenizerParams = deserialize_params(py, state)?;
         self.inner = params.build()?;
         Ok(())
     }
