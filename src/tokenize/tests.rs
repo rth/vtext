@@ -20,7 +20,7 @@ fn test_regexp_tokenizer() {
 fn test_unicode_tokenizer() {
     let s = "The quick (\"brown\") fox can't jump 32.3 feet, right?";
 
-    let tokenizer = UnicodeSegmentTokenizerParams::default()
+    let tokenizer = UnicodeWordTokenizerParams::default()
         .word_bounds(false)
         .build()
         .unwrap();
@@ -30,7 +30,7 @@ fn test_unicode_tokenizer() {
     ];
     assert_eq!(tokens, b);
 
-    let tokenizer = UnicodeSegmentTokenizer::default();
+    let tokenizer = UnicodeWordTokenizer::default();
     let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
     let b: &[_] = &[
         "The", "quick", "(", "\"", "brown", "\"", ")", "fox", "can't", "jump", "32.3", "feet", ",",
@@ -121,6 +121,6 @@ fn test_character_tokenizer() {
 
 #[test]
 fn test_tokenizer_defaults() {
-    let tokenizer = UnicodeSegmentTokenizer::default();
+    let tokenizer = UnicodeWordTokenizer::default();
     assert_eq!(tokenizer.params.word_bounds, true);
 }

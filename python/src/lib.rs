@@ -184,7 +184,7 @@ fn _lib(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<vectorize::_HashingVectorizerWrapper>()?;
     m.add_class::<vectorize::_CountVectorizerWrapper>()?;
     m.add_class::<tokenize::BaseTokenizer>()?;
-    m.add_class::<tokenize::UnicodeSegmentTokenizer>()?;
+    m.add_class::<tokenize::UnicodeWordTokenizer>()?;
     m.add_class::<tokenize_sentence::UnicodeSentenceTokenizer>()?;
     m.add_class::<tokenize_sentence::PunctuationTokenizer>()?;
     m.add_class::<tokenize::RegexpTokenizer>()?;

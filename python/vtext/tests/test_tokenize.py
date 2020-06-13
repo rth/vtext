@@ -9,7 +9,7 @@ import hypothesis
 import hypothesis.strategies as st
 
 from vtext.tokenize import (
-    UnicodeSegmentTokenizer,
+    UnicodeWordTokenizer,
     RegexpTokenizer,
     CharacterTokenizer,
     VTextTokenizer,
@@ -19,7 +19,7 @@ from vtext.tokenize import (
 TOKENIZERS = [
     RegexpTokenizer,
     CharacterTokenizer,
-    UnicodeSegmentTokenizer,
+    UnicodeWordTokenizer,
     VTextTokenizer,
 ]
 
@@ -31,17 +31,17 @@ def _pytest_ids(x):
 
 def test_unicode_segment_tokenize():
 
-    tokenizer = UnicodeSegmentTokenizer(word_bounds=False)
+    tokenizer = UnicodeWordTokenizer(word_bounds=False)
     assert tokenizer.tokenize("Today, tomorrow") == ["Today", "tomorrow"]
 
-    tokenizer = UnicodeSegmentTokenizer(word_bounds=True)
+    tokenizer = UnicodeWordTokenizer(word_bounds=True)
     assert tokenizer.tokenize("Today, tomorrow") == ["Today", ",", "tomorrow"]
 
     with pytest.raises(TypeError):
-        UnicodeSegmentTokenizer(word_bounds=1)
+        UnicodeWordTokenizer(word_bounds=1)
 
     with pytest.raises(TypeError):
-        UnicodeSegmentTokenizer().tokenize(2)
+        UnicodeWordTokenizer().tokenize(2)
 
 
 def test_regexp_tokenize():
@@ -72,7 +72,7 @@ def test_character_tokenizer():
     [
         RegexpTokenizer(),
         CharacterTokenizer(),
-        UnicodeSegmentTokenizer(),
+        UnicodeWordTokenizer(),
         VTextTokenizer("en"),
         VTextTokenizer("fr"),
     ],
@@ -87,7 +87,7 @@ def test_tokenize_edge_cases(tokenizer, txt):
     [
         (RegexpTokenizer(), {"pattern": r"\b\w\w+\b"}),
         (CharacterTokenizer(), {"window_size": 4}),
-        (UnicodeSegmentTokenizer(), {"word_bounds": True}),
+        (UnicodeWordTokenizer(), {"word_bounds": True}),
         (VTextTokenizer("en"), {"lang": "en"}),
         (VTextTokenizer("fr"), {"lang": "fr"}),
     ],
