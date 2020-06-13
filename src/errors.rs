@@ -1,20 +1,17 @@
-use std::error::Error;
-use std::fmt;
-use regex;
-use thiserror::Error;
 #[cfg(feature = "python")]
 use pyo3;
-
+use regex;
+use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum EstimatorErr {
     #[error("Invalid paramer: `{0}`")]
     InvalidParams(String),
-    #[error("Invalid regex paramer")]
+    #[error("Invalid regex parameter")]
     RegexErr {
         #[from]
-        source: regex::Error
-    }
+        source: regex::Error,
+    },
 }
 
 #[cfg(feature = "python")]

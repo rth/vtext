@@ -33,15 +33,14 @@ pub struct UnicodeSentenceTokenizer {
 #[pymethods]
 impl UnicodeSentenceTokenizer {
     #[new]
-    fn new() -> (Self, BaseTokenizer) {
-        let tokenizer = vtext::tokenize_sentence::UnicodeSentenceTokenizerParams::default()
-            .build()
-            .unwrap();
+    fn new() -> PyResult<(Self, BaseTokenizer)> {
+        let tokenizer =
+            vtext::tokenize_sentence::UnicodeSentenceTokenizerParams::default().build()?;
 
-        (
+        Ok((
             UnicodeSentenceTokenizer { inner: tokenizer },
             BaseTokenizer::new(),
-        )
+        ))
     }
 
     /// tokenize(self, x)
@@ -81,7 +80,7 @@ impl UnicodeSentenceTokenizer {
 
     pub fn __setstate__(&mut self, py: Python, state: PyObject) -> PyResult<()> {
         let mut params: UnicodeSentenceTokenizerParams = deserialize_params(py, state)?;
-        self.inner = params.build().unwrap();
+        self.inner = params.build()?;
         Ok(())
     }
 }
@@ -108,16 +107,15 @@ pub struct PunctuationTokenizer {
 impl PunctuationTokenizer {
     #[new]
     #[args(punctuation = "vecString![\".\", \"!\", \"?\"]")]
-    fn new(punctuation: Vec<String>) -> (Self, BaseTokenizer) {
+    fn new(punctuation: Vec<String>) -> PyResult<(Self, BaseTokenizer)> {
         let tokenizer = vtext::tokenize_sentence::PunctuationTokenizerParams::default()
             .punctuation(punctuation)
-            .build()
-            .unwrap();
+            .build()?;
 
-        (
+        Ok((
             PunctuationTokenizer { inner: tokenizer },
             BaseTokenizer::new(),
-        )
+        ))
     }
 
     /// tokenize(self, x)
@@ -157,7 +155,7 @@ impl PunctuationTokenizer {
 
     pub fn __setstate__(&mut self, py: Python, state: PyObject) -> PyResult<()> {
         let mut params: PunctuationTokenizerParams = deserialize_params(py, state)?;
-        self.inner = params.build().unwrap();
+        self.inner = params.build()?;
         Ok(())
     }
 }

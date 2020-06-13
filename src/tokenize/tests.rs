@@ -16,15 +16,11 @@ fn test_regexp_tokenizer() {
     assert_eq!(tokens, b);
 }
 
-
 #[test]
 fn test_regexp_tokenizer_error() {
-    let tokenizer = RegexpTokenizerParams::default()
-        .pattern("(")
-        .build();
+    let tokenizer = RegexpTokenizerParams::default().pattern("(").build();
 
     assert!(tokenizer.is_err());
-
 }
 
 #[test]

@@ -89,7 +89,7 @@ impl UnicodeSegmentTokenizer {
 
     pub fn __setstate__(&mut self, py: Python, state: PyObject) -> PyResult<()> {
         let mut params: UnicodeSegmentTokenizerParams = deserialize_params(py, state)?;
-        self.inner = params.build().unwrap();
+        self.inner = params.build()?;
         Ok(())
     }
 }
@@ -119,13 +119,12 @@ pub struct VTextTokenizer {
 impl VTextTokenizer {
     #[new]
     #[args(lang = "\"en\"")]
-    fn new(lang: &str) -> (Self, BaseTokenizer) {
+    fn new(lang: &str) -> PyResult<(Self, BaseTokenizer)> {
         let tokenizer = vtext::tokenize::VTextTokenizerParams::default()
             .lang(lang)
-            .build()
-            .unwrap();
+            .build()?;
 
-        (VTextTokenizer { inner: tokenizer }, BaseTokenizer::new())
+        Ok((VTextTokenizer { inner: tokenizer }, BaseTokenizer::new()))
     }
 
     /// tokenize(self, x)
@@ -165,7 +164,7 @@ impl VTextTokenizer {
 
     pub fn __setstate__(&mut self, py: Python, state: PyObject) -> PyResult<()> {
         let mut params: VTextTokenizerParams = deserialize_params(py, state)?;
-        self.inner = params.build().unwrap();
+        self.inner = params.build()?;
         Ok(())
     }
 }
@@ -182,13 +181,12 @@ pub struct RegexpTokenizer {
 impl RegexpTokenizer {
     #[new]
     #[args(pattern = "\"\\\\b\\\\w\\\\w+\\\\b\"")]
-    fn new(pattern: &str) -> (Self, BaseTokenizer) {
+    fn new(pattern: &str) -> PyResult<(Self, BaseTokenizer)> {
         let inner = vtext::tokenize::RegexpTokenizerParams::default()
             .pattern(pattern)
-            .build()
-            .unwrap();
+            .build()?;
 
-        (RegexpTokenizer { inner: inner }, BaseTokenizer::new())
+        Ok((RegexpTokenizer { inner: inner }, BaseTokenizer::new()))
     }
 
     /// tokenize(self, x)
@@ -228,7 +226,7 @@ impl RegexpTokenizer {
 
     pub fn __setstate__(&mut self, py: Python, state: PyObject) -> PyResult<()> {
         let mut params: RegexpTokenizerParams = deserialize_params(py, state)?;
-        self.inner = params.build().unwrap();
+        self.inner = params.build()?;
         Ok(())
     }
 }
@@ -258,13 +256,12 @@ pub struct CharacterTokenizer {
 impl CharacterTokenizer {
     #[new]
     #[args(window_size = 4)]
-    fn new(window_size: usize) -> (Self, BaseTokenizer) {
+    fn new(window_size: usize) -> PyResult<(Self, BaseTokenizer)> {
         let inner = vtext::tokenize::CharacterTokenizerParams::default()
             .window_size(window_size)
-            .build()
-            .unwrap();
+            .build()?;
 
-        (CharacterTokenizer { inner: inner }, BaseTokenizer::new())
+        Ok((CharacterTokenizer { inner: inner }, BaseTokenizer::new()))
     }
 
     /// tokenize(self, x)
@@ -304,7 +301,7 @@ impl CharacterTokenizer {
 
     pub fn __setstate__(&mut self, py: Python, state: PyObject) -> PyResult<()> {
         let mut params: CharacterTokenizerParams = deserialize_params(py, state)?;
-        self.inner = params.build().unwrap();
+        self.inner = params.build()?;
         Ok(())
     }
 }
