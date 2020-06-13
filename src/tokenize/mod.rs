@@ -29,11 +29,11 @@ which would remove all punctuation. A more general approach is to apply unicode 
 ```rust
 # let s = "The “brown” fox can't jump 32.3 feet, right?";
 # use vtext::tokenize::*;
-let tokenizer = UnicodeSegmentTokenizer::default();
+let tokenizer = UnicodeWordTokenizer::default();
 let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
 assert_eq!(tokens, &["The", "“", "brown", "”", "fox", "can't", "jump", "32.3", "feet", ",", "right", "?"]);
 ```
-Here `UnicodeSegmentTokenizer` object is a thin wrapper around the
+Here `UnicodeWordTokenizer` object is a thin wrapper around the
 [unicode-segmentation](https://github.com/unicode-rs/unicode-segmentation) crate.
 
 This approach produces better results, however for instance the word "can't" should be tokenized
@@ -133,43 +133,43 @@ impl fmt::Debug for RegexpTokenizer {
 ///
 /// * [Unicode® Standard Annex #29](http://www.unicode.org/reports/tr29/)
 #[derive(Debug, Clone)]
-pub struct UnicodeSegmentTokenizer {
-    pub params: UnicodeSegmentTokenizerParams,
+pub struct UnicodeWordTokenizer {
+    pub params: UnicodeWordTokenizerParams,
 }
 
 /// Builder for the unicode segmentation tokenizer
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "python", derive(FromPyObject, IntoPyObject))]
-pub struct UnicodeSegmentTokenizerParams {
+pub struct UnicodeWordTokenizerParams {
     word_bounds: bool,
 }
 
-impl UnicodeSegmentTokenizerParams {
-    pub fn word_bounds(&mut self, value: bool) -> UnicodeSegmentTokenizerParams {
+impl UnicodeWordTokenizerParams {
+    pub fn word_bounds(&mut self, value: bool) -> UnicodeWordTokenizerParams {
         self.word_bounds = value;
         self.clone()
     }
-    pub fn build(&mut self) -> Result<UnicodeSegmentTokenizer, VTextError> {
-        Ok(UnicodeSegmentTokenizer {
+    pub fn build(&mut self) -> Result<UnicodeWordTokenizer, VTextError> {
+        Ok(UnicodeWordTokenizer {
             params: self.clone(),
         })
     }
 }
 
-impl Default for UnicodeSegmentTokenizerParams {
-    fn default() -> UnicodeSegmentTokenizerParams {
-        UnicodeSegmentTokenizerParams { word_bounds: true }
+impl Default for UnicodeWordTokenizerParams {
+    fn default() -> UnicodeWordTokenizerParams {
+        UnicodeWordTokenizerParams { word_bounds: true }
     }
 }
 
-impl Default for UnicodeSegmentTokenizer {
+impl Default for UnicodeWordTokenizer {
     /// Create a new instance
-    fn default() -> UnicodeSegmentTokenizer {
-        UnicodeSegmentTokenizerParams::default().build().unwrap()
+    fn default() -> UnicodeWordTokenizer {
+        UnicodeWordTokenizerParams::default().build().unwrap()
     }
 }
 
-impl Tokenizer for UnicodeSegmentTokenizer {
+impl Tokenizer for UnicodeWordTokenizer {
     /// Tokenize a string
     fn tokenize<'a>(&self, text: &'a str) -> Box<dyn Iterator<Item = &'a str> + 'a> {
         if self.params.word_bounds {

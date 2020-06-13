@@ -21,7 +21,7 @@ vtext.tokenize
    :toctree: generated/
 
    tokenize.RegexpTokenizer
-   tokenize.UnicodeSegmentTokenizer
+   tokenize.UnicodeWordTokenizer
    tokenize.VTextTokenizer
    tokenize.CharacterTokenizer
 

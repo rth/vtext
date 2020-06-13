@@ -10,8 +10,6 @@ NLP in Rust with Python bindings
 This package aims to provide a high performance toolkit for ingesting textual data for
 machine learning applications.
 
-The API is currently unstable.
-
 ### Features
 
  - Tokenization: Regexp tokenizer, Unicode segmentation + language specific rules

@@ -151,7 +151,7 @@ fn test_dispatch_tokenizer() {
         .build()
         .unwrap();
 
-    let tokenizer = UnicodeSegmentTokenizerParams::default()
+    let tokenizer = UnicodeWordTokenizerParams::default()
         .word_bounds(false)
         .build()
         .unwrap();

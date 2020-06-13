@@ -9,7 +9,7 @@ import pytest
 from vtext.tokenize import (
     CharacterTokenizer,
     RegexpTokenizer,
-    UnicodeSegmentTokenizer,
+    UnicodeWordTokenizer,
     VTextTokenizer,
 )
 from vtext.tokenize_sentence import UnicodeSentenceTokenizer, PunctuationTokenizer
@@ -19,7 +19,7 @@ from vtext.stem import SnowballStemmer
 TOKENIZERS = [
     CharacterTokenizer,
     RegexpTokenizer,
-    UnicodeSegmentTokenizer,
+    UnicodeWordTokenizer,
     VTextTokenizer,
 ]
 
