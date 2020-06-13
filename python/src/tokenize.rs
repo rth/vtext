@@ -41,16 +41,15 @@ pub struct UnicodeSegmentTokenizer {
 impl UnicodeSegmentTokenizer {
     #[new]
     #[args(word_bounds = true)]
-    fn new(word_bounds: bool) -> (Self, BaseTokenizer) {
+    fn new(word_bounds: bool) -> PyResult<(Self, BaseTokenizer)> {
         let tokenizer = vtext::tokenize::UnicodeSegmentTokenizerParams::default()
             .word_bounds(word_bounds)
-            .build()
-            .unwrap();
+            .build()?;
 
-        (
+        Ok((
             UnicodeSegmentTokenizer { inner: tokenizer },
             BaseTokenizer::new(),
-        )
+        ))
     }
 
     /// tokenize(self, x)
