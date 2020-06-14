@@ -1,6 +1,6 @@
 [package]
 name = "vtext"
-version = "0.1.0-alpha.3"
+version = "0.2.0"
 description = "NLP with Rust"
 license = "Apache-2.0"
 documentation = "https://docs.rs/vtext/"

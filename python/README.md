@@ -5,8 +5,6 @@ This is a Python wrapper for the Rust vtext crate.
 This package aims to provide a high performance toolkit for ingesting textual data for
 machine learning applications.
 
-The API is currently unstable.
-
 ### Features
 
  - Tokenization: Regexp tokenizer, Unicode segmentation + language specific rules
@@ -19,10 +17,10 @@ The API is currently unstable.
 
 ### Installation
 
-vtext requires Python 3.5+, numpy 1.15+ and can be installed with,
+vtext requires Python 3.6+, numpy 1.15+ and can be installed with,
 
 ```
-pip install --pre vtext
+pip install vtext
 ```
 
 ### Documentation

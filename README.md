@@ -25,7 +25,7 @@ machine learning applications.
 
 vtext requires Python 3.6+ and can be installed with,
 ```
-pip install --pre vtext
+pip install vtext
 ```
 
 Below is a simple tokenization example,
@@ -43,7 +43,7 @@ For more details see the project documentation: [vtext.io/doc/latest/index.html]
 Add the following to `Cargo.toml`,
 ```toml
 [dependencies]
-vtext = "0.1.0-alpha.2"
+vtext = "0.2.0"
 ```
 
 For more details see rust documentation: [docs.rs/vtext](https://docs.rs/vtext)

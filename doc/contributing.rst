@@ -4,7 +4,7 @@ Contributing
 Building from sources
 ---------------------
 
-Building requires Python 3.5+ as well as Rust nightly >=1.30.0
+Building requires Python 3.6+ as well as Rust nightly >=1.30.0
 (due to `rust-numpy <https://github.com/rust-numpy/rust-numpy>`_ and
 `pyo3 <https://github.com/PyO3/pyo3>`_ requirements),
 
@@ -22,7 +22,7 @@ The easiest might be to use docker to setup a build environment,
 .. code::
 
     ./run_docker_env.sh
-    rustup default nightly-2019-06-04
+    rustup default nightly-2020-06-01
     python3.7 -m pip install -r /src/python/requirements.txt
     cd /src/python && python3.7 setup.py install
     python3.7 -m pip install pandas conllu
