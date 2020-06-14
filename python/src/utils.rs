@@ -16,7 +16,7 @@ where
     Ok(PyBytes::new(py, &serialize(&params).unwrap()).to_object(py))
 }
 
-pub fn deserialize_params<'p, T>(py: Python<'p>, state: PyObject) -> PyResult<T>
+pub fn deserialize_params<T>(py: Python, state: PyObject) -> PyResult<T>
 where
     T: DeserializeOwned + Clone,
 {

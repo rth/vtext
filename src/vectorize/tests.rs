@@ -6,6 +6,7 @@
 
 use crate::tokenize::*;
 use crate::vectorize::*;
+use ndarray::array;
 
 #[test]
 fn test_count_vectorizer_simple() {

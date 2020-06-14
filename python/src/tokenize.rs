@@ -185,8 +185,8 @@ impl RegexpTokenizer {
         let inner = vtext::tokenize::RegexpTokenizerParams::default()
             .pattern(pattern)
             .build()?;
-
-        Ok((RegexpTokenizer { inner: inner }, BaseTokenizer::new()))
+      
+        Ok((RegexpTokenizer { inner }, BaseTokenizer::new()))
     }
 
     /// tokenize(self, x)
@@ -261,7 +261,8 @@ impl CharacterTokenizer {
             .window_size(window_size)
             .build()?;
 
-        Ok((CharacterTokenizer { inner: inner }, BaseTokenizer::new()))
+        Ok((CharacterTokenizer { inner }, BaseTokenizer::new()))
+
     }
 
     /// tokenize(self, x)
