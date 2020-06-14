@@ -4,14 +4,6 @@
 // <http://apache.org/licenses/LICENSE-2.0>. This file may not be copied,
 // modified, or distributed except according to those terms.
 
-#[macro_use]
-extern crate ndarray;
-extern crate numpy;
-#[macro_use]
-extern crate pyo3;
-extern crate rust_stemmers;
-extern crate vtext;
-
 use pyo3::prelude::*;
 use pyo3::wrap_pyfunction;
 
