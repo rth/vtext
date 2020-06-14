@@ -5,13 +5,29 @@
 // modified, or distributed except according to those terms.
 
 /*!
-# Token processor modules
+# Token processor module
 
 This modules includes estimators that operate on tokens, for instance for stop words filtering,
 n-gram construction or stemming.
+
+## Stop word filtering
+
+```rust
+use vtext::token_processor::*;
+
+let tokens = vec!["this", "is", "a", "long", "sentence"];
+let stop_words = vec!["a", "this"];
+
+let filter = StopWordFilterParams::default()
+    .stop_words(stop_words)
+    .build()
+    .unwrap();
+
+let tokens_out: Vec<&str> = filter.transform(tokens.iter().cloned()).collect();
+assert_eq!(tokens_out, vec!["is", "long", "sentence"]);
 */
 
-use crate::errors::VTextError;
+use crate::errors::EstimatorErr;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::fmt;
@@ -20,10 +36,8 @@ use std::fmt;
 mod tests;
 
 pub trait TokenProcessor: fmt::Debug {
-    fn transform<'a>(
-        &'a self,
-        tokens: Box<dyn Iterator<Item = &'a str> + 'a>,
-    ) -> Box<dyn Iterator<Item = &'a str> + 'a>;
+    fn transform<'a, T>(&'a self, tokens: T) -> Box<dyn Iterator<Item = &'a str> + 'a>
+    where T: Iterator<Item = &'a str> + 'a;
 }
 
 /// Stop words filter
@@ -45,7 +59,7 @@ impl StopWordFilterParams {
         self.stop_words = value.iter().map(|el| el.to_string()).collect();
         self.clone()
     }
-    pub fn build(&mut self) -> Result<StopWordFilter, VTextError> {
+    pub fn build(&mut self) -> Result<StopWordFilter, EstimatorErr> {
         Ok(StopWordFilter {
             params: self.clone(),
         })
@@ -72,11 +86,12 @@ impl Default for StopWordFilter {
 }
 
 impl TokenProcessor for StopWordFilter {
-    fn transform<'a>(
+    fn transform<'a, T>(
         &'a self,
-        tokens: Box<dyn Iterator<Item = &'a str> + 'a>,
-    ) -> Box<dyn Iterator<Item = &'a str> + 'a>{
+        tokens: T
+    ) -> Box<dyn Iterator<Item = &'a str> + 'a>
+    where T: Iterator<Item = &'a str> + 'a
+    {
         Box::new(tokens.filter(move |tok| !self.params.stop_words.contains(*tok)))
     }
-
 }
