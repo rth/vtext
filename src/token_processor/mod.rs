@@ -11,18 +11,24 @@ This modules includes estimators that operate on tokens, for instance for stop w
 n-gram construction or stemming.
 */
 
-use std::fmt;
-use std::collections::HashSet;
-use serde::{Deserialize, Serialize};
 use crate::errors::VTextError;
+use serde::{Deserialize, Serialize};
+use std::collections::HashSet;
+use std::fmt;
+
+#[cfg(test)]
+mod tests;
 
 pub trait TokenProcessor: fmt::Debug {
-    fn transform<'a>(&'a self, tokens: dyn Iterator<Item = &'a str>) -> Box<dyn Iterator<Item = &'a str> + 'a>;
+    fn transform<'a>(
+        &'a self,
+        tokens: Box<dyn Iterator<Item = &'a str> + 'a>,
+    ) -> Box<dyn Iterator<Item = &'a str> + 'a>;
 }
 
 /// Stop words filter
 ///
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct StopWordFilter {
     pub params: StopWordFilterParams,
 }
@@ -50,7 +56,10 @@ impl Default for StopWordFilterParams {
     /// Create a new instance
     fn default() -> StopWordFilterParams {
         StopWordFilterParams {
-            stop_words: vec!["and", "or", "this"].iter().map(|el| el.to_string()).collect()
+            stop_words: vec!["and", "or", "this"]
+                .iter()
+                .map(|el| el.to_string())
+                .collect(),
         }
     }
 }
@@ -60,4 +69,14 @@ impl Default for StopWordFilter {
     fn default() -> StopWordFilter {
         StopWordFilterParams::default().build().unwrap()
     }
+}
+
+impl TokenProcessor for StopWordFilter {
+    fn transform<'a>(
+        &'a self,
+        tokens: Box<dyn Iterator<Item = &'a str> + 'a>,
+    ) -> Box<dyn Iterator<Item = &'a str> + 'a>{
+        Box::new(tokens.filter(move |tok| !self.params.stop_words.contains(*tok)))
+    }
+
 }
