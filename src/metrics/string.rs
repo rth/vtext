@@ -22,9 +22,10 @@ use std::cmp::{max, min};
 ///  # Example
 ///  ```rust
 ///  use vtext::metrics::string::edit_distance;
+///  use float_cmp::ApproxEqUlps;
 ///
 ///  let res = edit_distance("yesterday", "today", 1, false);
-///  // returns 5.0
+///  assert!(res.approx_eq_ulps(&5.0, 1));
 ///  ```
 #[allow(clippy::many_single_char_names)]
 pub fn edit_distance(x: &str, y: &str, substitution_cost: usize, transpositions: bool) -> f64 {
@@ -86,9 +87,10 @@ pub fn edit_distance(x: &str, y: &str, substitution_cost: usize, transpositions:
 ///  # Example
 ///  ```rust
 ///  use vtext::metrics::string::dice_similarity;
+///  use float_cmp::ApproxEqUlps;
 ///
 ///  let res = dice_similarity("yesterday", "today");
-///  // returns 0.333
+///  assert!(res.approx_eq_ulps(&(1./3.), 4));
 ///  ```
 pub fn dice_similarity(x: &str, y: &str) -> f64 {
     if (x.len() < 2) | (y.len() < 2) {
@@ -133,7 +135,7 @@ pub fn dice_similarity(x: &str, y: &str) -> f64 {
 ///  use vtext::metrics::string::jaro_similarity;
 ///
 ///  let res = jaro_similarity("yesterday", "today");
-///  // returns 0.581
+///  // returns 0.58148
 ///  ```
 pub fn jaro_similarity(x: &str, y: &str) -> f64 {
     // implementation adapted from NLTK
