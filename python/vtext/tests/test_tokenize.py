@@ -53,6 +53,9 @@ def test_regexp_tokenize():
     tokenizer = RegexpTokenizer()
     assert tokenizer.tokenize("Today, tomorrow") == ["Today", "tomorrow"]
 
+    with pytest.raises(ValueError, match="Invalid regex parameter"):
+        RegexpTokenizer(pattern="(")
+
 
 def test_character_tokenizer():
     tokenizer = CharacterTokenizer()

@@ -48,15 +48,14 @@ pub struct _HashingVectorizerWrapper {
 impl _HashingVectorizerWrapper {
     #[new]
     #[args(n_jobs = 1)]
-    fn new(n_jobs: usize) -> Self {
+    fn new(n_jobs: usize) -> PyResult<Self> {
         let tokenizer = vtext::tokenize::RegexpTokenizer::default();
         let estimator = vtext::vectorize::HashingVectorizerParams::default()
             .tokenizer(tokenizer)
             .n_jobs(n_jobs)
-            .build()
-            .unwrap();
+            .build()?;
 
-        _HashingVectorizerWrapper { inner: estimator }
+        Ok(_HashingVectorizerWrapper { inner: estimator })
     }
 
     fn transform(&mut self, py: Python, x: PyObject) -> PyResult<PyCsrArray> {
@@ -79,14 +78,14 @@ pub struct _CountVectorizerWrapper {
 impl _CountVectorizerWrapper {
     #[new]
     #[args(n_jobs = 1)]
-    fn new(n_jobs: usize) -> Self {
+    fn new(n_jobs: usize) -> PyResult<Self> {
         let tokenizer = vtext::tokenize::RegexpTokenizer::default();
         let estimator = vtext::vectorize::CountVectorizerParams::default()
             .tokenizer(tokenizer)
             .n_jobs(n_jobs)
-            .build()
-            .unwrap();
-        _CountVectorizerWrapper { inner: estimator }
+            .build()?;
+
+        Ok(_CountVectorizerWrapper { inner: estimator })
     }
 
     fn fit(&mut self, py: Python, x: PyObject) -> PyResult<()> {
