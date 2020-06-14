@@ -45,4 +45,5 @@ mod math;
 pub mod metrics;
 pub mod tokenize;
 pub mod tokenize_sentence;
+pub mod token_processor;
 pub mod vectorize;
