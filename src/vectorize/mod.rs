@@ -102,7 +102,7 @@ impl<T: Tokenizer + Clone> CountVectorizerParams<T> {
         self.clone()
     }
     pub fn tokenizer(&mut self, value: T) -> CountVectorizerParams<T> {
-        self.tokenizer = value.clone();
+        self.tokenizer = value;
         self.clone()
     }
     pub fn n_jobs(&mut self, value: usize) -> CountVectorizerParams<T> {
@@ -337,7 +337,7 @@ impl<T: Tokenizer + Clone> HashingVectorizerParams<T> {
         self.clone()
     }
     pub fn tokenizer(&mut self, value: T) -> HashingVectorizerParams<T> {
-        self.tokenizer = value.clone();
+        self.tokenizer = value;
         self.clone()
     }
     pub fn n_jobs(&mut self, value: usize) -> HashingVectorizerParams<T> {

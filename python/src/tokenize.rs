@@ -189,7 +189,7 @@ impl RegexpTokenizer {
             .build()
             .unwrap();
 
-        (RegexpTokenizer { inner: inner }, BaseTokenizer::new())
+        (RegexpTokenizer { inner }, BaseTokenizer::new())
     }
 
     /// tokenize(self, x)
@@ -265,7 +265,7 @@ impl CharacterTokenizer {
             .build()
             .unwrap();
 
-        (CharacterTokenizer { inner: inner }, BaseTokenizer::new())
+        (CharacterTokenizer { inner }, BaseTokenizer::new())
     }
 
     /// tokenize(self, x)

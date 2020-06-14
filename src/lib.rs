@@ -40,22 +40,6 @@ let tokens = tok.tokenize("Flights can't depart after 2:00 pm.");
 
 #![allow(non_snake_case)]
 
-extern crate lazy_static;
-extern crate regex;
-extern crate seahash;
-#[macro_use]
-extern crate ndarray;
-#[cfg(feature = "python")]
-extern crate dict_derive;
-extern crate hashbrown;
-extern crate itertools;
-#[cfg(feature = "rayon")]
-extern crate rayon;
-extern crate sprs;
-#[cfg(feature = "python")]
-#[macro_use]
-extern crate pyo3;
-
 pub mod errors;
 mod math;
 pub mod metrics;
