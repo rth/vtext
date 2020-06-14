@@ -147,7 +147,7 @@ pub struct PunctuationTokenizerParams {
 
 impl PunctuationTokenizerParams {
     pub fn punctuation(&mut self, punctuation: Vec<String>) -> PunctuationTokenizerParams {
-        self.punctuation = punctuation.clone();
+        self.punctuation = punctuation;
         self.clone()
     }
     pub fn build(&mut self) -> Result<PunctuationTokenizer, VTextError> {
@@ -213,7 +213,7 @@ fn punctuation_sentence_iterator<'a>(
         .collect();
 
     PunctuationTokenizerIterator {
-        text: text,
+        text,
         punctuation: punctuation_chars,
         seen_punct: false,
         i: 0,
@@ -240,12 +240,14 @@ impl<'a> PunctuationTokenizerIterator<'a> {
         let bytes_span: &[u8];
 
         // Slice array
-        if start.is_none() {
-            bytes_span = &bytes[..end.unwrap()];
-        } else if end.is_none() {
-            bytes_span = &bytes[start.unwrap()..];
-        } else if !end.is_none() & !start.is_none() {
-            bytes_span = &bytes[start.unwrap()..end.unwrap()];
+        if let Some(start_idx) = start {
+            if let Some(end_idx) = end {
+                bytes_span = &bytes[start_idx..end_idx];
+            } else {
+                bytes_span = &bytes[start_idx..];
+            }
+        } else if let Some(end_idx) = end {
+            bytes_span = &bytes[..end_idx];
         } else {
             return self.text;
         }
@@ -280,7 +282,7 @@ impl<'a> Iterator for PunctuationTokenizerIterator<'a> {
                     self.span_end = idx_offset + i;
                     self.seen_punct = false;
                     let span = self.bytes_slice(Some(span_start), Some(self.span_end));
-                    if span.len() > 0 {
+                    if !span.is_empty() {
                         // Dont output if bytes represent 0 characters
                         return Some(span);
                     }
@@ -295,7 +297,7 @@ impl<'a> Iterator for PunctuationTokenizerIterator<'a> {
             let span_start = self.span_end;
             self.span_end = self.bytes_len;
             let span = self.bytes_slice(Some(span_start), None);
-            if span.len() > 0 {
+            if !span.is_empty() {
                 // Dont output if bytes represent 0 characters
                 return Some(span);
             }

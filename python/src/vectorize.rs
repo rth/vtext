@@ -51,7 +51,7 @@ impl _HashingVectorizerWrapper {
     fn new(n_jobs: usize) -> Self {
         let tokenizer = vtext::tokenize::RegexpTokenizer::default();
         let estimator = vtext::vectorize::HashingVectorizerParams::default()
-            .tokenizer(tokenizer.clone())
+            .tokenizer(tokenizer)
             .n_jobs(n_jobs)
             .build()
             .unwrap();
@@ -82,7 +82,7 @@ impl _CountVectorizerWrapper {
     fn new(n_jobs: usize) -> Self {
         let tokenizer = vtext::tokenize::RegexpTokenizer::default();
         let estimator = vtext::vectorize::CountVectorizerParams::default()
-            .tokenizer(tokenizer.clone())
+            .tokenizer(tokenizer)
             .n_jobs(n_jobs)
             .build()
             .unwrap();
