@@ -28,9 +28,9 @@ assert_eq!(tokens_out, vec!["is", "long", "sentence"]);
 */
 
 use crate::errors::EstimatorErr;
-use serde::{Deserialize, Serialize};
 #[cfg(feature = "python")]
 use dict_derive::{FromPyObject, IntoPyObject};
+use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::fmt;
 
