@@ -37,7 +37,8 @@ mod tests;
 
 pub trait TokenProcessor: fmt::Debug {
     fn transform<'a, T>(&'a self, tokens: T) -> Box<dyn Iterator<Item = &'a str> + 'a>
-    where T: Iterator<Item = &'a str> + 'a;
+    where
+        T: Iterator<Item = &'a str> + 'a;
 }
 
 /// Stop words filter
@@ -86,11 +87,9 @@ impl Default for StopWordFilter {
 }
 
 impl TokenProcessor for StopWordFilter {
-    fn transform<'a, T>(
-        &'a self,
-        tokens: T
-    ) -> Box<dyn Iterator<Item = &'a str> + 'a>
-    where T: Iterator<Item = &'a str> + 'a
+    fn transform<'a, T>(&'a self, tokens: T) -> Box<dyn Iterator<Item = &'a str> + 'a>
+    where
+        T: Iterator<Item = &'a str> + 'a,
     {
         Box::new(tokens.filter(move |tok| !self.params.stop_words.contains(*tok)))
     }
