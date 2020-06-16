@@ -10,10 +10,7 @@ trait PipelineComponent<'a> {
     type InItem;
     type OutItem;
 
-    fn transform<T>(
-        &'a self,
-        items: T
-    ) -> Box<dyn Iterator<Item = Self::OutItem> + 'a>
+    fn transform<T>(&'a self, items: T) -> Box<dyn Iterator<Item = Self::OutItem> + 'a>
     where
         T: Iterator<Item = Self::InItem> + 'a;
 }
@@ -33,12 +30,9 @@ impl<'a> PipelineComponent<'a> for DummyTokenizer {
     type InItem = &'a str;
     type OutItem = StringWrap<'a>;
 
-    fn transform<T>(
-        &'a self,
-        items: T
-    ) -> Box<dyn Iterator<Item = Self::OutItem> + 'a>
-        where
-        T: Iterator<Item = Self::InItem> + 'a
+    fn transform<T>(&'a self, items: T) -> Box<dyn Iterator<Item = Self::OutItem> + 'a>
+    where
+        T: Iterator<Item = Self::InItem> + 'a,
     {
         let iter = items.flat_map(move |s| self.transform_text(s));
         Box::new(iter)
@@ -53,13 +47,9 @@ impl<'a> PipelineComponent<'a> for DummyFilter {
     type InItem = StringWrap<'a>;
     type OutItem = Self::InItem;
 
-    fn transform<T>(
-        &'a self,
-        items: T
-    ) -> Box<dyn Iterator<Item = Self::OutItem> + 'a>
-        where
-        T: Iterator<Item = Self::InItem> + 'a
-
+    fn transform<T>(&'a self, items: T) -> Box<dyn Iterator<Item = Self::OutItem> + 'a>
+    where
+        T: Iterator<Item = Self::InItem> + 'a,
     {
         let iter = items.filter(move |x| match x {
             StringWrap::Slice(s) => s.clone() != self.word,
@@ -75,12 +65,9 @@ impl<'a> PipelineComponent<'a> for DummyStemmer {
     type InItem = StringWrap<'a>;
     type OutItem = Self::InItem;
 
-    fn transform<T>(
-        &'a self,
-        items: T
-    ) -> Box<dyn Iterator<Item = Self::OutItem> + 'a>
-        where
-        T: Iterator<Item = Self::InItem> + 'a
+    fn transform<T>(&'a self, items: T) -> Box<dyn Iterator<Item = Self::OutItem> + 'a>
+    where
+        T: Iterator<Item = Self::InItem> + 'a,
     {
         // Outputs a StringWrap::string
         let iter = items.map(|x| match x {
