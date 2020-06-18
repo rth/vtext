@@ -22,10 +22,10 @@ use std::cmp::{max, min};
 ///  # Example
 ///  ```rust
 ///  use vtext::metrics::string::edit_distance;
-///  use float_cmp::ApproxEqUlps;
+///  use approx;
 ///
 ///  let res = edit_distance("yesterday", "today", 1, false);
-///  assert!(res.approx_eq_ulps(&5.0, 1));
+///  approx::assert_abs_diff_eq!(res, 5.0, epsilon=1e-6);
 ///  ```
 #[allow(clippy::many_single_char_names)]
 pub fn edit_distance(x: &str, y: &str, substitution_cost: usize, transpositions: bool) -> f64 {
@@ -87,10 +87,10 @@ pub fn edit_distance(x: &str, y: &str, substitution_cost: usize, transpositions:
 ///  # Example
 ///  ```rust
 ///  use vtext::metrics::string::dice_similarity;
-///  use float_cmp::ApproxEqUlps;
+///  use approx;
 ///
 ///  let res = dice_similarity("yesterday", "today");
-///  assert!(res.approx_eq_ulps(&(1./3.), 4));
+///  approx::assert_abs_diff_eq!(res, (1./3.), epsilon=1e-4);
 ///  ```
 pub fn dice_similarity(x: &str, y: &str) -> f64 {
     if (x.len() < 2) | (y.len() < 2) {
@@ -133,9 +133,10 @@ pub fn dice_similarity(x: &str, y: &str) -> f64 {
 ///  # Example
 ///  ```rust
 ///  use vtext::metrics::string::jaro_similarity;
+///  use approx;
 ///
 ///  let res = jaro_similarity("yesterday", "today");
-///  // returns 0.58148
+///  approx::assert_abs_diff_eq!(res, 0.58148, epsilon=1e-4);
 ///  ```
 pub fn jaro_similarity(x: &str, y: &str) -> f64 {
     // implementation adapted from NLTK
@@ -209,7 +210,7 @@ pub fn jaro_similarity(x: &str, y: &str) -> f64 {
 ///  use vtext::metrics::string::jaro_winkler_similarity;
 ///
 ///  let res = jaro_winkler_similarity("yesterday", "today", 0.1, 4);
-///  // returns 0.581
+///  approx::assert_abs_diff_eq!(res, 0.581, epsilon=1e-3);
 ///  ```
 pub fn jaro_winkler_similarity(x: &str, y: &str, p: f64, max_l: usize) -> f64 {
     // implementation adapted from NLTK
@@ -238,43 +239,51 @@ pub fn jaro_winkler_similarity(x: &str, y: &str, p: f64, max_l: usize) -> f64 {
 #[cfg(test)]
 mod tests {
     use crate::metrics::string::*;
-    use float_cmp::ApproxEqUlps;
+    use approx::assert_abs_diff_eq;
 
     #[test]
     fn test_dice_similarity() {
         let res = dice_similarity("yesterday", "today");
-        assert!(((res * 100.).round() / 100.).approx_eq_ulps(&0.33, 2));
+        assert_abs_diff_eq!(res, 0.33, epsilon = 1e-2);
 
-        assert!(dice_similarity("healed", "sealed").approx_eq_ulps(&0.8, 2));
+        assert_abs_diff_eq!(dice_similarity("healed", "sealed"), 0.8, epsilon = 1e-2);
 
-        assert!(dice_similarity("", "").approx_eq_ulps(&0.0, 2));
+        assert_abs_diff_eq!(dice_similarity("", ""), 0.0, epsilon = 1e-2);
         // 1 char, doesn't allow to make a single 2-char ngram
-        assert!(dice_similarity("1", "test").approx_eq_ulps(&0.0, 2));
+        assert_abs_diff_eq!(dice_similarity("1", "test"), 0.0, epsilon = 1e-2);
 
-        assert!(dice_similarity("test", "test").approx_eq_ulps(&1.0, 2));
+        assert_abs_diff_eq!(dice_similarity("test", "test"), 1.0, epsilon = 1e-2);
     }
 
     #[test]
     fn test_jaro_similarity() {
         let res = jaro_similarity("AABABCAAAC", "ABAACBAAAC");
-        assert!(((res * 1000.).round() / 1000.).approx_eq_ulps(&0.933, 2));
+        assert_abs_diff_eq!(res, 0.933, epsilon = 1e-3);
 
         let res = jaro_similarity("SHACKLEFORD", "SHACKELFORD");
-        assert!(((res * 1000.).round() / 1000.).approx_eq_ulps(&0.970, 2));
+        assert_abs_diff_eq!(res, 0.970, epsilon = 1e-3);
 
-        assert!(jaro_similarity("", "").approx_eq_ulps(&0.0, 2));
-        assert!(jaro_similarity("1", "2").approx_eq_ulps(&0.0, 2));
-        assert!(jaro_similarity("test", "test").approx_eq_ulps(&1.0, 2));
+        assert_abs_diff_eq!(jaro_similarity("", ""), 0.0, epsilon = 1e-2);
+        assert_abs_diff_eq!(jaro_similarity("1", "2"), 0.0, epsilon = 1e-2);
+        assert_abs_diff_eq!(jaro_similarity("test", "test"), 1.0, epsilon = 1e-2);
     }
 
     #[test]
     fn test_jaro_winkler_similarity() {
         let res = jaro_winkler_similarity("SHACKLEFORD", "SHACKELFORD", 0.1, 4);
-        assert!(((res * 1000.).round() / 1000.).approx_eq_ulps(&0.982, 2));
+        assert_abs_diff_eq!(res, 0.982, epsilon = 1e-2);
 
-        assert!(jaro_winkler_similarity("", "", 0.1, 4).approx_eq_ulps(&0.0, 2));
-        assert!(jaro_winkler_similarity("1", "2", 0.1, 4).approx_eq_ulps(&0.0, 2));
-        assert!(jaro_winkler_similarity("test", "test", 0.1, 4).approx_eq_ulps(&1.0, 2));
+        assert_abs_diff_eq!(jaro_winkler_similarity("", "", 0.1, 4), 0.0, epsilon = 1e-2);
+        assert_abs_diff_eq!(
+            jaro_winkler_similarity("1", "2", 0.1, 4),
+            0.0,
+            epsilon = 1e-2
+        );
+        assert_abs_diff_eq!(
+            jaro_winkler_similarity("test", "test", 0.1, 4),
+            1.0,
+            epsilon = 1e-2
+        );
     }
 
     #[test]
@@ -287,6 +296,6 @@ mod tests {
     #[test]
     fn test_edit_distance() {
         let res = edit_distance("yesterday", "today", 1, false);
-        assert!(res.approx_eq_ulps(&5.0, 2));
+        assert_abs_diff_eq!(res, 5.0, epsilon = 1e-2);
     }
 }
