@@ -244,38 +244,46 @@ mod tests {
     #[test]
     fn test_dice_similarity() {
         let res = dice_similarity("yesterday", "today");
-        assert_abs_diff_eq!(res, 0.33, epsilon=1e-2);
+        assert_abs_diff_eq!(res, 0.33, epsilon = 1e-2);
 
-        assert_abs_diff_eq!(dice_similarity("healed", "sealed"), 0.8, epsilon=1e-2);
+        assert_abs_diff_eq!(dice_similarity("healed", "sealed"), 0.8, epsilon = 1e-2);
 
-        assert_abs_diff_eq!(dice_similarity("", ""), 0.0, epsilon=1e-2);
+        assert_abs_diff_eq!(dice_similarity("", ""), 0.0, epsilon = 1e-2);
         // 1 char, doesn't allow to make a single 2-char ngram
-        assert_abs_diff_eq!(dice_similarity("1", "test"), 0.0, epsilon=1e-2);
+        assert_abs_diff_eq!(dice_similarity("1", "test"), 0.0, epsilon = 1e-2);
 
-        assert_abs_diff_eq!(dice_similarity("test", "test"), 1.0, epsilon=1e-2);
+        assert_abs_diff_eq!(dice_similarity("test", "test"), 1.0, epsilon = 1e-2);
     }
 
     #[test]
     fn test_jaro_similarity() {
         let res = jaro_similarity("AABABCAAAC", "ABAACBAAAC");
-        assert_abs_diff_eq!(res, 0.933, epsilon=1e-3);
+        assert_abs_diff_eq!(res, 0.933, epsilon = 1e-3);
 
         let res = jaro_similarity("SHACKLEFORD", "SHACKELFORD");
-        assert_abs_diff_eq!(res, 0.970, epsilon=1e-3);
+        assert_abs_diff_eq!(res, 0.970, epsilon = 1e-3);
 
-        assert_abs_diff_eq!(jaro_similarity("", ""), 0.0, epsilon=1e-2);
-        assert_abs_diff_eq!(jaro_similarity("1", "2"), 0.0, epsilon=1e-2);
-        assert_abs_diff_eq!(jaro_similarity("test", "test"), 1.0, epsilon=1e-2);
+        assert_abs_diff_eq!(jaro_similarity("", ""), 0.0, epsilon = 1e-2);
+        assert_abs_diff_eq!(jaro_similarity("1", "2"), 0.0, epsilon = 1e-2);
+        assert_abs_diff_eq!(jaro_similarity("test", "test"), 1.0, epsilon = 1e-2);
     }
 
     #[test]
     fn test_jaro_winkler_similarity() {
         let res = jaro_winkler_similarity("SHACKLEFORD", "SHACKELFORD", 0.1, 4);
-        assert_abs_diff_eq!(res, 0.982, epsilon=1e-2);
+        assert_abs_diff_eq!(res, 0.982, epsilon = 1e-2);
 
-        assert_abs_diff_eq!(jaro_winkler_similarity("", "", 0.1, 4), 0.0, epsilon=1e-2);
-        assert_abs_diff_eq!(jaro_winkler_similarity("1", "2", 0.1, 4), 0.0, epsilon=1e-2);
-        assert_abs_diff_eq!(jaro_winkler_similarity("test", "test", 0.1, 4), 1.0, epsilon=1e-2);
+        assert_abs_diff_eq!(jaro_winkler_similarity("", "", 0.1, 4), 0.0, epsilon = 1e-2);
+        assert_abs_diff_eq!(
+            jaro_winkler_similarity("1", "2", 0.1, 4),
+            0.0,
+            epsilon = 1e-2
+        );
+        assert_abs_diff_eq!(
+            jaro_winkler_similarity("test", "test", 0.1, 4),
+            1.0,
+            epsilon = 1e-2
+        );
     }
 
     #[test]
@@ -288,6 +296,6 @@ mod tests {
     #[test]
     fn test_edit_distance() {
         let res = edit_distance("yesterday", "today", 1, false);
-        assert_abs_diff_eq!(res, 5.0, epsilon=1e-2);
+        assert_abs_diff_eq!(res, 5.0, epsilon = 1e-2);
     }
 }
