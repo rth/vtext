@@ -39,19 +39,19 @@ overflow-checks = false
 regex = "1"
 lazy_static = "1.4.0"
 seahash = "4.0.0"
-itertools = "0.8"
+itertools = "0.9"
 ndarray = "0.13.0"
 serde = { version = "1.0", features = ["derive"] }
 sprs = {version  = "0.7.1", default-features = false}
 unicode-segmentation = "1.6.0"
 thiserror = "1.0"
-hashbrown = { version = "0.7", features = ["rayon"] }
+hashbrown = { version = "0.8", features = ["rayon"] }
 rayon = {version = "1.3", optional = true}
 dict_derive = {version = "0.2", optional = true}
 pyo3 = {version = "0.10.1", optional = true}
 
 [dev-dependencies]
-float-cmp = "0.4.0" # for asserting floating point differences in test
+approx = "0.3.2"
 
 [features]
 # Additional bindings used from the python wrapper.
