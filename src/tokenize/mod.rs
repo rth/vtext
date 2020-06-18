@@ -56,6 +56,7 @@ use dict_derive::{FromPyObject, IntoPyObject};
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use std::fmt;
+use std::borrow::Cow;
 use unicode_segmentation::UnicodeSegmentation;
 
 #[cfg(test)]
@@ -404,5 +405,69 @@ impl Tokenizer for CharacterTokenizer {
             )
             .map(move |((i, _), (j, _))| &text[i..j]);
         Box::new(res)
+    }
+}
+
+
+/// Regular expression tokenizer
+///
+#[derive(Clone)]
+pub struct TreebankWordTokenizer {
+    pub params: TreebankWordTokenizerParams,
+    punctuation_regex: Vec<(Regex, String)>
+}
+
+impl TreebankWordTokenizer {
+    pub fn new() -> TreebankWordTokenizer {
+        let punctuation_regex = vec![
+            (Regex::new(r"([:,])([^\d])").unwrap(), " $1 $2".to_string())
+        ];
+        TreebankWordTokenizer {
+            params : TreebankWordTokenizerParams::default(),
+            punctuation_regex
+        }
+    }
+    fn tokenize<'a>(&'a self, text: &'a str) -> Box<dyn Iterator<Item = Cow<'a, str>> + 'a> {
+        let mut out: Cow<'_, str> = Cow::Borrowed(text);
+        for (regexp_obj, subst) in self.punctuation_regex.iter() {
+            out = regexp_obj.replace_all(text, subst.as_str());
+        }
+        //let out = self.punctuation_regex[0].0.replace_all(text, self.punctuation_regex[0].1.as_str()).to_string();
+        println!("{}", out);
+        Box::new(out.split_whitespace().map(|el| Cow::Borrowed(el).to_owned()))
+    }
+
+}
+
+/// Builder for the regexp tokenizer
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "python", derive(FromPyObject, IntoPyObject))]
+pub struct TreebankWordTokenizerParams {
+}
+
+impl TreebankWordTokenizerParams {
+    pub fn build(&mut self) -> Result<TreebankWordTokenizer, EstimatorErr> {
+        Ok(TreebankWordTokenizer::new())
+    }
+}
+
+impl Default for TreebankWordTokenizerParams {
+    /// Create a new instance
+    fn default() -> TreebankWordTokenizerParams {
+        TreebankWordTokenizerParams {
+        }
+    }
+}
+
+impl Default for TreebankWordTokenizer {
+    /// Create a new instance
+    fn default() -> TreebankWordTokenizer {
+        TreebankWordTokenizerParams::default().build().unwrap()
+    }
+}
+
+impl fmt::Debug for TreebankWordTokenizer {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "TreebankWordTokenizer {{ }}")
     }
 }

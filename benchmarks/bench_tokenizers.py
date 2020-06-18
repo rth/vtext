@@ -23,6 +23,11 @@ try:
 except ImportError:
     blingfire = None
 
+try:
+    import nltk
+except ImportError:
+    nltk = None
+
 
 base_dir = Path(__file__).parent.parent.resolve()
 
@@ -70,6 +75,9 @@ if __name__ == "__main__":
 
     if blingfire is not None:
         db.append(("BlingFire en", lambda x: blingfire.text_to_words(x).split(" ")))
+
+    if nltk is not None:
+        db.append(('NLTK word_tokenize', nltk.tokenize.TreebankWordTokenizer().tokenize))
 
     for label, func in db:
         t0 = time()
