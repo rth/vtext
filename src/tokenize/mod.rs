@@ -55,8 +55,8 @@ use crate::errors::EstimatorErr;
 use dict_derive::{FromPyObject, IntoPyObject};
 use regex::Regex;
 use serde::{Deserialize, Serialize};
-use std::fmt;
 use std::borrow::Cow;
+use std::fmt;
 use unicode_segmentation::UnicodeSegmentation;
 
 #[cfg(test)]
@@ -408,42 +408,100 @@ impl Tokenizer for CharacterTokenizer {
     }
 }
 
-
 /// Regular expression tokenizer
 ///
 #[derive(Clone)]
 pub struct TreebankWordTokenizer {
     pub params: TreebankWordTokenizerParams,
-    punctuation_regex: Vec<(Regex, String)>
+    stage1_regex: Vec<(Regex, String)>,
+    stage2_regex: Vec<(Regex, String)>,
 }
+
+
+
+macro_rules! regexReplacementVec {
+    ($( ($pattern:expr, $value:expr) ),*) => {{
+        vec![
+            $( (Regex::new($pattern).unwrap(), $value.to_string()), )*
+        ]
+    }}
+}
+
 
 impl TreebankWordTokenizer {
     pub fn new() -> TreebankWordTokenizer {
-        let punctuation_regex = vec![
-            (Regex::new(r"([:,])([^\d])").unwrap(), " $1 $2".to_string())
+        let stage1_regex = regexReplacementVec![
+            // starting quotes
+            ("^\"", "``"),
+            ("(``)", " $1 "),
+            // ("([ \\(\\[{<])(\"|\'{2})"
+
+            // Punctuation
+            (r"([:,])([^\d])", " $1 $2"),
+            (r"([:,])$", " $1"),
+            (r"\.\.\.", " ... "),
+            (r"([;@#$%&])", " $1 "),
+            ("([^\\.])(\\.)([\\]\\)}>\"\']*)\\s*$", "$1 $2 $3"),
+            (r"([?!])", " $1 "),
+            (r"([^'])' ", "$1 ' "),
+            // Pad parentheses
+            (r"([\]\[\(\)\{\}<>])", r" $1 "),
+
+            // Double dashed
+            ("--", " -- ")
+
+        ];
+
+        let stage2_regex = regexReplacementVec![
+            // ending quotes
+            ("\"", " '' "),
+            (r"(\S)('')", "$1 $2 "),
+            (r"([^' ])('[sS]|'[mM]|'[dD]|') ", "$1 $2 "),
+            (r"([^' ])('ll|'LL|'re|'RE|'ve|'VE|n't|N'T)", "$1 $2 "),
+
+            // List of contractions adapted from Robert MacIntyre's tokenizer.
+            // CONTRACTIONS2
+            (r"(?i)\b(can)(not)\b", " $1 $2 "), 
+            (r"(?i)\b(d)('ye)\b", " $1 $2 "),
+            (r"(?i)\b(gim)(me)\b", " $1 $2 "),
+            (r"(?i)\b(gon)(na)\b", " $1 $2 "),
+            (r"(?i)\b(got)(ta)\b", " $1 $2 "),
+            (r"(?i)\b(lem)(me)\b", " $1 $2 "),
+            (r"(?i)\b(mor)('n)\b", " $1 $2 "),
+            (r"(?i)\b(wan)(na)\s", " $1 $2 "),
+            // CONTRACTIONS3
+            (r"(?i) ('t)(is)\b", " $1 $2 "),
+            (r"(?i) ('t)(was)\b", " $1 $2 ")
         ];
         TreebankWordTokenizer {
-            params : TreebankWordTokenizerParams::default(),
-            punctuation_regex
+            params: TreebankWordTokenizerParams::default(),
+            stage1_regex,
+            stage2_regex
         }
     }
-    fn tokenize<'a>(&'a self, text: &'a str) -> Box<dyn Iterator<Item = Cow<'a, str>> + 'a> {
-        let mut out: Cow<'_, str> = Cow::Borrowed(text);
-        for (regexp_obj, subst) in self.punctuation_regex.iter() {
-            out = regexp_obj.replace_all(text, subst.as_str());
+    fn tokenize<'a>(&'a self, text: &'a str) -> Vec<String> {
+        let mut out = text.to_string();
+        for (regexp_obj, subst) in self.stage1_regex.iter() {
+            out = regexp_obj.replace_all(&out, subst.as_str()).to_string();
         }
-        //let out = self.punctuation_regex[0].0.replace_all(text, self.punctuation_regex[0].1.as_str()).to_string();
         println!("{}", out);
-        Box::new(out.split_whitespace().map(|el| Cow::Borrowed(el).to_owned()))
-    }
 
+        out = format!(" {} ", out);
+
+        // add extra space to make things easier
+        for (regexp_obj, subst) in self.stage1_regex.iter() {
+            out = regexp_obj.replace_all(&out, subst.as_str()).to_string();
+        }
+        let x = out.split_whitespace().map(|el| el.to_string()).to_owned();
+
+        x.collect()
+    }
 }
 
 /// Builder for the regexp tokenizer
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "python", derive(FromPyObject, IntoPyObject))]
-pub struct TreebankWordTokenizerParams {
-}
+pub struct TreebankWordTokenizerParams {}
 
 impl TreebankWordTokenizerParams {
     pub fn build(&mut self) -> Result<TreebankWordTokenizer, EstimatorErr> {
@@ -454,8 +512,7 @@ impl TreebankWordTokenizerParams {
 impl Default for TreebankWordTokenizerParams {
     /// Create a new instance
     fn default() -> TreebankWordTokenizerParams {
-        TreebankWordTokenizerParams {
-        }
+        TreebankWordTokenizerParams {}
     }
 }
 

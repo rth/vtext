@@ -132,14 +132,13 @@ fn test_tokenizer_defaults() {
     assert_eq!(tokenizer.params.word_bounds, true);
 }
 
-
 #[test]
 fn test_treebank_word_tokenizer() {
     let s = "The,quick (\"brown\") fox can't jump 32.3 feet, right?";
 
     let tokenizer = TreebankWordTokenizer::default();
 
-    let tokens: Vec<String> = tokenizer.tokenize(s).collect();
+    let tokens = tokenizer.tokenize(s);
     let b: &[_] = &[
         "The", "quick", "brown", "fox", "can't", "jump", "32.3", "feet", "right",
     ];
