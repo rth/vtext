@@ -305,3 +305,63 @@ impl CharacterTokenizer {
         Ok(())
     }
 }
+
+
+/// __init__(self, pattern=r'\\b\\w\\w+\\b')
+///
+/// Tokenize a 
+#[pyclass(extends=BaseTokenizer, module="vtext.tokenize")]
+pub struct TreebankWordTokenizer {
+    inner: vtext::tokenize::TreebankWordTokenizer,
+}
+
+#[pymethods]
+impl TreebankWordTokenizer {
+    #[new]
+    fn new() -> PyResult<(Self, BaseTokenizer)> {
+        let inner = vtext::tokenize::TreebankWordTokenizer::default();
+
+        Ok((TreebankWordTokenizer { inner }, BaseTokenizer::new()))
+    }
+
+    /// tokenize(self, x)
+    ///
+    /// Tokenize a string
+    ///
+    /// Parameters
+    /// ----------
+    /// x : bool
+    ///    the string to tokenize
+    ///
+    /// Returns
+    /// -------
+    /// tokens : List[str]
+    ///    computed tokens
+    fn tokenize<'py>(&self, py: Python<'py>, x: &str) -> PyResult<&'py PyList> {
+        let res: Vec<String> = self.inner.tokenize(x);
+        let list = PyList::new(py, res);
+        Ok(list)
+    }
+
+    /// get_params(self, x)
+    ///
+    /// Get parameters for this estimator.
+    ///
+    /// Returns
+    /// -------
+    /// params : mapping of string to any
+    ///          Parameter names mapped to their values.
+    fn get_params(&self) -> PyResult<TreebankWordTokenizerParams> {
+        Ok(self.inner.params.clone())
+    }
+
+    pub fn __getstate__(&self, py: Python) -> PyResult<PyObject> {
+        serialize_params(&self.inner.params, py)
+    }
+
+    pub fn __setstate__(&mut self, py: Python, state: PyObject) -> PyResult<()> {
+        let mut params: TreebankWordTokenizerParams = deserialize_params(py, state)?;
+        self.inner = params.build()?;
+        Ok(())
+    }
+}

@@ -182,6 +182,7 @@ fn _lib(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<tokenize::RegexpTokenizer>()?;
     m.add_class::<tokenize::VTextTokenizer>()?;
     m.add_class::<tokenize::CharacterTokenizer>()?;
+    m.add_class::<tokenize::TreebankWordTokenizer>()?;
     m.add_class::<stem::SnowballStemmer>()?;
     m.add_wrapped(wrap_pyfunction!(dice_similarity))?;
     m.add_wrapped(wrap_pyfunction!(jaro_similarity))?;

@@ -11,6 +11,7 @@ from vtext.tokenize import (
     RegexpTokenizer,
     UnicodeWordTokenizer,
     VTextTokenizer,
+    TreebankWordTokenizer,
 )
 from vtext.tokenize_sentence import UnicodeSentenceTokenizer, PunctuationTokenizer
 from vtext.stem import SnowballStemmer
@@ -21,6 +22,7 @@ TOKENIZERS = [
     RegexpTokenizer,
     UnicodeWordTokenizer,
     VTextTokenizer,
+    TreebankWordTokenizer,
 ]
 
 SENTENCE_TOKENIZERS = [UnicodeSentenceTokenizer, PunctuationTokenizer]

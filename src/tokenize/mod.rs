@@ -479,13 +479,11 @@ impl TreebankWordTokenizer {
             stage2_regex
         }
     }
-    fn tokenize<'a>(&'a self, text: &'a str) -> Vec<String> {
+    pub fn tokenize<'a>(&'a self, text: &'a str) -> Vec<String> {
         let mut out = text.to_string();
         for (regexp_obj, subst) in self.stage1_regex.iter() {
             out = regexp_obj.replace_all(&out, subst.as_str()).to_string();
         }
-        println!("{}", out);
-
         out = format!(" {} ", out);
 
         // add extra space to make things easier
