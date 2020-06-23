@@ -8,7 +8,7 @@ from vtext.tokenize import (
     UnicodeWordTokenizer,
     VTextTokenizer,
     CharacterTokenizer,
-    TreebankWordTokenizer
+    NTLKWordTokenizer
 )
 
 try:
@@ -67,7 +67,7 @@ if __name__ == "__main__":
         ),
         ("VTextTokenizer('en')", VTextTokenizer("en").tokenize),
         ("CharacterTokenizer(4)", CharacterTokenizer(4).tokenize),
-        ("TreebankWordTokenizer()", TreebankWordTokenizer().tokenize)
+        ("NTLKWordTokenizer()", NTLKWordTokenizer().tokenize)
     ]
 
     if sacremoses is not None:
@@ -81,7 +81,7 @@ if __name__ == "__main__":
         db.append(("BlingFire en", lambda x: blingfire.text_to_words(x).split(" ")))
 
     if nltk is not None:
-        db.append(('NLTK TreebankWordTokenizer', nltk.tokenize.TreebankWordTokenizer().tokenize))
+        db.append(('NLTK NLTKWordTokenizer', nltk.tokenize.NLTKWordTokenizer().tokenize))
 
     for label, func in db:
         t0 = time()

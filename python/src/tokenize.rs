@@ -311,17 +311,17 @@ impl CharacterTokenizer {
 ///
 /// Tokenize a 
 #[pyclass(extends=BaseTokenizer, module="vtext.tokenize")]
-pub struct TreebankWordTokenizer {
-    inner: vtext::tokenize::TreebankWordTokenizer,
+pub struct NTLKWordTokenizer {
+    inner: vtext::tokenize::NTLKWordTokenizer,
 }
 
 #[pymethods]
-impl TreebankWordTokenizer {
+impl NTLKWordTokenizer {
     #[new]
     fn new() -> PyResult<(Self, BaseTokenizer)> {
-        let inner = vtext::tokenize::TreebankWordTokenizer::default();
+        let inner = vtext::tokenize::NTLKWordTokenizer::default();
 
-        Ok((TreebankWordTokenizer { inner }, BaseTokenizer::new()))
+        Ok((NTLKWordTokenizer { inner }, BaseTokenizer::new()))
     }
 
     /// tokenize(self, x)
@@ -351,7 +351,7 @@ impl TreebankWordTokenizer {
     /// -------
     /// params : mapping of string to any
     ///          Parameter names mapped to their values.
-    fn get_params(&self) -> PyResult<TreebankWordTokenizerParams> {
+    fn get_params(&self) -> PyResult<NTLKWordTokenizerParams> {
         Ok(self.inner.params.clone())
     }
 
@@ -360,7 +360,7 @@ impl TreebankWordTokenizer {
     }
 
     pub fn __setstate__(&mut self, py: Python, state: PyObject) -> PyResult<()> {
-        let mut params: TreebankWordTokenizerParams = deserialize_params(py, state)?;
+        let mut params: NTLKWordTokenizerParams = deserialize_params(py, state)?;
         self.inner = params.build()?;
         Ok(())
     }

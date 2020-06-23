@@ -10,7 +10,7 @@ from ._lib import (
     RegexpTokenizer,
     VTextTokenizer,
     CharacterTokenizer,
-    TreebankWordTokenizer,
+    NTLKWordTokenizer,
 )
 
 
@@ -20,5 +20,5 @@ __all__ = [
     "RegexpTokenizer",
     "VTextTokenizer",
     "CharacterTokenizer",
-    "TreebankWordTokenizer",
+    "NTLKWordTokenizer",
 ]

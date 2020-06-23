@@ -411,13 +411,11 @@ impl Tokenizer for CharacterTokenizer {
 /// Regular expression tokenizer
 ///
 #[derive(Clone)]
-pub struct TreebankWordTokenizer {
-    pub params: TreebankWordTokenizerParams,
+pub struct NTLKWordTokenizer {
+    pub params: NTLKWordTokenizerParams,
     stage1_regex: Vec<(Regex, String)>,
     stage2_regex: Vec<(Regex, String)>,
 }
-
-
 
 macro_rules! regexReplacementVec {
     ($( ($pattern:expr, $value:expr) ),*) => {{
@@ -427,15 +425,13 @@ macro_rules! regexReplacementVec {
     }}
 }
 
-
-impl TreebankWordTokenizer {
-    pub fn new() -> TreebankWordTokenizer {
+impl NTLKWordTokenizer {
+    pub fn new() -> NTLKWordTokenizer {
         let stage1_regex = regexReplacementVec![
             // starting quotes
             ("^\"", "``"),
             ("(``)", " $1 "),
-            // ("([ \\(\\[{<])(\"|\'{2})"
-
+            ("([ \\(\\[{<])(\"|\'{2})", r"$1 `` "),
             // Punctuation
             (r"([:,])([^\d])", " $1 $2"),
             (r"([:,])$", " $1"),
@@ -446,10 +442,8 @@ impl TreebankWordTokenizer {
             (r"([^'])' ", "$1 ' "),
             // Pad parentheses
             (r"([\]\[\(\)\{\}<>])", r" $1 "),
-
             // Double dashed
             ("--", " -- ")
-
         ];
 
         let stage2_regex = regexReplacementVec![
@@ -458,10 +452,9 @@ impl TreebankWordTokenizer {
             (r"(\S)('')", "$1 $2 "),
             (r"([^' ])('[sS]|'[mM]|'[dD]|') ", "$1 $2 "),
             (r"([^' ])('ll|'LL|'re|'RE|'ve|'VE|n't|N'T)", "$1 $2 "),
-
             // List of contractions adapted from Robert MacIntyre's tokenizer.
             // CONTRACTIONS2
-            (r"(?i)\b(can)(not)\b", " $1 $2 "), 
+            (r"(?i)\b(can)(not)\b", " $1 $2 "),
             (r"(?i)\b(d)('ye)\b", " $1 $2 "),
             (r"(?i)\b(gim)(me)\b", " $1 $2 "),
             (r"(?i)\b(gon)(na)\b", " $1 $2 "),
@@ -473,10 +466,10 @@ impl TreebankWordTokenizer {
             (r"(?i) ('t)(is)\b", " $1 $2 "),
             (r"(?i) ('t)(was)\b", " $1 $2 ")
         ];
-        TreebankWordTokenizer {
-            params: TreebankWordTokenizerParams::default(),
+        NTLKWordTokenizer {
+            params: NTLKWordTokenizerParams::default(),
             stage1_regex,
-            stage2_regex
+            stage2_regex,
         }
     }
     pub fn tokenize<'a>(&'a self, text: &'a str) -> Vec<String> {
@@ -487,7 +480,7 @@ impl TreebankWordTokenizer {
         out = format!(" {} ", out);
 
         // add extra space to make things easier
-        for (regexp_obj, subst) in self.stage1_regex.iter() {
+        for (regexp_obj, subst) in self.stage2_regex.iter() {
             out = regexp_obj.replace_all(&out, subst.as_str()).to_string();
         }
         let x = out.split_whitespace().map(|el| el.to_string()).to_owned();
@@ -499,30 +492,30 @@ impl TreebankWordTokenizer {
 /// Builder for the regexp tokenizer
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "python", derive(FromPyObject, IntoPyObject))]
-pub struct TreebankWordTokenizerParams {}
+pub struct NTLKWordTokenizerParams {}
 
-impl TreebankWordTokenizerParams {
-    pub fn build(&mut self) -> Result<TreebankWordTokenizer, EstimatorErr> {
-        Ok(TreebankWordTokenizer::new())
+impl NTLKWordTokenizerParams {
+    pub fn build(&mut self) -> Result<NTLKWordTokenizer, EstimatorErr> {
+        Ok(NTLKWordTokenizer::new())
     }
 }
 
-impl Default for TreebankWordTokenizerParams {
+impl Default for NTLKWordTokenizerParams {
     /// Create a new instance
-    fn default() -> TreebankWordTokenizerParams {
-        TreebankWordTokenizerParams {}
+    fn default() -> NTLKWordTokenizerParams {
+        NTLKWordTokenizerParams {}
     }
 }
 
-impl Default for TreebankWordTokenizer {
+impl Default for NTLKWordTokenizer {
     /// Create a new instance
-    fn default() -> TreebankWordTokenizer {
-        TreebankWordTokenizerParams::default().build().unwrap()
+    fn default() -> NTLKWordTokenizer {
+        NTLKWordTokenizerParams::default().build().unwrap()
     }
 }
 
-impl fmt::Debug for TreebankWordTokenizer {
+impl fmt::Debug for NTLKWordTokenizer {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "TreebankWordTokenizer {{ }}")
+        write!(f, "NTLKWordTokenizer {{ }}")
     }
 }
