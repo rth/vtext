@@ -226,43 +226,65 @@ fn test_treebank_word_tokenizer() {
     let s = "The company spent 40.75% of its income last year.";
     let tokens = tokenizer.tokenize(s);
     let b: &[_] = &[
-     "The", "company", "spent", "40.75", "%", "of", "its", "income", "last", "year", "."
+        "The", "company", "spent", "40.75", "%", "of", "its", "income", "last", "year", ".",
     ];
     assert_eq!(tokens, b);
 
     let s = "He arrived at 3:00 pm.";
     let tokens = tokenizer.tokenize(s);
-    let b: &[_] = &[
-         "He", "arrived", "at", "3:00", "pm", "."
-    ];
+    let b: &[_] = &["He", "arrived", "at", "3:00", "pm", "."];
     assert_eq!(tokens, b);
 
     let s = "I bought these items: books, pencils, and pens.";
     let tokens = tokenizer.tokenize(s);
     let b: &[_] = &[
-         "I", "bought", "these", "items", ":", "books", ",", "pencils", ",", "and", "pens", "."
+        "I", "bought", "these", "items", ":", "books", ",", "pencils", ",", "and", "pens", ".",
     ];
     assert_eq!(tokens, b);
 
     let s = "Though there were 150, 100 of them were old.";
     let tokens = tokenizer.tokenize(s);
     let b: &[_] = &[
-        "Though", "there", "were", "150", ",", "100", "of", "them", "were", "old", "."
+        "Though", "there", "were", "150", ",", "100", "of", "them", "were", "old", ".",
     ];
     assert_eq!(tokens, b);
 
     let s = "There were 300,000, but that wasn't enough.";
     let tokens = tokenizer.tokenize(s);
     let b: &[_] = &[
-         "There", "were", "300,000", ",", "but", "that", "was", "n't", "enough", "."
+        "There", "were", "300,000", ",", "but", "that", "was", "n't", "enough", ".",
     ];
     assert_eq!(tokens, b);
 
     // Handling of unicode
     let s = "«Now that I can do.»";
     let tokens = tokenizer.tokenize(s);
+    let b: &[_] = &["«", "Now", "that", "I", "can", "do", ".", "»"];
+    assert_eq!(tokens, b);
+
+    let s = "The unicode 201C and 201D \u{201c}LEFT(RIGHT) DOUBLE QUOTATION MARK\u{201d} is also OPEN_PUNCT and CLOSE_PUNCT.";
+    let tokens = tokenizer.tokenize(s);
     let b: &[_] = &[
-         "«", "Now", "that", "I", "can", "do", ".", "»"
+        "The",
+        "unicode",
+        "201C",
+        "and",
+        "201D",
+        "\u{201c}",
+        "LEFT",
+        "(",
+        "RIGHT",
+        ")",
+        "DOUBLE",
+        "QUOTATION",
+        "MARK",
+        "\u{201d}",
+        "is",
+        "also",
+        "OPEN_PUNCT",
+        "and",
+        "CLOSE_PUNCT",
+        ".",
     ];
     assert_eq!(tokens, b);
 }

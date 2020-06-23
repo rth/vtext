@@ -435,7 +435,7 @@ impl NTLKWordTokenizer {
             ("([ \\(\\[{<])(\"|\'{2})", r"$1 `` "),
             // Can't do negative lookahead with regex crate
             // (r"(?i)(')(?!re|ve|ll|m|t|s|d)(\w)\b", r"$1 $2"),
-            
+
             // Punctuation
             ("([^\\.])(\\.)([\\]\\)}>\"'»”’ \" r\"]*)\\s*$", "$1 $2 $3"),
             (r"([:,])([^\d])", " $1 $2"),
@@ -445,7 +445,7 @@ impl NTLKWordTokenizer {
             ("([^\\.])(\\.)([\\]\\)}>\"\']*)\\s*$", "$1 $2 $3"),
             (r"([?!])", " $1 "),
             (r"([^'])' ", "$1 ' "),
-            (r"[*]", " $1 "), 
+            (r"[*]", " $1 "),
             // Pad parentheses
             (r"([\]\[\(\)\{\}<>])", r" $1 "),
             // Double dashed
