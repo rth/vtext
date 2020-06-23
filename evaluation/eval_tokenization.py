@@ -7,7 +7,7 @@ import conllu
 import pandas as pd
 import numpy as np
 
-from vtext.tokenize import UnicodeWordTokenizer, VTextTokenizer
+from vtext.tokenize import UnicodeWordTokenizer, VTextTokenizer, NTLKWordTokenizer
 
 try:
     import sacremoses
@@ -73,6 +73,7 @@ tok_db = [
         lambda lang: UnicodeWordTokenizer(word_bounds=True).tokenize,
     ),
     ("vtext", lambda lang: VTextTokenizer(lang).tokenize),
+    ("NTLKWordTokenizer", lambda lang: NTLKWordTokenizer().tokenize)
 ]
 
 if sacremoses is not None:
@@ -125,4 +126,7 @@ out = (
     .score.unstack(-1)
     .round(3)
 )
+
+pd.set_option('display.width', 120)
+pd.set_option('display.max_columns', 500)
 print(out)

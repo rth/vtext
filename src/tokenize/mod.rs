@@ -429,17 +429,23 @@ impl NTLKWordTokenizer {
     pub fn new() -> NTLKWordTokenizer {
         let stage1_regex = regexReplacementVec![
             // starting quotes
+            ("([«“‘„]|[`]+)", " $1 "),
             ("^\"", "``"),
             ("(``)", " $1 "),
             ("([ \\(\\[{<])(\"|\'{2})", r"$1 `` "),
+            // Can't do negative lookahead with regex crate
+            // (r"(?i)(')(?!re|ve|ll|m|t|s|d)(\w)\b", r"$1 $2"),
+            
             // Punctuation
+            ("([^\\.])(\\.)([\\]\\)}>\"'»”’ \" r\"]*)\\s*$", "$1 $2 $3"),
             (r"([:,])([^\d])", " $1 $2"),
             (r"([:,])$", " $1"),
-            (r"\.\.\.", " ... "),
+            (r"\.{2,}", " $1 "),
             (r"([;@#$%&])", " $1 "),
             ("([^\\.])(\\.)([\\]\\)}>\"\']*)\\s*$", "$1 $2 $3"),
             (r"([?!])", " $1 "),
             (r"([^'])' ", "$1 ' "),
+            (r"[*]", " $1 "), 
             // Pad parentheses
             (r"([\]\[\(\)\{\}<>])", r" $1 "),
             // Double dashed
@@ -448,6 +454,7 @@ impl NTLKWordTokenizer {
 
         let stage2_regex = regexReplacementVec![
             // ending quotes
+            ("([»”’])", " $1 "),
             ("\"", " '' "),
             (r"(\S)('')", "$1 $2 "),
             (r"([^' ])('[sS]|'[mM]|'[dD]|') ", "$1 $2 "),

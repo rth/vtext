@@ -264,6 +264,5 @@ fn test_treebank_word_tokenizer() {
     let b: &[_] = &[
          "«", "Now", "that", "I", "can", "do", ".", "»"
     ];
-    // TODO
-    // assert_eq!(tokens, b);
+    assert_eq!(tokens, b);
 }
