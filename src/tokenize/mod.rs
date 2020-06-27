@@ -47,9 +47,6 @@ let tokens: Vec<&str> = tokenizer.tokenize(s).collect();
 assert_eq!(tokens, &["The", "“", "brown", "”", "fox", "ca", "n't", "jump", "32.3", "feet", ",", "right", "?"]);
 
 */
-extern crate regex;
-extern crate unicode_segmentation;
-
 use crate::errors::EstimatorErr;
 #[cfg(feature = "python")]
 use dict_derive::{FromPyObject, IntoPyObject};
