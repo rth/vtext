@@ -5,6 +5,8 @@ use std::cmp::{min, max};
 use std::collections::VecDeque;
 use std::iter;
 
+use std::iter::Peekable;
+
 fn pad_items<'a>(
     items: Box<dyn Iterator<Item = &'a str> + 'a>,
     n: usize,
@@ -37,6 +39,61 @@ fn pad_items<'a>(
     all_chained
 }
 
+struct SkipVecIter {
+    prev: Vec<usize>,
+    n: usize,
+    k: usize,
+    first: bool,
+}
+
+impl SkipVecIter {
+    pub fn new(n: usize, k: usize) -> SkipVecIter {
+        SkipVecIter {
+            prev: vec![0; n],
+            n,
+            k,
+            first: true
+        }
+    }
+
+    pub fn new_empty() -> SkipVecIter {
+        SkipVecIter {
+            prev: Vec::new(),
+            n: 0,
+            k: 0,
+            first: false
+        }
+    }
+}
+
+impl Iterator for SkipVecIter {
+    type Item = Vec<usize>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.first {
+            self.first = false;
+            return Some(self.prev.clone());
+        } else {
+            for i in (0..self.n).rev() {
+                let e = self.prev[i];
+                if e < self.k {
+                    self.prev[i] += 1;
+                    for j in i+1..self.n {
+                        self.prev[j] = 0;
+                    }
+                    let sum: usize = self.prev.iter().sum();
+                    if sum <= self.k {
+                        return Some(self.prev.clone());
+                    } else {
+                        return self.next()
+                    }
+                }
+            }
+            return None;
+        }
+    }
+}
+
 enum IterMode {
     Start,
     PadLeft,
@@ -61,6 +118,7 @@ struct KSkipNGramsIter<'a> {
     n: usize, // length outputted last
     k: usize,
     p: usize,
+    combinations: Peekable<SkipVecIter>,
     mode: IterMode,
     first: bool,
 }
@@ -158,9 +216,26 @@ impl<'a> KSkipNGramsIter<'a> {
     fn next_gram_pad_left(&mut self) -> Option<Vec<&'a str>> {
         self.next_params_pad_left()?;
 
-        let slice_idx = (self.k..self.window.len())
-            .step_by(self.k + 1)
-            .take(self.n - self.p);
+        // let slice_idx = (self.k..self.window.len())
+        //     .step_by(self.k + 1)
+        //     .take(self.n - self.p);
+        // let grams = self.construct_grams_vec(slice_idx);
+        // return Some(grams);
+
+
+        let mut slice_idx: Vec<usize> = Vec::with_capacity(self.n);
+        let mut i = 0;
+        let spacing = self.combinations.next().unwrap();
+        println!("");
+        for (j, &e) in spacing.clone().iter().enumerate() { // TODO remove clone
+            if j == 0 {
+                i += e;
+            } else {
+                i += e+1;
+            }
+            slice_idx.push(i);
+        }
+        println!("LP {:?} {:?} {}", spacing, slice_idx, self.window.len());
         let grams = self.construct_grams_vec(slice_idx);
         return Some(grams);
     }
@@ -168,11 +243,38 @@ impl<'a> KSkipNGramsIter<'a> {
     fn next_gram_pad_right(&mut self) -> Option<Vec<&'a str>> {
         self.next_params_pad_right()?;
 
-        let slice_idx = (0..self.window.len() - self.k)
-            .rev()
-            .step_by(self.k + 1)
-            .take(self.n - self.p)
-            .rev();
+        // let slice_idx = (0..self.window.len() - self.k)
+        //     .rev()
+        //     .step_by(self.k + 1)
+        //     .take(self.n - self.p)
+        //     .rev();
+        // let grams = self.construct_grams_vec(slice_idx.collect::<Vec<_>>());
+        // return Some(grams);
+
+
+        let mut slice_idx: Vec<usize> = Vec::with_capacity(self.n);
+
+        let spacing = self.combinations.next().unwrap();
+        let end_idx = self.window.len()-1;
+        let mut i = end_idx;
+        for (j, &e) in spacing.clone().iter().enumerate() { // TODO remove clone
+            if j == 0 {
+                i -= e;
+            } else {
+                i -= e+1;
+            }
+            slice_idx.push(i);
+        }
+
+        slice_idx.reverse();
+
+        for i in slice_idx.clone() {
+            if i > end_idx {
+                println!();
+            }
+        }
+
+        println!("LP {:?} {:?} {}", spacing, slice_idx, self.window.len());
         let grams = self.construct_grams_vec(slice_idx);
         return Some(grams);
     }
@@ -187,7 +289,18 @@ impl<'a> KSkipNGramsIter<'a> {
         }
 
         // Get slice
-        let slice_idx = (0..self.window.len()).step_by(self.k + 1).take(self.n);
+        //let slice_idx = (0..self.window.len()).step_by(self.k + 1).take(self.n);
+
+        let mut slice_idx: Vec<usize> = Vec::with_capacity(self.n);
+        slice_idx.push(0);
+        let mut i = 0;
+        let spacing = self.combinations.next().unwrap();
+
+        for e in spacing.clone() { // TODO remove clone
+            i += e+1;
+            slice_idx.push(i);
+        }
+        println!("{:?} {:?} {}", spacing, slice_idx, self.window.len());
         let grams = self.construct_grams_vec(slice_idx);
         return Some(grams);
     }
@@ -196,15 +309,44 @@ impl<'a> KSkipNGramsIter<'a> {
         let finished = self.next_state_pad_main();
 
         if finished.is_none() {
+            // if self.window.len() >= 4 {
+            //     self.pop_window()?;
+            //     self.first = true;
+            //     return self.next_gram_main_end();
+            // } else if self.window.len() == 1 {
+            //     return None
+            // } else {
+            //     let grams = Vec::from(self.window.clone());
+            //     self.pop_window();
+            //     return Some(grams)
+            // }
+
             self.pop_window()?;
             self.first = true;
             return self.next_gram_main_end();
         }
 
         // Get slice
-        let slice_idx = (0..self.window.len()).step_by(self.k + 1).take(self.n);
+        // let slice_idx = (0..self.window.len()).step_by(self.k + 1).take(self.n);
+        // let grams = self.construct_grams_vec(slice_idx);
+
+        // return if grams.len() == self.n { // `take` takes n or less
+        //     Some(grams)
+        // } else {
+        //     None
+        // }
+
+        let mut slice_idx: Vec<usize> = Vec::with_capacity(self.n);
+        slice_idx.push(0);
+        let mut i = 0;
+        for e in self.combinations.next().unwrap() {
+            i += e+1;
+            slice_idx.push(i);
+        }
+        println!("{:?}, {}", slice_idx, self.window.len());
         let grams = self.construct_grams_vec(slice_idx);
-        return if grams.len() == self.n { // `take` takes n or less
+
+        return if grams.len() == self.n { // TODO: why?
             Some(grams)
         } else {
             None
@@ -239,26 +381,40 @@ impl<'a> KSkipNGramsIter<'a> {
     fn next_params_pad_left(&mut self) -> Option<()> {
         // Equivalent to a for-loop:
         // for n in max(self.min_n, 2)..self.max_n + 1
-        //      for k in self.min_k..self.max_k + 1
+        // --     for k in self.min_k..self.max_k + 1
         //          for p in (n-1)..0   // decreasing
-        //              next_gram(n, k, p)
+        //              for combi in combinations:
+        //                  next_gram(n, k, p)
         return if self.first {
             self.n = max(self.min_n, 2);
-            self.k = self.min_k;
+            //self.k = self.min_k;
             self.p = self.n - 1;
+
+            let pick_n = self.n - self.p;
+            let skip_total = self.max_k;
+            self.combinations = SkipVecIter::new(pick_n, skip_total).peekable();
+
             self.first = false;
+            Some(())
+        } else if self.combinations.peek().is_some() {
             Some(())
         } else if self.p > 1 {
             self.p -= 1;
-            Some(())
-        } else if self.k < self.max_k {
-            self.k += 1;
-            self.p = self.n - 1;
+
+            let pick_n = self.n - self.p;
+            let skip_total = self.max_k;
+            self.combinations = SkipVecIter::new(pick_n, skip_total).peekable();
+
             Some(())
         } else if self.n < self.max_n {
             self.n += 1;
-            self.k = self.min_k;
+            //self.k = self.min_k;
             self.p = self.n - 1;
+
+            let pick_n = self.n - self.p;
+            let skip_total = self.max_k;
+            self.combinations = SkipVecIter::new(pick_n, skip_total).peekable();
+
             Some(())
         } else {
             None
@@ -273,21 +429,34 @@ impl<'a> KSkipNGramsIter<'a> {
         //              next_gram(n, k, p)
         return if self.first {
             self.n = max(self.min_n, 2);
-            self.k = self.min_k;
+            //self.k = self.min_k;
             self.p = 1;
             self.first = false;
+
+            let pick_n = self.n - self.p;
+            let skip_total = self.max_k;
+            self.combinations = SkipVecIter::new(pick_n, skip_total).peekable();
+
+            Some(())
+        } else if self.combinations.peek().is_some() {
             Some(())
         } else if self.p < self.n - 1 {
             self.p += 1;
-            Some(())
-        } else if self.k < self.max_k {
-            self.k += 1;
-            self.p = 1;
+
+            let pick_n = self.n - self.p;
+            let skip_total = self.max_k;
+            self.combinations = SkipVecIter::new(pick_n, skip_total).peekable();
+
             Some(())
         } else if self.n < self.max_n {
             self.n += 1;
-            self.k = self.min_k;
+            //self.k = self.min_k;
             self.p = 1;
+
+            let pick_n = self.n - self.p;
+            let skip_total = self.max_k;
+            self.combinations = SkipVecIter::new(pick_n, skip_total).peekable();
+
             Some(())
         } else {
             None
@@ -297,28 +466,57 @@ impl<'a> KSkipNGramsIter<'a> {
     fn next_state_pad_main(&mut self) -> Option<()> {
         // Equivalent to a for-loop:
         // for n in self.min_n..self.max_n + 1
-        //      for k in self.min_k..self.max_k + 1
-        //          next_gram(n, k, p)
+        //      for combi in combination(window[1:], n)
+        //          next_gram = window[0] + combi
         return if self.first {
             self.n = self.min_n;
-            self.k = self.min_k;
+
+            let pick_n = min(self.max_n, self.window.len()) - 1;
+            let skip_total = min(self.window.len()-pick_n-1, self.max_k);
+            self.combinations = SkipVecIter::new(pick_n, skip_total).peekable();
+
             self.first = false;
             Some(())
-        } else if self.k < self.max_k {
-            self.k += 1;
+        } else if self.combinations.peek().is_some() {
             Some(())
         } else if self.n < min(self.max_n, self.window.len()) {
-            self.k = self.min_k;
             self.n += 1;
+
+            let pick_n = min(self.max_n, self.window.len()) - 1;
+            let skip_total = min(self.window.len()-pick_n-1, self.max_k);
+            self.combinations = SkipVecIter::new(pick_n, skip_total).peekable();
+
             Some(())
         } else {
             None
         }
     }
 
+    // fn next_state_pad_main_end(&mut self) -> Option<()> {
+    //     // Equivalent to a for-loop:
+    //     // for n in self.min_n..self.max_n + 1
+    //     //      for k in self.min_k..self.max_k + 1
+    //     //          next_gram(n, k, p)
+    //     return if self.first {
+    //         self.n = self.min_n;
+    //         self.k = self.min_k;
+    //         self.first = false;
+    //         Some(())
+    //     } else if self.k < self.max_k {
+    //         self.k += 1;
+    //         Some(())
+    //     } else if self.n < min(self.max_n, self.window.len()) {
+    //         self.k = self.min_k;
+    //         self.n += 1;
+    //         Some(())
+    //     } else {
+    //         None
+    //     }
+    // }
+
     fn construct_grams_vec(
         &mut self,
-        slice_idx: impl ExactSizeIterator<Item = usize>,
+        slice_idx: Vec<usize>,
     ) -> Vec<&'a str> {
         let grams = self.vec_from_idx(slice_idx);
 
@@ -345,10 +543,10 @@ impl<'a> KSkipNGramsIter<'a> {
         };
     }
 
-    fn vec_from_idx(&mut self, slice_idx: impl ExactSizeIterator<Item = usize>) -> Vec<&'a str> {
+    fn vec_from_idx(&mut self, slice_idx: Vec<usize>) -> Vec<&'a str> {
         let mut grams = Vec::with_capacity(slice_idx.len());
-        for idx in slice_idx {
-            grams.push(self.window[idx].clone());
+        for idx in slice_idx.iter() {
+            grams.push(self.window[*idx].clone());
         }
         grams
     }
@@ -415,6 +613,7 @@ fn build_k_skip_n_grams_iter<'a>(
         window_end: VecDeque::new(),
         n: 0, // length outputted last
         k: 0,
+        combinations: SkipVecIter::new_empty().peekable(),
         p: 0,
         mode: IterMode::Start,
         first: false,
