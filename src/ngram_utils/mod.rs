@@ -161,7 +161,7 @@ impl<'a> Iterator for KSkipNGramsIter<'a> {
             }
 
             IterMode::MainEnd => {
-                if self.min_n != self.max_n || self.max_k > 0  {
+                if (self.min_n != self.max_n || self.max_k > 0) && self.window.len() > 1  {
                     let next = self.next_gram_main_end();
                     match &next {
                         Some(_e) => next,
@@ -226,7 +226,7 @@ impl<'a> KSkipNGramsIter<'a> {
         let mut slice_idx: Vec<usize> = Vec::with_capacity(self.n);
         let mut i = 0;
         let spacing = self.combinations.next().unwrap();
-        println!("");
+
         for (j, &e) in spacing.clone().iter().enumerate() { // TODO remove clone
             if j == 0 {
                 i += e;
@@ -235,7 +235,6 @@ impl<'a> KSkipNGramsIter<'a> {
             }
             slice_idx.push(i);
         }
-        println!("LP {:?} {:?} {}", spacing, slice_idx, self.window.len());
         let grams = self.construct_grams_vec(slice_idx);
         return Some(grams);
     }
@@ -268,13 +267,6 @@ impl<'a> KSkipNGramsIter<'a> {
 
         slice_idx.reverse();
 
-        for i in slice_idx.clone() {
-            if i > end_idx {
-                println!();
-            }
-        }
-
-        println!("LP {:?} {:?} {}", spacing, slice_idx, self.window.len());
         let grams = self.construct_grams_vec(slice_idx);
         return Some(grams);
     }
@@ -300,7 +292,6 @@ impl<'a> KSkipNGramsIter<'a> {
             i += e+1;
             slice_idx.push(i);
         }
-        println!("{:?} {:?} {}", spacing, slice_idx, self.window.len());
         let grams = self.construct_grams_vec(slice_idx);
         return Some(grams);
     }
@@ -321,9 +312,14 @@ impl<'a> KSkipNGramsIter<'a> {
             //     return Some(grams)
             // }
 
-            self.pop_window()?;
-            self.first = true;
-            return self.next_gram_main_end();
+            return if self.window.len() > self.min_n {
+                self.pop_window()?;
+                self.first = true;
+                self.next_gram_main_end()
+            } else {
+                None
+            }
+
         }
 
         // Get slice
@@ -343,7 +339,6 @@ impl<'a> KSkipNGramsIter<'a> {
             i += e+1;
             slice_idx.push(i);
         }
-        println!("{:?}, {}", slice_idx, self.window.len());
         let grams = self.construct_grams_vec(slice_idx);
 
         return if grams.len() == self.n { // TODO: why?
@@ -471,7 +466,7 @@ impl<'a> KSkipNGramsIter<'a> {
         return if self.first {
             self.n = self.min_n;
 
-            let pick_n = min(self.max_n, self.window.len()) - 1;
+            let pick_n = min(self.n, self.window.len()) - 1;
             let skip_total = min(self.window.len()-pick_n-1, self.max_k);
             self.combinations = SkipVecIter::new(pick_n, skip_total).peekable();
 
@@ -482,7 +477,7 @@ impl<'a> KSkipNGramsIter<'a> {
         } else if self.n < min(self.max_n, self.window.len()) {
             self.n += 1;
 
-            let pick_n = min(self.max_n, self.window.len()) - 1;
+            let pick_n = min(self.n, self.window.len()) - 1;
             let skip_total = min(self.window.len()-pick_n-1, self.max_k);
             self.combinations = SkipVecIter::new(pick_n, skip_total).peekable();
 
@@ -566,7 +561,9 @@ fn build_window<'a>(
         let next_item = items.next();
         match next_item {
             None => {
-                return Err("Items length is smaller than what is required by `max_n` and `max_k`")
+                // TODO: remove result
+                return Ok(window);
+                //return Err("Items length is smaller than what is required by `max_n` and `max_k`")
             }
             Some(s) => {
                 window.push_back(s);
