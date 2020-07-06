@@ -1,4 +1,6 @@
 use crate::ngram_utils::*;
+use std::collections::HashSet;
+use std::iter::FromIterator;
 
 #[test]
 fn test_padding() {
@@ -98,6 +100,10 @@ fn test_everygram() {
     let output_iter = everygrams(Box::new(sent), 1, 3, Some("<s>"), Some("</s>")).unwrap();
     let output: Vec<Vec<&str>> = output_iter.collect();
 
+    for e in &output {
+        println!("{:?}", e);
+    }
+
     let expected = vec![
         vec!["<s>", "Mary"],
         vec!["<s>", "<s>", "Mary"],
@@ -172,11 +178,38 @@ fn test_skipgram() {
 }
 
 #[test]
+fn test_skipgram_everygram() {
+    let sent = "Mary had a little lamb".split(" ");
+
+    // min_n=2, max_n=3, max_k=1
+    let output_iter = build_k_skip_n_grams_iter(
+        Box::new(sent.clone()), 2, 3, 1, Some("<s>"), Some("</s>")).unwrap();
+    let output: Vec<_> = output_iter.collect();
+    let output_set: HashSet<Vec<&str>> = HashSet::from_iter(output.iter().cloned());
+
+    // should be equivalent to union of two skipgram outputs n=2,3 (k=1) but expect different ordering
+    let output_sg_2: Vec<_> = skipgrams(
+        Box::new(sent.clone()), 2, 1, Some("<s>"), Some("</s>")).unwrap().collect();
+    let output_sg_2_set: HashSet<Vec<&str>> = HashSet::from_iter(output_sg_2.iter().cloned());
+
+    let output_sg_3: Vec<_> = skipgrams(
+        Box::new(sent.clone()), 3, 1,Some("<s>"), Some("</s>")).unwrap().collect();
+    let output_sg_3_set: HashSet<Vec<&str>> = HashSet::from_iter(output_sg_3.iter().cloned());
+    let expected_set: HashSet<_> = output_sg_2_set.union(&output_sg_3_set).map(move |x| x.clone()).collect();
+
+    // Same output - different order
+    assert_eq!(output_set, expected_set);
+
+    // No duplicates from either output expected
+    assert_eq!(output.len(), output_sg_2.len()+output_sg_3.len());
+}
+
+#[test]
 fn test_ngram_edge_cases() {
     let sent = "Mary had a little lamb".split(" ");
 
     let output_iter = build_k_skip_n_grams_iter(
-        Box::new(sent.clone()), 1, 1, 1, 1, Some("<s>"), Some("</s>")).unwrap();
+        Box::new(sent.clone()), 1, 1, 0, Some("<s>"), Some("</s>")).unwrap();
     let output: Vec<Vec<&str>> = output_iter.collect();
 
     let expected = vec![
@@ -190,7 +223,7 @@ fn test_ngram_edge_cases() {
     assert_eq!(output, expected);
 
     let output_iter = build_k_skip_n_grams_iter(
-        Box::new(sent.clone()), 1, 1, 2, 2, Some("<s>"), Some("</s>")).unwrap();
+        Box::new(sent.clone()), 1, 1, 1, Some("<s>"), Some("</s>")).unwrap();
     let output: Vec<Vec<&str>> = output_iter.collect();
 
     assert_eq!(output, expected);
@@ -212,6 +245,60 @@ fn test_skip_vec_iter() {
         vec![1, 0, 1],
         vec![1, 1, 0],
         vec![2, 0, 0],
+    ];
+    assert_eq!(output, expected);
+
+}
+
+#[test]
+fn test_gram_combinations() {
+
+    let output: Vec<Vec<usize>> = GramCombinations::new(false, 3, 3).unwrap().collect();
+
+    let expected = vec![
+        vec![0, 1, 2],
+        vec![0, 1, 3],
+        vec![0, 2, 3],
+        vec![1, 2, 3],
+    ];
+    assert_eq!(output, expected);
+
+    let output: Vec<Vec<usize>> = GramCombinations::new(true, 3, 3).unwrap().collect();
+    let expected = vec![
+        vec![0, 1, 2],
+        vec![0, 1, 3],
+        vec![0, 2, 3],
+    ];
+    assert_eq!(output, expected);
+
+    // Single output
+    let output: Vec<Vec<usize>> = GramCombinations::new(false, 1, 2).unwrap().collect();
+    let expected = vec![
+        vec![0, 1],
+    ];
+    assert_eq!(output, expected);
+
+    let output: Vec<Vec<usize>> = GramCombinations::new(true, 1, 2).unwrap().collect();
+    let expected = vec![
+        vec![0, 1],
+    ];
+    assert_eq!(output, expected);
+
+    let output: Vec<Vec<usize>> = GramCombinations::new(true, 2, 3).unwrap().collect();
+    let expected = vec![
+        vec![0, 1, 2],
+    ];
+    assert_eq!(output, expected);
+
+    let output: Vec<Vec<usize>> = GramCombinations::new(false, 0, 1).unwrap().collect();
+    let expected = vec![
+        vec![0],
+    ];
+    assert_eq!(output, expected);
+
+    let output: Vec<Vec<usize>> = GramCombinations::new(true, 0, 1).unwrap().collect();
+    let expected = vec![
+        vec![0],
     ];
     assert_eq!(output, expected);
 
