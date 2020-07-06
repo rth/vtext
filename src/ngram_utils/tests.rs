@@ -3,31 +3,14 @@ use std::collections::HashSet;
 use std::iter::FromIterator;
 
 #[test]
-fn test_padding() {
-    let sent = "Mary had a little lamb".split(" ");
-
-    let output: Vec<&str> =
-        pad_items(Box::new(sent.clone()), 3, Some("<s>"), Some("</s>")).collect();
-    let expected = vec![
-        "<s>", "<s>", "Mary", "had", "a", "little", "lamb", "</s>", "</s>",
-    ];
-    assert_eq!(output, expected);
-
-    let output: Vec<&str> = pad_items(Box::new(sent.clone()), 2, Some("<s>"), None).collect();
-    let expected = vec!["<s>", "Mary", "had", "a", "little", "lamb"];
-    assert_eq!(output, expected);
-
-    let output: Vec<&str> = pad_items(Box::new(sent.clone()), 2, None, Some("</s>")).collect();
-    let expected = vec!["Mary", "had", "a", "little", "lamb", "</s>"];
-    assert_eq!(output, expected);
-}
-
-#[test]
 fn test_bigram() {
     let sent = "Mary had a little lamb".split(" ");
 
-    let output_iter = bigram(Box::new(sent), None, None).unwrap();
-    let output: Vec<Vec<&str>> = output_iter.collect();
+    let gramizer = KSkipNGrams::new_bigram();
+    let grams: Vec<Vec<&str>> = gramizer
+        .transform(Box::new(sent.clone()), None, None)
+        .unwrap()
+        .collect();
 
     let expected = vec![
         vec!["Mary", "had"],
@@ -36,15 +19,18 @@ fn test_bigram() {
         vec!["little", "lamb"],
     ];
 
-    assert_eq!(output, expected);
+    assert_eq!(grams, expected);
 }
 
 #[test]
 fn test_trigram() {
     let sent = "Mary had a little lamb".split(" ");
 
-    let output_iter = ngrams(Box::new(sent.clone()), 3, Some("<s>"), Some("</s>")).unwrap();
-    let output: Vec<Vec<&str>> = output_iter.collect();
+    let gramizer = KSkipNGrams::new_trigram();
+    let grams: Vec<Vec<&str>> = gramizer
+        .transform(Box::new(sent.clone()), Some("<s>"), Some("</s>"))
+        .unwrap()
+        .collect();
 
     let expected = vec![
         vec!["<s>", "<s>", "Mary"],
@@ -56,10 +42,13 @@ fn test_trigram() {
         vec!["lamb", "</s>", "</s>"],
     ];
 
-    assert_eq!(output, expected);
+    assert_eq!(grams, expected);
 
-    let output_iter = ngrams(Box::new(sent.clone()), 3, None, Some("</s>")).unwrap();
-    let output: Vec<Vec<&str>> = output_iter.collect();
+    let gramizer = KSkipNGrams::new_trigram();
+    let grams: Vec<Vec<&str>> = gramizer
+        .transform(Box::new(sent.clone()), None, Some("</s>"))
+        .unwrap()
+        .collect();
 
     let expected = vec![
         vec!["Mary", "had", "a"],
@@ -69,15 +58,18 @@ fn test_trigram() {
         vec!["lamb", "</s>", "</s>"],
     ];
 
-    assert_eq!(output, expected);
+    assert_eq!(grams, expected);
 }
 
 #[test]
 fn test_ngrams() {
     let sent = "Mary had a little lamb".split(" ");
 
-    let output_iter = ngrams(Box::new(sent), 4, Some("<s>"), Some("</s>")).unwrap();
-    let output: Vec<Vec<&str>> = output_iter.collect();
+    let gramizer = KSkipNGrams::new_ngrams(4);
+    let grams: Vec<Vec<&str>> = gramizer
+        .transform(Box::new(sent.clone()), Some("<s>"), Some("</s>"))
+        .unwrap()
+        .collect();
 
     let expected = vec![
         vec!["<s>", "<s>", "<s>", "Mary"],
@@ -90,15 +82,18 @@ fn test_ngrams() {
         vec!["lamb", "</s>", "</s>", "</s>"],
     ];
 
-    assert_eq!(output, expected);
+    assert_eq!(grams, expected);
 }
 
 #[test]
 fn test_everygram() {
     let sent = "Mary had a little lamb".split(" ");
 
-    let output_iter = everygrams(Box::new(sent), 1, 3, Some("<s>"), Some("</s>")).unwrap();
-    let output: Vec<Vec<&str>> = output_iter.collect();
+    let gramizer = KSkipNGrams::new_everygrams(1, 3);
+    let grams: Vec<Vec<&str>> = gramizer
+        .transform(Box::new(sent.clone()), Some("<s>"), Some("</s>"))
+        .unwrap()
+        .collect();
 
     let expected = vec![
         vec!["<s>", "Mary"],
@@ -121,15 +116,18 @@ fn test_everygram() {
         vec!["lamb", "</s>", "</s>"],
     ];
 
-    assert_eq!(output, expected);
+    assert_eq!(grams, expected);
 }
 
 #[test]
 fn test_skipgram() {
     let sent = "Mary had a little lamb".split(" ");
 
-    let output_iter = skipgrams(Box::new(sent.clone()), 2, 1, Some("<s>"), Some("</s>")).unwrap();
-    let output: Vec<Vec<&str>> = output_iter.collect();
+    let gramizer = KSkipNGrams::new_skipgrams(2, 1);
+    let grams: Vec<Vec<&str>> = gramizer
+        .transform(Box::new(sent.clone()), Some("<s>"), Some("</s>"))
+        .unwrap()
+        .collect();
 
     let expected = vec![
         vec!["<s>", "Mary"],
@@ -145,10 +143,13 @@ fn test_skipgram() {
         vec!["little", "</s>"],
     ];
 
-    assert_eq!(output, expected);
+    assert_eq!(grams, expected);
 
-    let output_iter = skipgrams(Box::new(sent.clone()), 3, 1, Some("<s>"), Some("</s>")).unwrap();
-    let output: Vec<Vec<&str>> = output_iter.collect();
+    let gramizer = KSkipNGrams::new_skipgrams(3, 1);
+    let grams: Vec<Vec<&str>> = gramizer
+        .transform(Box::new(sent.clone()), Some("<s>"), Some("</s>"))
+        .unwrap()
+        .collect();
 
     let expected = vec![
         vec!["<s>", "<s>", "Mary"],
@@ -170,31 +171,89 @@ fn test_skipgram() {
         vec!["little", "</s>", "</s>"],
     ];
 
-    assert_eq!(output, expected);
+    assert_eq!(grams, expected);
+
+    let sent = "Mary had a little lamb, whose fleece ...".split(" ");
+
+    let gramizer = KSkipNGrams::new_skipgrams(3, 2);
+    let grams: Vec<Vec<&str>> = gramizer
+        .transform(Box::new(sent.clone()), None, None)
+        .unwrap()
+        .collect();
+
+    let expected = vec![
+        vec!["Mary", "had", "a"],
+        vec!["Mary", "had", "little"],
+        vec!["Mary", "had", "lamb,"],
+        vec!["Mary", "a", "little"],
+        vec!["Mary", "a", "lamb,"],
+        vec!["Mary", "little", "lamb,"],
+        vec!["had", "a", "little"],
+        vec!["had", "a", "lamb,"],
+        vec!["had", "a", "whose"],
+        vec!["had", "little", "lamb,"],
+        vec!["had", "little", "whose"],
+        vec!["had", "lamb,", "whose"],
+        vec!["a", "little", "lamb,"],
+        vec!["a", "little", "whose"],
+        vec!["a", "little", "fleece"],
+        vec!["a", "lamb,", "whose"],
+        vec!["a", "lamb,", "fleece"],
+        vec!["a", "whose", "fleece"],
+        vec!["little", "lamb,", "whose"],
+        vec!["little", "lamb,", "fleece"],
+        vec!["little", "lamb,", "..."],
+        vec!["little", "whose", "fleece"],
+        vec!["little", "whose", "..."],
+        vec!["little", "fleece", "..."],
+        vec!["lamb,", "whose", "fleece"],
+        vec!["lamb,", "whose", "..."],
+        vec!["lamb,", "fleece", "..."],
+        vec!["whose", "fleece", "..."],
+    ];
+
+    assert_eq!(grams, expected);
 }
 
 #[test]
 fn test_skipgram_everygram() {
-    let sent = "Mary had a little lamb".split(" ");
+    let sent = "Mary had a little lamb, whose fleece ...".split(" ");
 
-    // min_n=2, max_n=3, max_k=1
-    let output_iter =
-        build_k_skip_n_grams(Box::new(sent.clone()), 2, 3, 1, Some("<s>"), Some("</s>")).unwrap();
-    let output: Vec<_> = output_iter.collect();
+    // min_n=2, max_n=4, max_k=3
+    let gramizer = KSkipNGrams::new(2, 4, 3);
+    let output: Vec<_> = gramizer
+        .transform(Box::new(sent.clone()), Some("<s>"), Some("</s>"))
+        .unwrap()
+        .collect();
     let output_set: HashSet<Vec<&str>> = HashSet::from_iter(output.iter().cloned());
 
-    // should be equivalent to union of two skipgram outputs n=2,3 (k=1) but expect different ordering
-    let output_sg_2: Vec<_> = skipgrams(Box::new(sent.clone()), 2, 1, Some("<s>"), Some("</s>"))
+    // Equivalent to union of three skip-gram outputs n=2,3,4 (k=3) but with different ordering
+    let gramizer_sg_2 = KSkipNGrams::new_skipgrams(2, 3);
+    let output_sg_2: Vec<_> = gramizer_sg_2
+        .transform(Box::new(sent.clone()), Some("<s>"), Some("</s>"))
         .unwrap()
         .collect();
     let output_sg_2_set: HashSet<Vec<&str>> = HashSet::from_iter(output_sg_2.iter().cloned());
 
-    let output_sg_3: Vec<_> = skipgrams(Box::new(sent.clone()), 3, 1, Some("<s>"), Some("</s>"))
+    let gramizer_sg_3 = KSkipNGrams::new_skipgrams(3, 3);
+    let output_sg_3: Vec<_> = gramizer_sg_3
+        .transform(Box::new(sent.clone()), Some("<s>"), Some("</s>"))
         .unwrap()
         .collect();
     let output_sg_3_set: HashSet<Vec<&str>> = HashSet::from_iter(output_sg_3.iter().cloned());
+
+    let gramizer_sg_4 = KSkipNGrams::new_skipgrams(4, 3);
+    let output_sg_4: Vec<_> = gramizer_sg_4
+        .transform(Box::new(sent.clone()), Some("<s>"), Some("</s>"))
+        .unwrap()
+        .collect();
+    let output_sg_4_set: HashSet<Vec<&str>> = HashSet::from_iter(output_sg_4.iter().cloned());
+
     let expected_set: HashSet<_> = output_sg_2_set
         .union(&output_sg_3_set)
+        .map(move |x| x.clone())
+        .collect::<HashSet<_>>()
+        .union(&output_sg_4_set)
         .map(move |x| x.clone())
         .collect();
 
@@ -202,16 +261,21 @@ fn test_skipgram_everygram() {
     assert_eq!(output_set, expected_set);
 
     // No duplicates from either output expected
-    assert_eq!(output.len(), output_sg_2.len() + output_sg_3.len());
+    assert_eq!(
+        output.len(),
+        output_sg_2.len() + output_sg_3.len() + output_sg_4.len()
+    );
 }
 
 #[test]
 fn test_ngram_edge_cases() {
     let sent = "Mary had a little lamb".split(" ");
 
-    let output_iter =
-        build_k_skip_n_grams(Box::new(sent.clone()), 1, 1, 0, Some("<s>"), Some("</s>")).unwrap();
-    let output: Vec<Vec<&str>> = output_iter.collect();
+    let gramizer = KSkipNGrams::new(1, 1, 0);
+    let grams: Vec<Vec<&str>> = gramizer
+        .transform(Box::new(sent.clone()), Some("<s>"), Some("</s>"))
+        .unwrap()
+        .collect();
 
     let expected = vec![
         vec!["Mary"],
@@ -221,13 +285,15 @@ fn test_ngram_edge_cases() {
         vec!["lamb"],
     ];
 
-    assert_eq!(output, expected);
+    assert_eq!(grams, expected);
 
-    let output_iter =
-        build_k_skip_n_grams(Box::new(sent.clone()), 1, 1, 1, Some("<s>"), Some("</s>")).unwrap();
-    let output: Vec<Vec<&str>> = output_iter.collect();
+    let gramizer = KSkipNGrams::new(1, 1, 1);
+    let grarms: Vec<Vec<&str>> = gramizer
+        .transform(Box::new(sent.clone()), Some("<s>"), Some("</s>"))
+        .unwrap()
+        .collect();
 
-    assert_eq!(output, expected);
+    assert_eq!(grarms, expected);
 }
 
 #[test]
@@ -239,6 +305,17 @@ fn test_sample_combinations() {
 
     let output: Vec<Vec<usize>> = SampleCombinations::new(true, 3, 3).unwrap().collect();
     let expected = vec![vec![0, 1, 2], vec![0, 1, 3], vec![0, 2, 3]];
+    assert_eq!(output, expected);
+
+    let output: Vec<Vec<usize>> = SampleCombinations::new(true, 4, 3).unwrap().collect();
+    let expected = vec![
+        vec![0, 1, 2],
+        vec![0, 1, 3],
+        vec![0, 1, 4],
+        vec![0, 2, 3],
+        vec![0, 2, 4],
+        vec![0, 3, 4],
+    ];
     assert_eq!(output, expected);
 
     // Single output
