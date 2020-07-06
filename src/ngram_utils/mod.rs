@@ -178,7 +178,10 @@ impl KSkipNGrams {
 }
 
 /// An iterator which provided with a sequence of `items` transforms into k-skip-n-grams.
-/// The iterator consumes the input `items` only once.
+///
+/// The iterator consumes the input iterator only once and holds a window of items to generate the
+/// grams from which is stepped forward as it consumes the input. It also correctly generates left
+/// or right padding if specified.
 pub struct KSkipNGramsIter<'a> {
     // Params
     items: Box<dyn Iterator<Item = &'a str> + 'a>,
@@ -189,18 +192,18 @@ pub struct KSkipNGramsIter<'a> {
     pad_right: Option<&'a str>,
 
     // Iterator state
-    window: VecDeque<&'a str>,
     /// Window which holds items that have been consumed
-    n: usize,
+    window: VecDeque<&'a str>,
     /// Gram length that was yielded last
-    p: usize,
+    n: usize,
     /// Amount of padding included in item yielded last
-    offset: usize,
+    p: usize,
     /// Offset used during MainEnd mode
-    sample_iter: Peekable<SampleCombinations>,
+    offset: usize,
     /// k-skip combinations of current window
-    mode: IterMode,
+    sample_iter: Peekable<SampleCombinations>,
     /// Current mode of iterator
+    mode: IterMode,
     first: bool,
 }
 
