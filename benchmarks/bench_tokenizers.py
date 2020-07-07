@@ -3,10 +3,13 @@ from glob import glob
 from pathlib import Path
 import re
 
-from vtext.tokenize import RegexpTokenizer
-from vtext.tokenize import UnicodeWordTokenizer
-from vtext.tokenize import VTextTokenizer
-from vtext.tokenize import CharacterTokenizer
+from vtext.tokenize import (
+    RegexpTokenizer,
+    UnicodeWordTokenizer,
+    VTextTokenizer,
+    CharacterTokenizer,
+    NTLKWordTokenizer
+)
 
 try:
     import sacremoses
@@ -22,6 +25,11 @@ try:
     import blingfire
 except ImportError:
     blingfire = None
+
+try:
+    import nltk
+except ImportError:
+    nltk = None
 
 
 base_dir = Path(__file__).parent.parent.resolve()
@@ -59,6 +67,7 @@ if __name__ == "__main__":
         ),
         ("VTextTokenizer('en')", VTextTokenizer("en").tokenize),
         ("CharacterTokenizer(4)", CharacterTokenizer(4).tokenize),
+        ("NTLKWordTokenizer()", NTLKWordTokenizer().tokenize)
     ]
 
     if sacremoses is not None:
@@ -70,6 +79,9 @@ if __name__ == "__main__":
 
     if blingfire is not None:
         db.append(("BlingFire en", lambda x: blingfire.text_to_words(x).split(" ")))
+
+    if nltk is not None:
+        db.append(('NLTK NLTKWordTokenizer', nltk.tokenize.NLTKWordTokenizer().tokenize))
 
     for label, func in db:
         t0 = time()

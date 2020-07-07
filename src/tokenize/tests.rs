@@ -131,3 +131,160 @@ fn test_tokenizer_defaults() {
     let tokenizer = UnicodeWordTokenizer::default();
     assert_eq!(tokenizer.params.word_bounds, true);
 }
+
+#[test]
+fn test_treebank_word_tokenizer() {
+    let tokenizer = NTLKWordTokenizer::default();
+
+    // test cases from NLTK
+    // https://github.com/nltk/nltk/blob/develop/nltk/test/tokenize.doctest
+    let s = "On a $50,000 mortgage of 30 years at 8 percent, the monthly payment would be $366.88.";
+    let tokens = tokenizer.tokenize(s);
+    let b: &[_] = &[
+        "On", "a", "$", "50,000", "mortgage", "of", "30", "years", "at", "8", "percent", ",",
+        "the", "monthly", "payment", "would", "be", "$", "366.88", ".",
+    ];
+    assert_eq!(tokens, b);
+
+    let s = "\"We beat some pretty good teams to get here,\" Slocum said.";
+    let tokens = tokenizer.tokenize(s);
+    let b: &[_] = &[
+        "``", "We", "beat", "some", "pretty", "good", "teams", "to", "get", "here", ",", "''",
+        "Slocum", "said", ".",
+    ];
+    assert_eq!(tokens, b);
+
+    let s = "Well, we couldn't have this predictable, cliche-ridden, \"Touched by an Angel\" (a show creator John Masius worked on) wanna-be if she didn't.";
+    let tokens = tokenizer.tokenize(s);
+    let b: &[_] = &[
+        "Well",
+        ",",
+        "we",
+        "could",
+        "n\"t",
+        "have",
+        "this",
+        "predictable",
+        ",",
+        "cliche-ridden",
+        ",",
+        "``",
+        "Touched",
+        "by",
+        "an",
+        "Angel",
+        "\"\"",
+        "(",
+        "a",
+        "show",
+        "creator",
+        "John",
+        "Masius",
+        "worked",
+        "on",
+        ")",
+        "wanna-be",
+        "if",
+        "she",
+        "did",
+        "n\"t",
+        ".",
+    ];
+    // TODO
+    // assert_eq!(tokens, b);
+
+    let s = "I cannot cannot work under these conditions!";
+    let tokens = tokenizer.tokenize(s);
+    let b: &[_] = &[
+        "I",
+        "can",
+        "not",
+        "can",
+        "not",
+        "work",
+        "under",
+        "these",
+        "conditions",
+        "!",
+    ];
+    assert_eq!(tokens, b);
+
+    let s = "The company spent $30,000,000 last year.";
+    let tokens = tokenizer.tokenize(s);
+    let b: &[_] = &[
+        "The",
+        "company",
+        "spent",
+        "$",
+        "30,000,000",
+        "last",
+        "year",
+        ".",
+    ];
+    assert_eq!(tokens, b);
+
+    let s = "The company spent 40.75% of its income last year.";
+    let tokens = tokenizer.tokenize(s);
+    let b: &[_] = &[
+        "The", "company", "spent", "40.75", "%", "of", "its", "income", "last", "year", ".",
+    ];
+    assert_eq!(tokens, b);
+
+    let s = "He arrived at 3:00 pm.";
+    let tokens = tokenizer.tokenize(s);
+    let b: &[_] = &["He", "arrived", "at", "3:00", "pm", "."];
+    assert_eq!(tokens, b);
+
+    let s = "I bought these items: books, pencils, and pens.";
+    let tokens = tokenizer.tokenize(s);
+    let b: &[_] = &[
+        "I", "bought", "these", "items", ":", "books", ",", "pencils", ",", "and", "pens", ".",
+    ];
+    assert_eq!(tokens, b);
+
+    let s = "Though there were 150, 100 of them were old.";
+    let tokens = tokenizer.tokenize(s);
+    let b: &[_] = &[
+        "Though", "there", "were", "150", ",", "100", "of", "them", "were", "old", ".",
+    ];
+    assert_eq!(tokens, b);
+
+    let s = "There were 300,000, but that wasn't enough.";
+    let tokens = tokenizer.tokenize(s);
+    let b: &[_] = &[
+        "There", "were", "300,000", ",", "but", "that", "was", "n't", "enough", ".",
+    ];
+    assert_eq!(tokens, b);
+
+    // Handling of unicode
+    let s = "«Now that I can do.»";
+    let tokens = tokenizer.tokenize(s);
+    let b: &[_] = &["«", "Now", "that", "I", "can", "do", ".", "»"];
+    assert_eq!(tokens, b);
+
+    let s = "The unicode 201C and 201D \u{201c}LEFT(RIGHT) DOUBLE QUOTATION MARK\u{201d} is also OPEN_PUNCT and CLOSE_PUNCT.";
+    let tokens = tokenizer.tokenize(s);
+    let b: &[_] = &[
+        "The",
+        "unicode",
+        "201C",
+        "and",
+        "201D",
+        "\u{201c}",
+        "LEFT",
+        "(",
+        "RIGHT",
+        ")",
+        "DOUBLE",
+        "QUOTATION",
+        "MARK",
+        "\u{201d}",
+        "is",
+        "also",
+        "OPEN_PUNCT",
+        "and",
+        "CLOSE_PUNCT",
+        ".",
+    ];
+    assert_eq!(tokens, b);
+}

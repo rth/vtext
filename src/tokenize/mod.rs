@@ -55,6 +55,7 @@ use crate::errors::EstimatorErr;
 use dict_derive::{FromPyObject, IntoPyObject};
 use regex::Regex;
 use serde::{Deserialize, Serialize};
+use std::borrow::Cow;
 use std::fmt;
 use unicode_segmentation::UnicodeSegmentation;
 
@@ -404,5 +405,124 @@ impl Tokenizer for CharacterTokenizer {
             )
             .map(move |((i, _), (j, _))| &text[i..j]);
         Box::new(res)
+    }
+}
+
+/// Regular expression tokenizer
+///
+#[derive(Clone)]
+pub struct NTLKWordTokenizer {
+    pub params: NTLKWordTokenizerParams,
+    stage1_regex: Vec<(Regex, String)>,
+    stage2_regex: Vec<(Regex, String)>,
+}
+
+macro_rules! regexReplacementVec {
+    ($( ($pattern:expr, $value:expr) ),*) => {{
+        vec![
+            $( (Regex::new($pattern).unwrap(), $value.to_string()), )*
+        ]
+    }}
+}
+
+impl NTLKWordTokenizer {
+    pub fn new() -> NTLKWordTokenizer {
+        let stage1_regex = regexReplacementVec![
+            // starting quotes
+            ("([«“‘„]|[`]+)", " $1 "),
+            ("^\"", "``"),
+            ("(``)", " $1 "),
+            ("([ \\(\\[{<])(\"|\'{2})", r"$1 `` "),
+            // Can't do negative lookahead with regex crate
+            // (r"(?i)(')(?!re|ve|ll|m|t|s|d)(\w)\b", r"$1 $2"),
+
+            // Punctuation
+            ("([^\\.])(\\.)([\\]\\)}>\"'»”’ \" r\"]*)\\s*$", "$1 $2 $3"),
+            (r"([:,])([^\d])", " $1 $2"),
+            (r"([:,])$", " $1"),
+            (r"\.{2,}", " $1 "),
+            (r"([;@#$%&])", " $1 "),
+            ("([^\\.])(\\.)([\\]\\)}>\"\']*)\\s*$", "$1 $2 $3"),
+            (r"([?!])", " $1 "),
+            (r"([^'])' ", "$1 ' "),
+            (r"[*]", " $1 "),
+            // Pad parentheses
+            (r"([\]\[\(\)\{\}<>])", r" $1 "),
+            // Double dashed
+            ("--", " -- ")
+        ];
+
+        let stage2_regex = regexReplacementVec![
+            // ending quotes
+            ("([»”’])", " $1 "),
+            ("\"", " '' "),
+            (r"(\S)('')", "$1 $2 "),
+            (r"([^' ])('[sS]|'[mM]|'[dD]|') ", "$1 $2 "),
+            (r"([^' ])('ll|'LL|'re|'RE|'ve|'VE|n't|N'T)", "$1 $2 "),
+            // List of contractions adapted from Robert MacIntyre's tokenizer.
+            // CONTRACTIONS2
+            (r"(?i)\b(can)(not)\b", " $1 $2 "),
+            (r"(?i)\b(d)('ye)\b", " $1 $2 "),
+            (r"(?i)\b(gim)(me)\b", " $1 $2 "),
+            (r"(?i)\b(gon)(na)\b", " $1 $2 "),
+            (r"(?i)\b(got)(ta)\b", " $1 $2 "),
+            (r"(?i)\b(lem)(me)\b", " $1 $2 "),
+            (r"(?i)\b(mor)('n)\b", " $1 $2 "),
+            (r"(?i)\b(wan)(na)\s", " $1 $2 "),
+            // CONTRACTIONS3
+            (r"(?i) ('t)(is)\b", " $1 $2 "),
+            (r"(?i) ('t)(was)\b", " $1 $2 ")
+        ];
+        NTLKWordTokenizer {
+            params: NTLKWordTokenizerParams::default(),
+            stage1_regex,
+            stage2_regex,
+        }
+    }
+    pub fn tokenize<'a>(&'a self, text: &'a str) -> Vec<String> {
+        let mut out = text.to_string();
+        for (regexp_obj, subst) in self.stage1_regex.iter() {
+            out = regexp_obj.replace_all(&out, subst.as_str()).to_string();
+        }
+        out = format!(" {} ", out);
+
+        // add extra space to make things easier
+        for (regexp_obj, subst) in self.stage2_regex.iter() {
+            out = regexp_obj.replace_all(&out, subst.as_str()).to_string();
+        }
+        let x = out.split_whitespace().map(|el| el.to_string()).to_owned();
+
+        x.collect()
+    }
+}
+
+/// Builder for the regexp tokenizer
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "python", derive(FromPyObject, IntoPyObject))]
+pub struct NTLKWordTokenizerParams {}
+
+impl NTLKWordTokenizerParams {
+    pub fn build(&mut self) -> Result<NTLKWordTokenizer, EstimatorErr> {
+        Ok(NTLKWordTokenizer::new())
+    }
+}
+
+impl Default for NTLKWordTokenizerParams {
+    /// Create a new instance
+    fn default() -> NTLKWordTokenizerParams {
+        NTLKWordTokenizerParams {}
+    }
+}
+
+impl Default for NTLKWordTokenizer {
+    /// Create a new instance
+    fn default() -> NTLKWordTokenizer {
+        NTLKWordTokenizerParams::default().build().unwrap()
+    }
+}
+
+impl fmt::Debug for NTLKWordTokenizer {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "NTLKWordTokenizer {{ }}")
     }
 }
