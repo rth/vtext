@@ -180,8 +180,8 @@ impl KSkipNGrams {
 /// An iterator which provided with a sequence of `items` transforms into k-skip-n-grams.
 ///
 /// The iterator consumes the input iterator only once and holds a window of items to generate the
-/// grams from which is stepped forward as it consumes the input. It also correctly generates left
-/// or right padding if specified.
+/// grams. The window is stepped forward as it consumes the input. It also correctly generates
+/// left or right padding if specified.
 pub struct KSkipNGramsIter<'a> {
     // Params
     items: Box<dyn Iterator<Item = &'a str> + 'a>,
@@ -667,6 +667,29 @@ enum IterMode {
     PadRight,
 }
 
+/// An iterator which generates the list of combinations of `n` items in a range upto `max_i`.
+/// It is possible to fix the first item at index 0 (i.e. `fix_0` == true)
+///
+/// Examples:
+/// ```
+/// use vtext::ngram_utils::*;
+/// let output: Vec<_> = SampleCombinations::new(false, 3, 3).unwrap().collect();
+/// let expected = vec![
+///     vec![0, 1, 2],
+///     vec![0, 1, 3],
+///     vec![0, 2, 3],
+///     vec![1, 2, 3]
+/// ];
+/// assert_eq!(output, expected);
+///
+/// let output: Vec<_> = SampleCombinations::new(true, 3, 3).unwrap().collect();
+/// let expected = vec![
+///     vec![0, 1, 2],
+///     vec![0, 1, 3],
+///     vec![0, 2, 3]
+/// ];
+/// assert_eq!(output, expected);
+/// ```
 pub struct SampleCombinations {
     // Params
     min_i: usize,
@@ -680,6 +703,12 @@ pub struct SampleCombinations {
 }
 
 impl SampleCombinations {
+    /// New `SampleCombinations`
+    ///
+    /// Parameters:
+    /// * `fix_0` - fix the first element at 0?
+    /// * `max_i` - the maximum index for the output elements
+    /// * `n` - number of items per combination
     pub fn new(fix_0: bool, max_i: usize, n: usize) -> Result<SampleCombinations, &'static str> {
         let min_i;
         if fix_0 {
@@ -709,6 +738,7 @@ impl SampleCombinations {
         })
     }
 
+    /// Produce dummy `SampleCombinations`. Will panic if `next` is executed.
     pub fn new_empty() -> SampleCombinations {
         SampleCombinations {
             min_i: 0,
