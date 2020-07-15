@@ -668,7 +668,7 @@ enum IterMode {
 /// It is possible to fix the first item at index 0 (i.e. `fix_0` == true)
 ///
 /// Examples:
-/// ```
+/// ```text
 /// use vtext::ngram_utils::*;
 /// let output: Vec<_> = SampleCombinations::new(false, 3, 3).unwrap().collect();
 /// let expected = vec![
@@ -687,7 +687,7 @@ enum IterMode {
 /// ];
 /// assert_eq!(output, expected);
 /// ```
-pub struct SampleCombinations {
+struct SampleCombinations {
     // Params
     min_i: usize,
     max_i: usize,
@@ -706,7 +706,7 @@ impl SampleCombinations {
     /// * `fix_0` - fix the first element at 0?
     /// * `max_i` - the maximum index for the output elements
     /// * `n` - number of items per combination
-    pub fn new(fix_0: bool, max_i: usize, n: usize) -> Result<SampleCombinations, &'static str> {
+    pub fn new(fix_0: bool, max_i: usize, n: usize) -> Result<SampleCombinations, EstimatorErr> {
         let min_i;
         if fix_0 {
             min_i = 1;
@@ -715,7 +715,7 @@ impl SampleCombinations {
         }
 
         if max_i + 1 < n {
-            return Err("`max_i`+1 must be less than `n`");
+            return Err(EstimatorErr::InvalidParams("`max_i`+1 must be less than `n`".to_string()));
         }
 
         let position: Vec<usize> = (0..n).collect();
