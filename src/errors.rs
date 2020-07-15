@@ -5,13 +5,15 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum EstimatorErr {
-    #[error("Invalid paramer: `{0}`")]
+    #[error("Invalid params: `{0}`")]
     InvalidParams(String),
     #[error("Invalid regex parameter")]
     RegexErr {
         #[from]
         source: regex::Error,
     },
+    #[error("Invalid Input: `{0}`")]
+    InvalidInput(String),
 }
 
 #[cfg(feature = "python")]

@@ -9,6 +9,7 @@ use std::iter::Peekable;
 #[cfg(feature = "python")]
 use dict_derive::{FromPyObject, IntoPyObject};
 use serde::{Deserialize, Serialize};
+use crate::errors::EstimatorErr;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "python", derive(FromPyObject, IntoPyObject))]
@@ -164,7 +165,7 @@ impl KSkipNGrams {
         items: Box<dyn Iterator<Item = &'a str> + 'a>,
         pad_left: Option<&'a str>,
         pad_right: Option<&'a str>,
-    ) -> Result<Box<dyn Iterator<Item = Vec<&'a str>> + 'a>, InputError> {
+    ) -> Result<Box<dyn Iterator<Item = Vec<&'a str>> + 'a>, EstimatorErr> {
         let k_skip_n_grams_iter = KSkipNGramsIter::new(
             items,
             self.params.min_n,
@@ -233,14 +234,14 @@ impl<'a> KSkipNGramsIter<'a> {
         max_k: usize,
         pad_left: Option<&'a str>,
         pad_right: Option<&'a str>,
-    ) -> Result<KSkipNGramsIter<'a>, InputError> {
+    ) -> Result<KSkipNGramsIter<'a>, EstimatorErr> {
         if min_n < 1 {
-            return Err(InputError(
+            return Err(EstimatorErr::InvalidParams(
                 "`min_n` must be greater than or equal to 1".to_string(),
             ));
         }
         if min_n > max_n {
-            return Err(InputError(
+            return Err(EstimatorErr::InvalidParams(
                 "`max_n` must be greater than or equal to `min_n`".to_string(),
             ));
         }
@@ -276,7 +277,7 @@ impl<'a> KSkipNGramsIter<'a> {
         items: &mut Box<dyn Iterator<Item = &'a str> + 'a>,
         max_n: usize,
         max_k: usize,
-    ) -> Result<VecDeque<&'a str>, InputError> {
+    ) -> Result<VecDeque<&'a str>, EstimatorErr> {
         let window_size = max_n + max_k;
         let mut window: VecDeque<&'a str> = VecDeque::with_capacity(window_size);
 
@@ -286,7 +287,7 @@ impl<'a> KSkipNGramsIter<'a> {
             let next_item = items.next();
             match next_item {
                 None => {
-                    return Err(InputError(
+                    return Err(EstimatorErr::InvalidInput(
                         "Items length is smaller than `max_n`+`max_k`".to_string(),
                     ))
                 }
@@ -653,10 +654,6 @@ impl<'a> KSkipNGramsIter<'a> {
         grams
     }
 }
-
-/// Error given when input is inconsistent
-#[derive(Debug, Clone)]
-pub struct InputError(String);
 
 /// Represents the different modes of `KSkipNGramsIter`
 enum IterMode {
