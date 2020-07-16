@@ -50,7 +50,7 @@ impl KSkipNGrams {
     /// Example:
     ///
     /// ```
-    /// use vtext::ngram_utils::*;
+    /// use vtext::token_processing::*;
     /// let sent = "One Two Three Four".split(" ");
     /// let gramizer = KSkipNGrams::new_bigram();
     /// let grams: Vec<_> = gramizer.transform(Box::new(sent), None, None).unwrap().collect();
@@ -64,7 +64,7 @@ impl KSkipNGrams {
     ///
     /// Example:
     /// ```
-    /// use vtext::ngram_utils::*;
+    /// use vtext::token_processing::*;
     /// let sent = "One Two Three Four".split(" ");
     /// let gramizer = KSkipNGrams::new_ngrams(3);
     /// let grams: Vec<_> = gramizer.transform(Box::new(sent), None, None).unwrap().collect();
@@ -81,7 +81,7 @@ impl KSkipNGrams {
     ///
     /// Example:
     /// ```
-    /// use vtext::ngram_utils::*;
+    /// use vtext::token_processing::*;
     /// let sent = "One Two Three".split(" ");
     /// let gramizer = KSkipNGrams::new_everygrams(1, 3);
     /// let grams: Vec<_> = gramizer.transform(Box::new(sent), None, None).unwrap().collect();
@@ -102,7 +102,7 @@ impl KSkipNGrams {
     ///
     /// Example:
     /// ```
-    /// use vtext::ngram_utils::*;
+    /// use vtext::token_processing::*;
     /// let sent = "One Two Three Four Five".split(" ");
     /// let gramizer = KSkipNGrams::new_skipgrams(3, 2);
     /// let grams: Vec<_> = gramizer.transform(Box::new(sent), None, None).unwrap().collect();
@@ -123,7 +123,7 @@ impl KSkipNGrams {
     ///
     /// Example:
     /// ```
-    /// use vtext::ngram_utils::*;
+    /// use vtext::token_processing::*;
     /// let sent = "One Two Three Four".split(" ");
     /// let gramizer = KSkipNGrams::new(2, 3, 1);
     /// let grams: Vec<_> = gramizer.transform(Box::new(sent), None, None).unwrap().collect();
@@ -177,7 +177,7 @@ impl<'a> KSkipNGramsIter<'a> {
     ///
     /// Example:
     /// ```
-    /// use vtext::ngram_utils::*;
+    /// use vtext::token_processing::*;
     /// let sent = "One Two Three".split(" ");
     /// let grams_iter = KSkipNGramsIter::new(Box::new(sent), 1, 2, 1, Some("<s>"), Some("</s>"));
     /// let grams: Vec<Vec<&str>> = grams_iter.unwrap().collect();
@@ -248,7 +248,7 @@ impl<'a> NGramIter<'a> {
     ///
     /// Example:
     /// ```
-    /// use vtext::ngram_utils::*;
+    /// use vtext::token_processing::*;
     /// let sent = "One Two Three".split(" ");
     /// let grams_iter = NGramIter::new(Box::new(sent), 1, Some("<s>"), Some("</s>"));
     /// let grams: Vec<Vec<&str>> = grams_iter.unwrap().collect();
@@ -357,7 +357,7 @@ impl<'a> SkipGramIter<'a> {
     ///
     /// Example:
     /// ```
-    /// use vtext::ngram_utils::*;
+    /// use vtext::token_processing::*;
     /// let sent = "One Two Three".split(" ");
     /// let grams_iter = SkipGramIter::new(Box::new(sent), 1, 2, Some("<s>"), Some("</s>"));
     /// let grams: Vec<Vec<&str>> = grams_iter.unwrap().collect();
@@ -490,7 +490,7 @@ impl<'a> Iterator for SkipGramIter<'a> {
 ///
 /// Examples:
 /// ```text
-/// use vtext::ngram_utils::*;
+/// use vtext::token_processing::*;
 /// let output: Vec<_> = SampleCombinations::new(false, 3, 3).unwrap().collect();
 /// let expected = vec![
 ///     vec![0, 1, 2],
@@ -527,7 +527,7 @@ impl SampleCombinations {
     /// * `fix_0` - fix the first element at 0?
     /// * `max_i` - the maximum index for the output elements
     /// * `n` - number of items per combination
-    pub fn new(fix_0: bool, max_i: usize, n: usize) -> Result<SampleCombinations, EstimatorErr> {
+    fn new(fix_0: bool, max_i: usize, n: usize) -> Result<SampleCombinations, EstimatorErr> {
         let min_i;
         if fix_0 {
             min_i = 1;
@@ -593,7 +593,7 @@ impl Iterator for SampleCombinations {
 ///
 /// Example:
 /// ```
-/// use vtext::ngram_utils::*;
+/// use vtext::token_processing::*;
 /// let sent = "One Two Three".split(" ");
 /// let grams_iter = SkipGramIter::new(Box::new(sent), 1, 2, Some("<s>"), Some("</s>"));
 /// let grams: Vec<Vec<&str>> = grams_iter.unwrap().collect();
