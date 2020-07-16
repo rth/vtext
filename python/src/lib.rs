@@ -8,6 +8,7 @@ use pyo3::prelude::*;
 use pyo3::wrap_pyfunction;
 
 mod stem;
+mod token_processing;
 mod tokenize;
 mod tokenize_sentence;
 mod utils;
@@ -183,6 +184,7 @@ fn _lib(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<tokenize::VTextTokenizer>()?;
     m.add_class::<tokenize::CharacterTokenizer>()?;
     m.add_class::<stem::SnowballStemmer>()?;
+    m.add_class::<token_processing::KSkipNGrams>()?;
     m.add_wrapped(wrap_pyfunction!(dice_similarity))?;
     m.add_wrapped(wrap_pyfunction!(jaro_similarity))?;
     m.add_wrapped(wrap_pyfunction!(jaro_winkler_similarity))?;

@@ -198,6 +198,12 @@ impl<'a> KSkipNGramsIter<'a> {
         pad_left: Option<&'a str>,
         pad_right: Option<&'a str>,
     ) -> Result<KSkipNGramsIter<'a>, EstimatorErr> {
+        if min_n > max_n {
+            return Err(EstimatorErr::InvalidParams(
+                "`min_n` must be equal to or less than `max_n`".to_string(),
+            ));
+        }
+
         let mut iter: Box<dyn Iterator<Item = Vec<&'a str>> + 'a> = Box::new(iter::empty());
 
         for n in min_n..max_n + 1 {
