@@ -26,7 +26,7 @@ fn test_bigram() {
 fn test_trigram() {
     let sent = "Mary had a little lamb".split(" ");
 
-    let gramizer = KSkipNGrams::new_trigram();
+    let gramizer = KSkipNGrams::new_ngrams(3);
     let grams: Vec<Vec<&str>> = gramizer
         .transform(Box::new(sent.clone()), Some("<s>"), Some("</s>"))
         .unwrap()
@@ -44,7 +44,7 @@ fn test_trigram() {
 
     assert_eq!(grams, expected);
 
-    let gramizer = KSkipNGrams::new_trigram();
+    let gramizer = KSkipNGrams::new_ngrams(3);
     let grams: Vec<Vec<&str>> = gramizer
         .transform(Box::new(sent.clone()), None, Some("</s>"))
         .unwrap()
@@ -96,24 +96,24 @@ fn test_everygram() {
         .collect();
 
     let expected = vec![
+        vec!["Mary"],
+        vec!["had"],
+        vec!["a"],
+        vec!["little"],
+        vec!["lamb"],
         vec!["<s>", "Mary"],
+        vec!["Mary", "had"],
+        vec!["had", "a"],
+        vec!["a", "little"],
+        vec!["little", "lamb"],
+        vec!["lamb", "</s>"],
         vec!["<s>", "<s>", "Mary"],
         vec!["<s>", "Mary", "had"],
-        vec!["Mary"],
-        vec!["Mary", "had"],
         vec!["Mary", "had", "a"],
-        vec!["had"],
-        vec!["had", "a"],
         vec!["had", "a", "little"],
-        vec!["a"],
-        vec!["a", "little"],
         vec!["a", "little", "lamb"],
-        vec!["little"],
-        vec!["little", "lamb"],
-        vec!["lamb"],
-        vec!["lamb", "</s>"],
         vec!["little", "lamb", "</s>"],
-        vec!["lamb", "</s>", "</s>"],
+        vec!["lamb", "</s>", "</s>"]
     ];
 
     assert_eq!(grams, expected);
@@ -139,8 +139,8 @@ fn test_skipgram() {
         vec!["a", "little"],
         vec!["a", "lamb"],
         vec!["little", "lamb"],
-        vec!["lamb", "</s>"],
         vec!["little", "</s>"],
+        vec!["lamb", "</s>"],
     ];
 
     assert_eq!(grams, expected);
@@ -155,6 +155,7 @@ fn test_skipgram() {
         vec!["<s>", "<s>", "Mary"],
         vec!["<s>", "<s>", "had"],
         vec!["<s>", "Mary", "had"],
+        vec!["<s>", "Mary", "had"],
         vec!["<s>", "Mary", "a"],
         vec!["<s>", "had", "a"],
         vec!["Mary", "had", "a"],
@@ -164,11 +165,12 @@ fn test_skipgram() {
         vec!["had", "a", "lamb"],
         vec!["had", "little", "lamb"],
         vec!["a", "little", "lamb"],
-        vec!["little", "lamb", "</s>"],
-        vec!["a", "lamb", "</s>"],
         vec!["a", "little", "</s>"],
-        vec!["lamb", "</s>", "</s>"],
+        vec!["a", "lamb", "</s>"],
+        vec!["little", "lamb", "</s>"],
+        vec!["little", "lamb", "</s>"],
         vec!["little", "</s>", "</s>"],
+        vec!["lamb", "</s>", "</s>"],
     ];
 
     assert_eq!(grams, expected);
