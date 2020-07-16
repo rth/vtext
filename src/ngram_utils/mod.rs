@@ -5,11 +5,11 @@ use std::cmp::min;
 use std::collections::VecDeque;
 use std::iter;
 
+use crate::errors::EstimatorErr;
 #[cfg(feature = "python")]
 use dict_derive::{FromPyObject, IntoPyObject};
-use serde::{Deserialize, Serialize};
-use crate::errors::EstimatorErr;
 use itertools::Itertools;
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "python", derive(FromPyObject, IntoPyObject))]
@@ -60,7 +60,7 @@ impl KSkipNGrams {
         KSkipNGramsParams::new(2, 2, 0).build()
     }
 
-    /// Generate all ngrams from a sequence of `items`, an iterator.
+    /// Generate n-grams from a sequence of `items`, an iterator.
     ///
     /// Example:
     /// ```
@@ -77,7 +77,7 @@ impl KSkipNGrams {
         KSkipNGramsParams::new(n, n, 0).build()
     }
 
-    /// Generate all ngrams between `min_n` and `max_n` from a sequence of `items`, an iterator.
+    /// Generate all n-grams between `min_n` and `max_n` from a sequence of `items`, an iterator.
     ///
     /// Example:
     /// ```
@@ -86,8 +86,8 @@ impl KSkipNGrams {
     /// let gramizer = KSkipNGrams::new_everygrams(1, 3);
     /// let grams: Vec<_> = gramizer.transform(Box::new(sent), None, None).unwrap().collect();
     /// assert_eq!(grams, vec![
-    /// vec!["One"], vec!["One", "Two"], vec!["One", "Two", "Three"], vec!["Two"],
-    /// vec!["Two", "Three"], vec!["Three"]]);
+    /// vec!["One"], vec!["Two"], vec!["Three"], vec!["One", "Two"], vec!["Two", "Three"],
+    /// vec!["One", "Two", "Three"]]);
     /// ```
     ///
     /// Paramaters:
@@ -127,9 +127,9 @@ impl KSkipNGrams {
     /// let sent = "One Two Three Four".split(" ");
     /// let gramizer = KSkipNGrams::new(2, 3, 1);
     /// let grams: Vec<_> = gramizer.transform(Box::new(sent), None, None).unwrap().collect();
-    /// assert_eq!(grams, vec![vec!["One", "Two"], vec!["One", "Three"], vec!["One", "Two", "Three"],
-    /// vec!["One", "Two", "Four"], vec!["One", "Three", "Four"], vec!["Two", "Three"],
-    /// vec!["Two", "Four"], vec!["Two", "Three", "Four"], vec!["Three", "Four"]]);
+    /// assert_eq!(grams, vec![vec!["One", "Two"], vec!["One", "Three"], vec!["Two", "Three"],
+    /// vec!["Two", "Four"], vec!["Three", "Four"], vec!["One", "Two", "Three"],
+    /// vec!["One", "Two", "Four"], vec!["One", "Three", "Four"], vec!["Two", "Three", "Four"]]);
     /// ```
     ///
     /// Paramaters:
@@ -152,7 +152,7 @@ impl KSkipNGrams {
         pad_left: Option<&'a str>,
         pad_right: Option<&'a str>,
     ) -> Result<Box<dyn Iterator<Item = Vec<&'a str>> + 'a>, EstimatorErr> {
-        let k_skip_n_grams_iter = KSkipNGramsIter2::new(
+        let k_skip_n_grams_iter = KSkipNGramsIter::new(
             items,
             self.params.min_n,
             self.params.max_n,
@@ -164,491 +164,326 @@ impl KSkipNGrams {
     }
 }
 
-// /// An iterator which provided with a sequence of `items` transforms into k-skip-n-grams.
-// ///
-// /// The iterator consumes the input iterator only once and holds a window of items to generate the
-// /// grams. The window is stepped forward as it consumes the input. It also correctly generates
-// /// left or right padding if specified.
-// pub struct KSkipNGramsIter<'a> {
-//     // Params
-//     items: Box<dyn Iterator<Item = &'a str> + 'a>,
-//     min_n: usize,
-//     max_n: usize,
-//     max_k: usize,
-//     pad_left: Option<&'a str>,
-//     pad_right: Option<&'a str>,
-//
-//     // Iterator state
-//     /// Window which holds items that have been consumed
-//     window: VecDeque<&'a str>,
-//     /// Gram length that was yielded last
-//     n: usize,
-//     /// Amount of padding included in item yielded last
-//     p: usize,
-//     /// Offset used during MainEnd mode
-//     offset: usize,
-//     /// k-skip combinations of current window
-//     sample_iter: Peekable<SampleCombinations>,
-//     /// Current mode of iterator
-//     mode: IterMode,
-//     first: bool,
-// }
-//
-// /// Core methods to build `KSkipNGramsIter`
-// impl<'a> KSkipNGramsIter<'a> {
-//     /// Build a new `KSkipNGramsIter`.
-//     ///
-//     /// Example:
-//     /// ```
-//     /// use vtext::ngram_utils::*;
-//     /// let sent = "One Two Three".split(" ");
-//     /// let grams_iter = KSkipNGramsIter::new(Box::new(sent), 1, 2, 1, Some("<s>"), Some("</s>"));
-//     /// let grams: Vec<Vec<&str>> = grams_iter.unwrap().collect();
-//     /// ```
-//     ///
-//     /// Parameters:
-//     /// * `items` - Input iterator
-//     /// * `min_n` - The minimum degree of the ngram
-//     /// * `max_n` - The maximum degree of the ngram
-//     /// * `max_k` - The maximum-degree of the skipgram: the total max skip between items
-//     /// * `pad_left` - Optional string to use as left padding
-//     /// * `pad_right` - Optional string to use as right padding
-//     pub fn new(
-//         mut items: Box<dyn Iterator<Item = &'a str> + 'a>,
-//         min_n: usize,
-//         max_n: usize,
-//         max_k: usize,
-//         pad_left: Option<&'a str>,
-//         pad_right: Option<&'a str>,
-//     ) -> Result<KSkipNGramsIter<'a>, EstimatorErr> {
-//         if min_n < 1 {
-//             return Err(EstimatorErr::InvalidParams(
-//                 "`min_n` must be greater than or equal to 1".to_string(),
-//             ));
-//         }
-//         if min_n > max_n {
-//             return Err(EstimatorErr::InvalidParams(
-//                 "`max_n` must be greater than or equal to `min_n`".to_string(),
-//             ));
-//         }
-//         let mut max_k = max_k;
-//         if max_n == 1 {
-//             max_k = 0; // if n == 1. k has no effect
-//         }
-//
-//         let window = Self::build_window(&mut items, max_n, max_k)?;
-//
-//         Ok(KSkipNGramsIter {
-//             // Params
-//             items,
-//             min_n,
-//             max_n,
-//             max_k,
-//             pad_left,
-//             pad_right,
-//
-//             // Iterator state
-//             window,
-//             n: 0,
-//             p: 0,
-//             offset: 0,
-//             sample_iter: SampleCombinations::new_empty().peekable(),
-//             mode: IterMode::Start,
-//             first: false,
-//         })
-//     }
-//
-//     // Prepare and populate start window
-//     fn build_window(
-//         items: &mut Box<dyn Iterator<Item = &'a str> + 'a>,
-//         max_n: usize,
-//         max_k: usize,
-//     ) -> Result<VecDeque<&'a str>, EstimatorErr> {
-//         let window_size = max_n + max_k;
-//         let mut window: VecDeque<&'a str> = VecDeque::with_capacity(window_size);
-//
-//         // Populate window
-//         let mut i = window_size;
-//         while i > 0 {
-//             let next_item = items.next();
-//             match next_item {
-//                 None => {
-//                     return Err(EstimatorErr::InvalidInput(
-//                         "Items length is smaller than `max_n`+`max_k`".to_string(),
-//                     ))
-//                 }
-//                 Some(s) => {
-//                     window.push_back(s);
-//                 }
-//             }
-//             i -= 1;
-//         }
-//         Ok(window)
-//     }
-// }
-//
-// /// Iterator functions
-// impl<'a> Iterator for KSkipNGramsIter<'a> {
-//     type Item = Vec<&'a str>;
-//
-//     // Next item. Depending on current mode obtain next item.
-//     // If current mode has been exhausted then switch to next
-//     fn next(&mut self) -> Option<Self::Item> {
-//         return match &self.mode {
-//             IterMode::Start => {
-//                 self.start_mode_pad_left();
-//                 self.next()
-//             }
-//
-//             IterMode::PadLeft => {
-//                 if self.pad_left.is_some() && self.max_n > 1 {
-//                     let next = self.next_gram_pad_left();
-//                     match &next {
-//                         Some(_e) => next,
-//                         None => {
-//                             self.start_mode_main();
-//                             self.next()
-//                         }
-//                     }
-//                 } else {
-//                     self.start_mode_main();
-//                     self.next()
-//                 }
-//             }
-//
-//             IterMode::Main => {
-//                 let next = self.next_gram_main();
-//                 match &next {
-//                     Some(_e) => next,
-//                     None => {
-//                         self.start_mode_main_end();
-//                         self.next()
-//                     }
-//                 }
-//             }
-//
-//             IterMode::MainEnd => {
-//                 if (self.min_n != self.max_n || self.max_k > 0) && self.window.len() > 1 {
-//                     let next = self.next_gram_main_end();
-//                     match &next {
-//                         Some(_e) => next,
-//                         None => {
-//                             self.start_mode_pad_right();
-//                             self.next()
-//                         }
-//                     }
-//                 } else {
-//                     self.start_mode_pad_right();
-//                     self.next()
-//                 }
-//             }
-//
-//             IterMode::PadRight => {
-//                 if self.pad_right.is_some() && self.max_n > 1 {
-//                     self.next_gram_pad_right()
-//                 } else {
-//                     return None;
-//                 }
-//             }
-//         };
-//     }
-// }
-//
-// /// Internal functions
-// impl<'a> KSkipNGramsIter<'a> {
-//     // Switching between modes
-//     fn start_mode_pad_left(&mut self) {
-//         self.mode = IterMode::PadLeft;
-//         self.first = true;
-//     }
-//
-//     fn start_mode_main(&mut self) {
-//         self.mode = IterMode::Main;
-//         self.first = true;
-//     }
-//
-//     fn start_mode_main_end(&mut self) {
-//         self.mode = IterMode::MainEnd;
-//         self.first = true;
-//     }
-//
-//     fn start_mode_pad_right(&mut self) {
-//         self.mode = IterMode::PadRight;
-//         self.first = true;
-//     }
-//
-//     // Obtain next gram for PadLeft mode
-//     fn next_gram_pad_left(&mut self) -> Option<Vec<&'a str>> {
-//         self.next_params_pad_left()?;
-//
-//         let slice_idx: Vec<usize> = self.sample_iter.next().unwrap();
-//         let grams = self.construct_grams_vec(slice_idx);
-//         Some(grams)
-//     }
-//
-//     // Obtain next gram for PadRight mode
-//     fn next_gram_pad_right(&mut self) -> Option<Vec<&'a str>> {
-//         self.next_params_pad_right()?;
-//
-//         let mut sample_idx: Vec<usize> = self.sample_iter.next().unwrap();
-//
-//         // Mirror index
-//         for e in sample_idx.iter_mut() {
-//             *e = self.window.len() - 1 - *e;
-//         }
-//         sample_idx.reverse();
-//
-//         let grams = self.construct_grams_vec(sample_idx);
-//         Some(grams)
-//     }
-//
-//     // Obtain next gram for Main mode
-//     fn next_gram_main(&mut self) -> Option<Vec<&'a str>> {
-//         let finished = self.next_state_pad_main();
-//
-//         if finished.is_none() {
-//             self.forward_window()?;
-//             self.first = true;
-//             return self.next_gram_main();
-//         }
-//
-//         let sample_idx = self.sample_iter.next().unwrap();
-//         let grams = self.construct_grams_vec(sample_idx);
-//         Some(grams)
-//     }
-//
-//     // Obtain next gram for MainEnd mode
-//     fn next_gram_main_end(&mut self) -> Option<Vec<&'a str>> {
-//         self.next_state_pad_main_end()?;
-//
-//         let mut sample_idx = self.sample_iter.next().unwrap();
-//         // Offset index
-//         for e in sample_idx.iter_mut() {
-//             *e += self.offset;
-//         }
-//         let grams = self.construct_grams_vec(sample_idx);
-//         Some(grams)
-//     }
-//
-//     // Forward the window by one step
-//     fn forward_window(&mut self) -> Option<()> {
-//         // Need to forward window when yielded ngram of max-length and max-skip-size
-//         let next_item = self.items.next();
-//
-//         return match next_item {
-//             None => None,
-//             Some(s) => {
-//                 self.window.pop_front();
-//                 self.window.push_back(s);
-//                 Some(()) // Successfully forwarded window
-//             }
-//         };
-//     }
-//
-//     // Increment parameters and sample iterator
-//     fn next_params_pad_left(&mut self) -> Option<()> {
-//         // Equivalent to a for-loop:
-//         // for n in max(self.min_n, 2)..self.max_n+1:
-//         //      for p in (n-1)..0:   // decreasing
-//         //          for sample_idx in sample_iter:
-//         //              next_gram(n, p, sample_idx)
-//         return if self.first {
-//             self.n = max(self.min_n, 2);
-//             self.p = self.n - 1;
-//             self.sample_iter =
-//                 SampleCombinations::new(false, self.n + self.max_k - self.p - 1, self.n - self.p)
-//                     .unwrap()
-//                     .peekable();
-//
-//             self.first = false;
-//             Some(())
-//         } else if self.sample_iter.peek().is_some() {
-//             Some(())
-//         } else if self.p > 1 {
-//             self.p -= 1;
-//
-//             self.sample_iter =
-//                 SampleCombinations::new(false, self.n + self.max_k - self.p - 1, self.n - self.p)
-//                     .unwrap()
-//                     .peekable();
-//
-//             Some(())
-//         } else if self.n < self.max_n {
-//             self.n += 1;
-//             self.p = self.n - 1;
-//
-//             self.sample_iter =
-//                 SampleCombinations::new(false, self.n + self.max_k - self.p - 1, self.n - self.p)
-//                     .unwrap()
-//                     .peekable();
-//
-//             Some(())
-//         } else {
-//             None
-//         };
-//     }
-//
-//     // Increment parameters and sample iterator
-//     fn next_params_pad_right(&mut self) -> Option<()> {
-//         // Equivalent to a for-loop:
-//         // for n in max(self.min_n, 2)..self.max_n+1:
-//         //      for p in 1..n:
-//         //          for sample_idx in sample_iter:
-//         //              next_gram(n, p, sample_idx)
-//         return if self.first {
-//             self.n = max(self.min_n, 2);
-//             self.p = 1;
-//             self.first = false;
-//
-//             self.sample_iter =
-//                 SampleCombinations::new(false, self.n + self.max_k - self.p - 1, self.n - self.p)
-//                     .unwrap()
-//                     .peekable();
-//
-//             Some(())
-//         } else if self.sample_iter.peek().is_some() {
-//             Some(())
-//         } else if self.p < self.n - 1 {
-//             self.p += 1;
-//
-//             self.sample_iter =
-//                 SampleCombinations::new(false, self.n + self.max_k - self.p - 1, self.n - self.p)
-//                     .unwrap()
-//                     .peekable();
-//
-//             Some(())
-//         } else if self.n < self.max_n {
-//             self.n += 1;
-//             self.p = 1;
-//
-//             self.sample_iter =
-//                 SampleCombinations::new(false, self.n + self.max_k - self.p - 1, self.n - self.p)
-//                     .unwrap()
-//                     .peekable();
-//
-//             Some(())
-//         } else {
-//             None
-//         };
-//     }
-//
-//     // Increment parameters and sample iterator for each window
-//     fn next_state_pad_main(&mut self) -> Option<()> {
-//         // Equivalent to a for-loop:
-//         // for n in self.min_n..self.max_n + 1:
-//         //      for sample_idx in sample_iter:
-//         //          next_gram(n, sample_idx)
-//         return if self.first {
-//             self.n = self.min_n;
-//             self.sample_iter = SampleCombinations::new(true, self.n + self.max_k - 1, self.n)
-//                 .unwrap()
-//                 .peekable();
-//
-//             self.first = false;
-//             Some(())
-//         } else if self.sample_iter.peek().is_some() {
-//             Some(())
-//         } else if self.n < min(self.max_n, self.window.len()) {
-//             self.n += 1;
-//             self.sample_iter = SampleCombinations::new(true, self.n + self.max_k - 1, self.n)
-//                 .unwrap()
-//                 .peekable();
-//
-//             Some(())
-//         } else {
-//             None
-//         };
-//     }
-//
-//     // Increment parameters and sample iterator for each window
-//     fn next_state_pad_main_end(&mut self) -> Option<()> {
-//         // Equivalent to a for-loop:
-//         // for offset in 1..window.len()-min_n
-//         //      for n in self.min_n..self.max_n + 1:
-//         //          for sample_idx in sample_iter:
-//         //              next_gram(offset, n, sample_idx)
-//         return if self.first {
-//             self.n = self.min_n;
-//             self.offset = 1;
-//             self.reset_sample_iter_main_end();
-//
-//             self.first = false;
-//             Some(())
-//         } else if self.sample_iter.peek().is_some() {
-//             Some(())
-//         } else if self.n < min(self.max_n, self.window.len() - self.offset) {
-//             self.n += 1;
-//             self.reset_sample_iter_main_end();
-//
-//             Some(())
-//         } else if self.window.len() - self.offset > self.min_n {
-//             self.offset += 1;
-//             self.n = self.min_n;
-//             self.reset_sample_iter_main_end();
-//
-//             Some(())
-//         } else {
-//             None
-//         };
-//     }
-//
-//     fn reset_sample_iter_main_end(&mut self) {
-//         let window_len = self.window.len() - self.offset;
-//         let mut k = 0;
-//         if window_len > self.n {
-//             k = min(self.max_k, window_len - self.n);
-//         }
-//         let max_i = self.n + k - 1;
-//         self.sample_iter = SampleCombinations::new(true, max_i, self.n)
-//             .unwrap()
-//             .peekable();
-//     }
-//
-//     // Create output vec from sample index and add padding if necessary
-//     fn construct_grams_vec(&mut self, sample_idx: Vec<usize>) -> Vec<&'a str> {
-//         let grams = self.vec_from_idx(sample_idx);
-//
-//         return match self.mode {
-//             IterMode::PadLeft => {
-//                 // Add padding to the left
-//                 [
-//                     iter::repeat(self.pad_left.unwrap()).take(self.p).collect(),
-//                     grams,
-//                 ]
-//                 .concat()
-//             }
-//
-//             IterMode::PadRight => {
-//                 // Add padding to the right
-//                 [
-//                     grams,
-//                     iter::repeat(self.pad_right.unwrap()).take(self.p).collect(),
-//                 ]
-//                 .concat()
-//             }
-//
-//             _ => grams,
-//         };
-//     }
-//
-//     // Create output vec from sample index
-//     fn vec_from_idx(&mut self, sample_idx: Vec<usize>) -> Vec<&'a str> {
-//         let mut grams = Vec::with_capacity(sample_idx.len());
-//         for idx in sample_idx.iter() {
-//             grams.push(self.window[*idx].clone());
-//         }
-//         grams
-//     }
-// }
-//
-// /// Represents the different modes of `KSkipNGramsIter`
-// enum IterMode {
-//     Start,
-//     PadLeft,
-//     Main,
-//     MainEnd,
-//     PadRight,
-// }
+/// An iterator which provided with a sequence of `items` transforms into k-skip-n-grams.
+///
+/// It also correctly generates left or right padding if specified.
+pub struct KSkipNGramsIter<'a> {
+    iter: Box<dyn Iterator<Item = Vec<&'a str>> + 'a>,
+}
+
+/// Core methods to build `KSkipNGramsIter`
+impl<'a> KSkipNGramsIter<'a> {
+    /// Build a new `KSkipNGramsIter`.
+    ///
+    /// Example:
+    /// ```
+    /// use vtext::ngram_utils::*;
+    /// let sent = "One Two Three".split(" ");
+    /// let grams_iter = KSkipNGramsIter::new(Box::new(sent), 1, 2, 1, Some("<s>"), Some("</s>"));
+    /// let grams: Vec<Vec<&str>> = grams_iter.unwrap().collect();
+    /// ```
+    ///
+    /// Parameters:
+    /// * `items` - Input iterator
+    /// * `min_n` - The minimum degree of the ngram
+    /// * `max_n` - The maximum degree of the ngram
+    /// * `max_k` - The maximum-degree of the skipgram: the total max skip between items
+    /// * `pad_left` - Optional string to use as left padding
+    /// * `pad_right` - Optional string to use as right padding
+    pub fn new(
+        mut items: Box<dyn Iterator<Item = &'a str> + 'a>,
+        min_n: usize,
+        max_n: usize,
+        max_k: usize,
+        pad_left: Option<&'a str>,
+        pad_right: Option<&'a str>,
+    ) -> Result<KSkipNGramsIter<'a>, EstimatorErr> {
+        let mut iter: Box<dyn Iterator<Item = Vec<&'a str>> + 'a> = Box::new(iter::empty());
+
+        for n in min_n..max_n + 1 {
+            let (iter_split_1, iter_split_0) = items.tee();
+            items = Box::new(iter_split_0);
+
+            if max_k == 0 {
+                let sub_iter = NGramIter::new(Box::new(iter_split_1), n, pad_left, pad_right)?;
+                iter = Box::new(iter.chain(sub_iter));
+            } else {
+                let sub_iter =
+                    SkipGramIter::new(Box::new(iter_split_1), n, max_k, pad_left, pad_right)?;
+                iter = Box::new(iter.chain(sub_iter));
+            }
+        }
+
+        Ok(KSkipNGramsIter { iter })
+    }
+}
+
+/// Iterator functions
+impl<'a> Iterator for KSkipNGramsIter<'a> {
+    type Item = Vec<&'a str>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.iter.next()
+    }
+}
+
+/// An iterator which provided with a sequence of `items` transforms into n-grams.
+///
+/// The iterator consumes the input iterator only once and holds a window of items to generate the
+/// n-grams. The window is stepped forward as it consumes the input. It also correctly generates
+/// left or right padding if specified.
+pub struct NGramIter<'a> {
+    // Params
+    items: Box<dyn Iterator<Item = &'a str> + 'a>,
+
+    // Iterator state
+    /// Window which holds items that have been consumed
+    window: VecDeque<&'a str>,
+    first: bool,
+}
+
+/// Core method to build `NGramIter`
+impl<'a> NGramIter<'a> {
+    /// Build a new `NGramIter`.
+    ///
+    /// Example:
+    /// ```
+    /// use vtext::ngram_utils::*;
+    /// let sent = "One Two Three".split(" ");
+    /// let grams_iter = NGramIter::new(Box::new(sent), 1, Some("<s>"), Some("</s>"));
+    /// let grams: Vec<Vec<&str>> = grams_iter.unwrap().collect();
+    /// ```
+    ///
+    /// Parameters:
+    /// * `items` - Input iterator
+    /// * `min_n` - The degree of the ngrams
+    /// * `pad_left` - Optional string to use as left padding
+    /// * `pad_right` - Optional string to use as right padding
+    pub fn new(
+        mut items: Box<dyn Iterator<Item = &'a str> + 'a>,
+        n: usize,
+        pad_left: Option<&'a str>,
+        pad_right: Option<&'a str>,
+    ) -> Result<NGramIter<'a>, EstimatorErr> {
+        if n < 1 {
+            return Err(EstimatorErr::InvalidParams(
+                "`min_n` must be greater than or equal to 1".to_string(),
+            ));
+        }
+
+        if pad_left.is_some() || pad_right.is_some() {
+            items = pad_items(items, n, pad_left, pad_right)?;
+        }
+
+        let window = Self::build_window(&mut items, n)?;
+
+        Ok(NGramIter {
+            // Params
+            items,
+
+            // Iterator state
+            window,
+            first: true,
+        })
+    }
+
+    /// Prepare and populate start window
+    fn build_window(
+        items: &mut Box<dyn Iterator<Item = &'a str> + 'a>,
+        n: usize,
+    ) -> Result<VecDeque<&'a str>, EstimatorErr> {
+        let window_size = n;
+        let mut window: VecDeque<&'a str> = VecDeque::with_capacity(window_size);
+
+        // Populate window
+        let mut i = window_size;
+        while i > 0 {
+            let next_item = items.next();
+            match next_item {
+                None => {
+                    return Err(EstimatorErr::InvalidInput(
+                        "Items length is smaller than `n`".to_string(),
+                    ))
+                }
+                Some(s) => {
+                    window.push_back(s);
+                }
+            }
+            i -= 1;
+        }
+        Ok(window)
+    }
+}
+
+/// Iterator functions
+impl<'a> Iterator for NGramIter<'a> {
+    type Item = Vec<&'a str>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.first {
+            self.first = false;
+            return Some(Vec::from(self.window.clone()));
+        }
+
+        // Forward window or when self.items return None
+        let next_item = self.items.next()?;
+        self.window.pop_front();
+        self.window.push_back(next_item);
+
+        return Some(Vec::from(self.window.clone()));
+    }
+}
+
+/// An iterator which provided with a sequence of `items` transforms into k-skip-grams.
+///
+/// The iterator consumes the input iterator only once and holds a window of items to generate the
+/// k-skip-grams. The window is stepped forward as it consumes the input. It also correctly
+/// generates left or right padding if specified.
+pub struct SkipGramIter<'a> {
+    // Params
+    items: Box<dyn Iterator<Item = &'a str> + 'a>,
+    n: usize,
+    max_k: usize,
+
+    // Iterator state
+    /// Window which holds items that have been consumed
+    window: VecDeque<&'a str>,
+    sample_iter: SampleCombinations,
+}
+
+/// Core methods to build `SkipGramIter`
+impl<'a> SkipGramIter<'a> {
+    /// Build a new `SkipGramIter`.
+    ///
+    /// Example:
+    /// ```
+    /// use vtext::ngram_utils::*;
+    /// let sent = "One Two Three".split(" ");
+    /// let grams_iter = SkipGramIter::new(Box::new(sent), 1, 2, Some("<s>"), Some("</s>"));
+    /// let grams: Vec<Vec<&str>> = grams_iter.unwrap().collect();
+    /// ```
+    ///
+    /// Parameters:
+    /// * `items` - Input iterator
+    /// * `n` - The degree of the ngram
+    /// * `max_k` - The maximum-degree of the skipgram: the total max skip between items
+    /// * `pad_left` - Optional string to use as left padding
+    /// * `pad_right` - Optional string to use as right padding
+    pub fn new(
+        mut items: Box<dyn Iterator<Item = &'a str> + 'a>,
+        n: usize,
+        max_k: usize,
+        pad_left: Option<&'a str>,
+        pad_right: Option<&'a str>,
+    ) -> Result<SkipGramIter<'a>, EstimatorErr> {
+        if n < 1 {
+            return Err(EstimatorErr::InvalidParams(
+                "`min_n` must be greater than or equal to 1".to_string(),
+            ));
+        }
+
+        if pad_left.is_some() || pad_right.is_some() {
+            items = pad_items(items, n, pad_left, pad_right)?;
+        }
+
+        let window = Self::build_window(&mut items, n, max_k)?;
+        let sample_iter = SampleCombinations::new(true, n + max_k - 1, n)?;
+
+        Ok(SkipGramIter {
+            // Params
+            items,
+            n,
+            max_k,
+
+            // Iterator state
+            window,
+            sample_iter,
+        })
+    }
+
+    // Prepare and populate start window
+    fn build_window(
+        items: &mut Box<dyn Iterator<Item = &'a str> + 'a>,
+        n: usize,
+        max_k: usize,
+    ) -> Result<VecDeque<&'a str>, EstimatorErr> {
+        let window_size = n + max_k;
+        let mut window: VecDeque<&'a str> = VecDeque::with_capacity(window_size);
+
+        // Populate window
+        let mut i = window_size;
+        while i > 0 {
+            let next_item = items.next();
+            match next_item {
+                None => {
+                    return Err(EstimatorErr::InvalidInput(
+                        "Items length is smaller than `n`+`max_k`".to_string(),
+                    ))
+                }
+                Some(s) => {
+                    window.push_back(s);
+                }
+            }
+            i -= 1;
+        }
+        Ok(window)
+    }
+}
+
+/// Iterator functions
+impl<'a> Iterator for SkipGramIter<'a> {
+    type Item = Vec<&'a str>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let next_sample = self.sample_iter.next();
+
+        return match next_sample {
+            // Generate and return samples using self.sample_iter
+            Some(sample_idx) => {
+                let mut sample = Vec::with_capacity(sample_idx.len());
+                for idx in sample_idx.iter() {
+                    sample.push(self.window[*idx].clone());
+                }
+                Some(sample)
+            }
+
+            // Sample_iter finished so attempt to forward window
+            None => {
+                // Try to forward window
+                let next_item = self.items.next();
+                match next_item {
+                    // Forward window
+                    Some(item) => {
+                        self.window.pop_front();
+                        self.window.push_back(item);
+
+                        self.sample_iter =
+                            SampleCombinations::new(true, self.n + self.max_k - 1, self.n).unwrap();
+
+                        self.next()
+                    }
+
+                    // self.items finished. So reduce window size iteratively to n and then finish
+                    None => {
+                        if self.window.len() > self.n {
+                            // reduce window
+                            self.window.pop_front();
+                        } else {
+                            // finished
+                            return None;
+                        }
+
+                        // Generate samples from smaller window
+                        let k = min(self.max_k, self.window.len() - self.n);
+                        self.sample_iter =
+                            SampleCombinations::new(true, self.n + k - 1, self.n).unwrap();
+                        self.next()
+                    }
+                }
+            }
+        };
+    }
+}
 
 /// An iterator which generates the list of combinations of `n` items in a range upto `max_i`.
 /// It is possible to fix the first item at index 0 (i.e. `fix_0` == true)
@@ -701,7 +536,9 @@ impl SampleCombinations {
         }
 
         if max_i + 1 < n {
-            return Err(EstimatorErr::InvalidParams("`max_i`+1 must be less than `n`".to_string()));
+            return Err(EstimatorErr::InvalidParams(
+                "`max_i`+1 must be less than `n`".to_string(),
+            ));
         }
 
         let position: Vec<usize> = (0..n).collect();
@@ -719,18 +556,6 @@ impl SampleCombinations {
             first: true,
             last,
         })
-    }
-
-    /// Produce dummy `SampleCombinations`. Will panic if `next` is executed.
-    pub fn new_empty() -> SampleCombinations {
-        SampleCombinations {
-            min_i: 0,
-            max_i: 0,
-            n: 0,
-            position: Vec::new(),
-            first: false,
-            last: false,
-        }
     }
 }
 
@@ -764,314 +589,33 @@ impl Iterator for SampleCombinations {
     }
 }
 
-
-// ------------------------------------------------------------------------------------------------
-
-
-/// An iterator which provided with a sequence of `items` transforms into k-skip-n-grams.
+/// Pad an integrator left and/or right with tokens.
 ///
-/// The iterator consumes the input iterator only once and holds a window of items to generate the
-/// grams. The window is stepped forward as it consumes the input. It also correctly generates
-/// left or right padding if specified.
-pub struct NGramIter<'a> {
-    // Params
-    items: Box<dyn Iterator<Item = &'a str> + 'a>,
-
-    // Iterator state
-    /// Window which holds items that have been consumed
-    window: VecDeque<&'a str>,
-    first: bool,
-}
-
-/// Core methods to build `KSkipNGramsIter`
-impl<'a> NGramIter<'a> {
-    /// Build a new `KSkipNGramsIter`.
-    ///
-    /// Example:
-    /// ```
-    /// use vtext::ngram_utils::*;
-    /// let sent = "One Two Three".split(" ");
-    /// let grams_iter = KSkipNGramsIter::new(Box::new(sent), 1, 2, 1, Some("<s>"), Some("</s>"));
-    /// let grams: Vec<Vec<&str>> = grams_iter.unwrap().collect();
-    /// ```
-    ///
-    /// Parameters:
-    /// * `items` - Input iterator
-    /// * `min_n` - The minimum degree of the ngram
-    /// * `max_n` - The maximum degree of the ngram
-    /// * `max_k` - The maximum-degree of the skipgram: the total max skip between items
-    /// * `pad_left` - Optional string to use as left padding
-    /// * `pad_right` - Optional string to use as right padding
-    pub fn new(
-        mut items: Box<dyn Iterator<Item = &'a str> + 'a>,
-        n: usize,
-        pad_left: Option<&'a str>,
-        pad_right: Option<&'a str>,
-    ) -> Result<NGramIter<'a>, EstimatorErr> {
-        if n < 1 {
-            return Err(EstimatorErr::InvalidParams(
-                "`min_n` must be greater than or equal to 1".to_string(),
-            ));
-        }
-
-        if pad_left.is_some() || pad_right.is_some() {
-            items = pad_items(items, n, pad_left, pad_right);
-        }
-
-        let window = Self::build_window(&mut items, n)?;
-
-        Ok(NGramIter {
-            // Params
-            items,
-
-            // Iterator state
-            window,
-            first: true,
-        })
-    }
-
-    // Prepare and populate start window
-    fn build_window(
-        items: &mut Box<dyn Iterator<Item = &'a str> + 'a>,
-        n: usize,
-    ) -> Result<VecDeque<&'a str>, EstimatorErr> {
-        let window_size = n;
-        let mut window: VecDeque<&'a str> = VecDeque::with_capacity(window_size);
-
-        // Populate window
-        let mut i = window_size;
-        while i > 0 {
-            let next_item = items.next();
-            match next_item {
-                None => {
-                    return Err(EstimatorErr::InvalidInput(
-                        "Items length is smaller than `n`".to_string(),
-                    ))
-                }
-                Some(s) => {
-                    window.push_back(s);
-                }
-            }
-            i -= 1;
-        }
-        Ok(window)
-    }
-}
-
-/// Iterator functions
-impl<'a> Iterator for NGramIter<'a> {
-    type Item = Vec<&'a str>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.first {
-            self.first = false;
-            return Some(Vec::from(self.window.clone()));
-        }
-
-        let next_item = self.items.next()?;
-
-        self.window.pop_front();
-        self.window.push_back(next_item);
-
-        return Some(Vec::from(self.window.clone()));
-    }
-}
-
-
-pub struct SkipGramIter<'a> {
-    // Params
-    items: Box<dyn Iterator<Item = &'a str> + 'a>,
-    n: usize,
-    max_k: usize,
-
-    // Iterator state
-    /// Window which holds items that have been consumed
-    window: VecDeque<&'a str>,
-    sample_iter: SampleCombinations,
-    last: bool,
-}
-
-/// Core methods to build `KSkipNGramsIter`
-impl<'a> SkipGramIter<'a> {
-    /// Build a new `KSkipNGramsIter`.
-    ///
-    /// Example:
-    /// ```
-    /// use vtext::ngram_utils::*;
-    /// let sent = "One Two Three".split(" ");
-    /// let grams_iter = KSkipNGramsIter::new(Box::new(sent), 1, 2, 1, Some("<s>"), Some("</s>"));
-    /// let grams: Vec<Vec<&str>> = grams_iter.unwrap().collect();
-    /// ```
-    ///
-    /// Parameters:
-    /// * `items` - Input iterator
-    /// * `min_n` - The minimum degree of the ngram
-    /// * `max_n` - The maximum degree of the ngram
-    /// * `max_k` - The maximum-degree of the skipgram: the total max skip between items
-    /// * `pad_left` - Optional string to use as left padding
-    /// * `pad_right` - Optional string to use as right padding
-    pub fn new(
-        mut items: Box<dyn Iterator<Item = &'a str> + 'a>,
-        n: usize,
-        max_k: usize,
-        pad_left: Option<&'a str>,
-        pad_right: Option<&'a str>,
-    ) -> Result<SkipGramIter<'a>, EstimatorErr> {
-        if n < 1 {
-            return Err(EstimatorErr::InvalidParams(
-                "`min_n` must be greater than or equal to 1".to_string(),
-            ));
-        }
-
-        if pad_left.is_some() || pad_right.is_some() {
-            items = pad_items(items, n, pad_left, pad_right);
-        }
-
-        let window = Self::build_window(&mut items, n, max_k)?;
-        let sample_iter = SampleCombinations::new(true, n+max_k-1, n)?;
-
-        Ok(SkipGramIter {
-            // Params
-            items,
-            n,
-            max_k,
-
-            // Iterator state
-            window,
-            sample_iter,
-            last: false
-        })
-    }
-
-    // Prepare and populate start window
-    fn build_window(
-        items: &mut Box<dyn Iterator<Item = &'a str> + 'a>,
-        n: usize,
-        max_k: usize,
-    ) -> Result<VecDeque<&'a str>, EstimatorErr> {
-        let window_size = n+max_k;
-        let mut window: VecDeque<&'a str> = VecDeque::with_capacity(window_size);
-
-        // Populate window
-        let mut i = window_size;
-        while i > 0 {
-            let next_item = items.next();
-            match next_item {
-                None => {
-                    return Err(EstimatorErr::InvalidInput(
-                        "Items length is smaller than `n`+`max_k`".to_string(),
-                    ))
-                }
-                Some(s) => {
-                    window.push_back(s);
-                }
-            }
-            i -= 1;
-        }
-        Ok(window)
-    }
-}
-
-/// Iterator functions
-impl<'a> Iterator for SkipGramIter<'a> {
-    type Item = Vec<&'a str>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-
-        let next_sample = self.sample_iter.next();
-
-        return match next_sample {
-            None => {
-                // forward window
-                let next_item = self.items.next(); // If ended then return None
-
-                match next_item {
-                    Some(item) => {
-                        self.window.pop_front();
-                        self.window.push_back(item);
-
-                        self.sample_iter = SampleCombinations::new(true, self.n + self.max_k - 1, self.n).unwrap();
-
-                        self.next()
-                    },
-
-                    None => {
-                        // 1. Reduce window
-                        if self.window.len() > self.n {
-                            // reduce window
-                            self.window.pop_front();
-                        } else {
-                            return None;
-                        }
-
-                        let k = min(self.max_k, self.window.len() - self.n);
-                        self.sample_iter = SampleCombinations::new(true, self.n + k - 1, self.n).unwrap();
-                        self.next()
-                    }
-                }
-            },
-            Some(sample_idx) => {
-                let mut sample = Vec::with_capacity(sample_idx.len());
-                for idx in sample_idx.iter() {
-                    sample.push(self.window[*idx].clone());
-                }
-                Some(sample)
-            }
-        }
-    }
-}
-
-
-pub struct KSkipNGramsIter2<'a> {
-    // Params
-    iter: Box<dyn Iterator<Item = Vec<&'a str>> + 'a>,
-}
-
-impl<'a> KSkipNGramsIter2<'a> {
-    pub fn new(
-        mut items: Box<dyn Iterator<Item = &'a str> + 'a>,
-        min_n: usize,
-        max_n: usize,
-        max_k: usize,
-        pad_left: Option<&'a str>,
-        pad_right: Option<&'a str>,
-    ) -> Result<KSkipNGramsIter2<'a>, EstimatorErr> {
-        let mut iter: Box<dyn Iterator<Item = Vec<&'a str>> + 'a> = Box::new(iter::empty());
-
-        for n in min_n..max_n+1 {
-            let (iter_split_1, iter_split_0) = items.tee();
-            items = Box::new(iter_split_0);
-
-            if max_k == 0 {
-                let sub_iter = NGramIter::new(Box::new(iter_split_1), n, pad_left, pad_right)?;
-                iter = Box::new(iter.chain(sub_iter));
-            } else {
-                let sub_iter = SkipGramIter::new(Box::new(iter_split_1), n, max_k, pad_left, pad_right)?;
-                iter = Box::new(iter.chain(sub_iter));
-            }
-        }
-
-        Ok(KSkipNGramsIter2 {
-            iter
-        })
-    }
-}
-
-impl<'a> Iterator for KSkipNGramsIter2<'a> {
-    type Item = Vec<&'a str>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        self.iter.next()
-    }
-}
-
-
-fn pad_items<'a>(
+/// Example:
+/// ```
+/// use vtext::ngram_utils::*;
+/// let sent = "One Two Three".split(" ");
+/// let grams_iter = SkipGramIter::new(Box::new(sent), 1, 2, Some("<s>"), Some("</s>"));
+/// let grams: Vec<Vec<&str>> = grams_iter.unwrap().collect();
+/// ```
+///
+/// Parameters:
+/// * `items` - Input iterator
+/// * `n` - The degree of the ngram
+/// * `pad_left` - Optional string to use as left padding
+/// * `pad_right` - Optional string to use as right padding
+pub fn pad_items<'a>(
     items: Box<dyn Iterator<Item = &'a str> + 'a>,
     n: usize,
     pad_left: Option<&'a str>,
     pad_right: Option<&'a str>,
-) -> Box<dyn Iterator<Item = &'a str> + 'a> {
+) -> Result<Box<dyn Iterator<Item = &'a str> + 'a>, EstimatorErr> {
+    if n < 1 {
+        return Err(EstimatorErr::InvalidParams(
+            "`n` must be greater than or equal to 1".to_string(),
+        ));
+    }
+
     let left_chained: Box<dyn Iterator<Item = &'a str>>;
     let all_chained: Box<dyn Iterator<Item = &'a str>>;
 
@@ -1095,5 +639,5 @@ fn pad_items<'a>(
         }
     }
 
-    all_chained
+    Ok(all_chained)
 }

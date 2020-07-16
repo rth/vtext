@@ -113,7 +113,7 @@ fn test_everygram() {
         vec!["had", "a", "little"],
         vec!["a", "little", "lamb"],
         vec!["little", "lamb", "</s>"],
-        vec!["lamb", "</s>", "</s>"]
+        vec!["lamb", "</s>", "</s>"],
     ];
 
     assert_eq!(grams, expected);
@@ -339,5 +339,19 @@ fn test_sample_combinations() {
 
     let output: Vec<Vec<usize>> = SampleCombinations::new(true, 0, 1).unwrap().collect();
     let expected = vec![vec![0]];
+    assert_eq!(output, expected);
+}
+
+#[test]
+fn test_padding() {
+    let iter = "Mary had a little lamb".split(" ");
+
+    let output_iter = pad_items(Box::new(iter), 3, Some("<s>"), Some("</s>")).unwrap();
+    let output: Vec<&str> = output_iter.collect();
+
+    let expected = vec![
+        "<s>", "<s>", "Mary", "had", "a", "little", "lamb", "</s>", "</s>",
+    ];
+
     assert_eq!(output, expected);
 }
