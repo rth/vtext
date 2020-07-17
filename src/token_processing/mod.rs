@@ -601,8 +601,7 @@ impl Iterator for SampleCombinations {
 /// ```
 /// use vtext::token_processing::*;
 /// let sent = "One Two Three".split(" ");
-/// let grams_iter = SkipGramIter::new(Box::new(sent), 1, 2, Some("<s>"), Some("</s>"));
-/// let grams: Vec<Vec<&str>> = grams_iter.unwrap().collect();
+/// let sent_padded: Vec<_> = pad_items(Box::new(sent), 3, Some("<s>"), Some("</s>")).unwrap().collect();
 /// ```
 ///
 /// Parameters:
