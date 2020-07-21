@@ -35,6 +35,6 @@ def test_unicode_segment_tokenize():
         KSkipNGrams(min_n=1, max_n=1, max_k=-1).transform(["One", "Two", "Three"])
 
 
-@hypothesis.given(st.lists(st.text(min_size=2)))
+@hypothesis.given(st.lists(st.text(), min_size=2))
 def test_tokenize_edge_cases(txt):
     KSkipNGrams(min_n=1, max_n=1, max_k=1).transform(txt)
