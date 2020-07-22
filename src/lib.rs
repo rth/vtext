@@ -41,6 +41,7 @@ assert_eq!(tokens, vec!["Flights", "ca", "n't", "depart", "after", "2:00", "pm",
 pub mod errors;
 mod math;
 pub mod metrics;
+pub mod token_processing;
 pub mod tokenize;
 pub mod tokenize_sentence;
 pub mod vectorize;
