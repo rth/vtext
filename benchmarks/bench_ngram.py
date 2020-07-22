@@ -33,22 +33,10 @@ if __name__ == "__main__":
     print("# Testing {} documents".format(len(data)))
 
     db = [
-        (
-            r"vtext: everygram",
-            KSkipNGrams(min_n=1, max_n=3, max_k=0).transform,
-        ),
-        (
-            "nltk: everygram",
-            lambda seq: nltk_everygrams(seq, 1, 3),
-        ),
-        (
-            r"vtext: skipgram",
-            KSkipNGrams(min_n=3, max_n=3, max_k=2).transform,
-        ),
-        (
-            "nltk: skipgram",
-            lambda seq: nltk_skipgrams(seq, n=3, k=2),
-        ),
+        (r"vtext: everygram", KSkipNGrams(min_n=1, max_n=3, max_k=0).transform,),
+        ("nltk: everygram", lambda seq: nltk_everygrams(seq, 1, 3),),
+        (r"vtext: skipgram", KSkipNGrams(min_n=3, max_n=3, max_k=2).transform,),
+        ("nltk: skipgram", lambda seq: nltk_skipgrams(seq, n=3, k=2),),
     ]
 
     tokenizer = RegexpTokenizer(pattern=token_regexp)
