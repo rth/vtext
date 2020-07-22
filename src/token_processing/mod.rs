@@ -336,7 +336,7 @@ impl<'a> Iterator for NGramIter<'a> {
         self.window.pop_front();
         self.window.push_back(next_item);
 
-        return Some(Vec::from(self.window.clone()));
+        Some(Vec::from(self.window.clone()))
     }
 }
 
@@ -443,12 +443,12 @@ impl<'a> Iterator for SkipGramIter<'a> {
     fn next(&mut self) -> Option<Self::Item> {
         let next_sample = self.sample_iter.next();
 
-        return match next_sample {
+        match next_sample {
             // Generate and return samples using self.sample_iter
             Some(sample_idx) => {
                 let mut sample = Vec::with_capacity(sample_idx.len());
-                for idx in sample_idx.iter() {
-                    sample.push(self.window[*idx].clone());
+                for idx in sample_idx.into_iter() {
+                    sample.push(self.window[idx]);
                 }
                 Some(sample)
             }
@@ -487,7 +487,7 @@ impl<'a> Iterator for SkipGramIter<'a> {
                     }
                 }
             }
-        };
+        }
     }
 }
 
@@ -534,12 +534,7 @@ impl SampleCombinations {
     /// * `max_i` - the maximum index for the output elements
     /// * `n` - number of items per combination
     fn new(fix_0: bool, max_i: usize, n: usize) -> Result<SampleCombinations, EstimatorErr> {
-        let min_i;
-        if fix_0 {
-            min_i = 1;
-        } else {
-            min_i = 0;
-        }
+        let min_i = if fix_0 { 1 } else { 0 };
 
         if max_i + 1 < n {
             return Err(EstimatorErr::InvalidParams(
@@ -549,10 +544,7 @@ impl SampleCombinations {
 
         let position: Vec<usize> = (0..n).collect();
 
-        let mut last = false;
-        if n == max_i + 1 {
-            last = true;
-        }
+        let last = n == max_i + 1;
 
         Ok(SampleCombinations {
             min_i,
