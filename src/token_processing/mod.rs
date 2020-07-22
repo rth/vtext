@@ -246,6 +246,7 @@ pub struct NGramIter<'a> {
     /// Window which holds items that have been consumed
     window: VecDeque<&'a str>,
     first: bool,
+    last: bool
 }
 
 /// Core method to build `NGramIter`
@@ -281,7 +282,9 @@ impl<'a> NGramIter<'a> {
             items = pad_items(items, n, pad_left, pad_right)?;
         }
 
-        let window = Self::build_window(&mut items, n)?;
+        // Build window
+        let window = build_window(&mut items, n);
+        let last = window.len() < n; // if not full window then will always return None
 
         Ok(NGramIter {
             // Params
@@ -290,34 +293,8 @@ impl<'a> NGramIter<'a> {
             // Iterator state
             window,
             first: true,
+            last
         })
-    }
-
-    /// Prepare and populate start window
-    fn build_window(
-        items: &mut Box<dyn Iterator<Item = &'a str> + 'a>,
-        n: usize,
-    ) -> Result<VecDeque<&'a str>, EstimatorErr> {
-        let window_size = n;
-        let mut window: VecDeque<&'a str> = VecDeque::with_capacity(window_size);
-
-        // Populate window
-        let mut i = window_size;
-        while i > 0 {
-            let next_item = items.next();
-            match next_item {
-                None => {
-                    return Err(EstimatorErr::InvalidInput(
-                        "Items length is smaller than `n`".to_string(),
-                    ))
-                }
-                Some(s) => {
-                    window.push_back(s);
-                }
-            }
-            i -= 1;
-        }
-        Ok(window)
     }
 }
 
@@ -326,6 +303,9 @@ impl<'a> Iterator for NGramIter<'a> {
     type Item = Vec<&'a str>;
 
     fn next(&mut self) -> Option<Self::Item> {
+        if self.last {
+             return None;
+        }
         if self.first {
             self.first = false;
             return Some(Vec::from(self.window.clone()));
@@ -355,6 +335,7 @@ pub struct SkipGramIter<'a> {
     /// Window which holds items that have been consumed
     window: VecDeque<&'a str>,
     sample_iter: SampleCombinations,
+    last: bool
 }
 
 /// Core methods to build `SkipGramIter`
@@ -392,8 +373,22 @@ impl<'a> SkipGramIter<'a> {
             items = pad_items(items, n, pad_left, pad_right)?;
         }
 
-        let window = Self::build_window(&mut items, n, max_k)?;
-        let sample_iter = SampleCombinations::new(true, n + max_k - 1, n)?;
+        let window_size = n + max_k;
+        let window = build_window(&mut items, window_size);
+
+        let sample_iter;
+        let last;
+        if window.len() >= n {
+            let k = min(max_k, window.len() - n);
+            sample_iter =
+                SampleCombinations::new(true, n + k - 1, n)?;
+            last = false;
+        } else {
+            // Window too small. Always return None
+            sample_iter = SampleCombinations::new_empty();
+            last = true;
+        }
+
 
         Ok(SkipGramIter {
             // Params
@@ -404,35 +399,8 @@ impl<'a> SkipGramIter<'a> {
             // Iterator state
             window,
             sample_iter,
+            last
         })
-    }
-
-    // Prepare and populate start window
-    fn build_window(
-        items: &mut Box<dyn Iterator<Item = &'a str> + 'a>,
-        n: usize,
-        max_k: usize,
-    ) -> Result<VecDeque<&'a str>, EstimatorErr> {
-        let window_size = n + max_k;
-        let mut window: VecDeque<&'a str> = VecDeque::with_capacity(window_size);
-
-        // Populate window
-        let mut i = window_size;
-        while i > 0 {
-            let next_item = items.next();
-            match next_item {
-                None => {
-                    return Err(EstimatorErr::InvalidInput(
-                        "Items length is smaller than `n`+`max_k`".to_string(),
-                    ))
-                }
-                Some(s) => {
-                    window.push_back(s);
-                }
-            }
-            i -= 1;
-        }
-        Ok(window)
     }
 }
 
@@ -441,6 +409,9 @@ impl<'a> Iterator for SkipGramIter<'a> {
     type Item = Vec<&'a str>;
 
     fn next(&mut self) -> Option<Self::Item> {
+        if self.last {
+            return None
+        }
         let next_sample = self.sample_iter.next();
 
         match next_sample {
@@ -555,6 +526,17 @@ impl SampleCombinations {
             last,
         })
     }
+
+    fn new_empty() -> SampleCombinations {
+        SampleCombinations{
+            min_i: 0,
+            max_i: 0,
+            n: 0,
+            position: Vec::new(),
+            first: false,
+            last: true,
+        }
+    }
 }
 
 impl Iterator for SampleCombinations {
@@ -637,4 +619,28 @@ pub fn pad_items<'a>(
     }
 
     Ok(all_chained)
+}
+
+/// Build and populate window for start of NGramIter or SkipGrmIter
+fn build_window<'a>(
+    items: &mut Box<dyn Iterator<Item = &'a str> + 'a>,
+    window_size: usize,
+) -> VecDeque<&'a str> {
+    let mut window: VecDeque<&'a str> = VecDeque::with_capacity(window_size);
+
+    // Populate window
+    let mut i = window_size;
+    while i > 0 {
+        let next_item = items.next();
+        match next_item {
+            None => {
+                break
+            }
+            Some(s) => {
+                window.push_back(s);
+            }
+        }
+        i -= 1;
+    }
+    window
 }

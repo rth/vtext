@@ -271,6 +271,52 @@ fn test_skipgram_everygram() {
 
 #[test]
 fn test_ngram_edge_cases() {
+    // Input length less than n
+    let sent = vec!["a", "b"].into_iter(); // Empty
+    let gramizer = NGramIter::new(Box::new(sent), 3, None, None).unwrap();
+    let grarms: Vec<Vec<&str>> = gramizer.collect();
+
+    let expected: Vec<Vec<&str>> = Vec::new(); // Empty
+    assert_eq!(grarms, expected);
+
+    // Empty input
+    let sent = Vec::<&str>::new().into_iter(); // Empty
+    let gramizer = NGramIter::new(Box::new(sent), 1, Some("<s>"), Some("</s>")).unwrap();
+    let grarms: Vec<Vec<&str>> = gramizer.collect();
+
+    let expected: Vec<Vec<&str>> = Vec::new(); // Empty
+    assert_eq!(grarms, expected);
+}
+
+#[test]
+fn test_skipgram_edge_cases() {
+    // Input length less than n + k but greater or equal to n
+    let sent = vec!["a", "b"].into_iter(); // Empty
+    let gramizer = SkipGramIter::new(Box::new(sent), 2, 1, None, None).unwrap();
+    let grarms: Vec<Vec<&str>> = gramizer.collect();
+
+    let expected = vec![vec!["a", "b"]];
+    assert_eq!(grarms, expected);
+
+    // Input length less than n + k
+    let sent = vec!["a"].into_iter(); // Empty
+    let gramizer = SkipGramIter::new(Box::new(sent), 2, 1, None, None).unwrap();
+    let grarms: Vec<Vec<&str>> = gramizer.collect();
+
+    let expected: Vec<Vec<&str>> = Vec::new(); // Empty
+    assert_eq!(grarms, expected);
+
+    // Empty input
+    let sent = Vec::<&str>::new().into_iter(); // Empty
+    let gramizer = NGramIter::new(Box::new(sent), 1, Some("<s>"), Some("</s>")).unwrap();
+    let grarms: Vec<Vec<&str>> = gramizer.collect();
+
+    let expected: Vec<Vec<&str>> = Vec::new(); // Empty
+    assert_eq!(grarms, expected);
+}
+
+#[test]
+fn test_kskipngram_edge_cases() {
     let sent = "Mary had a little lamb".split(" ");
 
     let gramizer = KSkipNGrams::new(1, 1, 0);
@@ -295,6 +341,16 @@ fn test_ngram_edge_cases() {
         .unwrap()
         .collect();
 
+    assert_eq!(grarms, expected);
+
+    let sent = Vec::<&str>::new().into_iter(); // Empty
+    let gramizer = KSkipNGrams::new(1, 2, 1);
+    let grarms: Vec<Vec<&str>> = gramizer
+        .transform(Box::new(sent), None, None)
+        .unwrap()
+        .collect();
+
+    let expected: Vec<Vec<&str>> = Vec::new(); // Empty
     assert_eq!(grarms, expected);
 }
 
