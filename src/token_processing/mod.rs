@@ -246,7 +246,7 @@ pub struct NGramIter<'a> {
     /// Window which holds items that have been consumed
     window: VecDeque<&'a str>,
     first: bool,
-    last: bool
+    last: bool,
 }
 
 /// Core method to build `NGramIter`
@@ -293,7 +293,7 @@ impl<'a> NGramIter<'a> {
             // Iterator state
             window,
             first: true,
-            last
+            last,
         })
     }
 }
@@ -304,7 +304,7 @@ impl<'a> Iterator for NGramIter<'a> {
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.last {
-             return None;
+            return None;
         }
         if self.first {
             self.first = false;
@@ -335,7 +335,7 @@ pub struct SkipGramIter<'a> {
     /// Window which holds items that have been consumed
     window: VecDeque<&'a str>,
     sample_iter: SampleCombinations,
-    last: bool
+    last: bool,
 }
 
 /// Core methods to build `SkipGramIter`
@@ -380,15 +380,13 @@ impl<'a> SkipGramIter<'a> {
         let last;
         if window.len() >= n {
             let k = min(max_k, window.len() - n);
-            sample_iter =
-                SampleCombinations::new(true, n + k - 1, n)?;
+            sample_iter = SampleCombinations::new(true, n + k - 1, n)?;
             last = false;
         } else {
             // Window too small. Always return None
             sample_iter = SampleCombinations::new_empty();
             last = true;
         }
-
 
         Ok(SkipGramIter {
             // Params
@@ -399,7 +397,7 @@ impl<'a> SkipGramIter<'a> {
             // Iterator state
             window,
             sample_iter,
-            last
+            last,
         })
     }
 }
@@ -410,7 +408,7 @@ impl<'a> Iterator for SkipGramIter<'a> {
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.last {
-            return None
+            return None;
         }
         let next_sample = self.sample_iter.next();
 
@@ -528,7 +526,7 @@ impl SampleCombinations {
     }
 
     fn new_empty() -> SampleCombinations {
-        SampleCombinations{
+        SampleCombinations {
             min_i: 0,
             max_i: 0,
             n: 0,
@@ -633,9 +631,7 @@ fn build_window<'a>(
     while i > 0 {
         let next_item = items.next();
         match next_item {
-            None => {
-                break
-            }
+            None => break,
             Some(s) => {
                 window.push_back(s);
             }
