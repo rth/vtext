@@ -24,6 +24,8 @@ rustup default nightly-2020-06-01
 
 cd python/
 python -m pip install -r ../ci/requirements-build.txt
+
+cargo tree
 python setup.py bdist_wheel
 
 pip install --pre --no-index --find-links dist/ vtext
