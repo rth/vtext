@@ -48,7 +48,9 @@ def test_punctuation_sentence_tokenizer():
 
 @hypothesis.given(st.text())
 @pytest.mark.parametrize(
-    "tokenizer", [UnicodeSentenceTokenizer(), PunctuationTokenizer()], ids=_pytest_ids,
+    "tokenizer",
+    [UnicodeSentenceTokenizer(), PunctuationTokenizer()],
+    ids=_pytest_ids,
 )
 def test_tokenize_edge_cases(tokenizer, txt):
     tokens = tokenizer.tokenize(txt)
