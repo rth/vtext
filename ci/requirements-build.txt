@@ -2,4 +2,4 @@ setuptools
 wheel
 setuptools-rust
 numpy==1.17.3
-scipy==1.4.1
+scipy==1.10.0
